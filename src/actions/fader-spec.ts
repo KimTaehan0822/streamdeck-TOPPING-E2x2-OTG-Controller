@@ -148,7 +148,7 @@ export function meterView(v: Vol, s: MixerState, meters: ReadonlyMap<MeterChanne
 		right: levelToAxis(right),
 		fader: faderPos(raw),
 		faderDb: dbText(raw),
-		levelDb: levelText(Math.max(left, right)),
+		levelDb: pair ? levelText(Math.max(left, right)) : '', // no meter codes known: show nothing, not -∞
 		muted: v.muted(s) && !peek,
 		overlay: 'none',
 	}

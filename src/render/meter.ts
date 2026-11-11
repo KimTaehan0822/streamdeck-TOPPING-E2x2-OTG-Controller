@@ -94,13 +94,17 @@ export function renderVuStrip(v: MeterView): string {
 
 export type FaderRole = 'top' | 'bottom' | 'left' | 'right'
 
-/** Name rows (plate, MIX X, name) end at TEXT_END; the fader cap, centred on the end of the axis, then just clears them. */
-const TEXT_END = 72
+/** Top key text (name rows, fader dB) ends at TEXT_END; the fader cap, centred on the end of the axis, then just clears it. */
+const TEXT_END = 100
 const CAP = 14 * (KEY / 100) // cap thickness along the axis, about 20
-const AXIS_START = TEXT_END + CAP / 2 // top key: y of axis 1 (vertical); the axis then runs 2 * AXIS_LEN down through the seam
-const AXIS_LEN = KEY - AXIS_START // length of one key's half of the axis (vertical, 62)
+const AXIS_START = TEXT_END + CAP / 2 // vertical: y of axis 1 in the top key (about 110); the axis continues through the seam
+const TOP_LEN = KEY - AXIS_START // length of the axis in the top key
+const BOTTOM_LEN = 108 // length of the axis in the bottom key; the level dB sits under it
+const AXIS_LEN = TOP_LEN + BOTTOM_LEN
+const SEAM = BOTTOM_LEN / AXIS_LEN // axis position of the seam: the bottom key holds 0..SEAM, the top key SEAM..1
 const H_START = 10 // left key: x of axis 0 (horizontal); the axis runs 2 * H_LEN to the right through the seam
 const H_LEN = KEY - H_START // 134
+const H_BAR = [108, 122] as const // horizontal: y of the two bars (12 high); the text rows end above them
 
 /** Name block of the top / left key: MIX X plate with the name under it (a long name wraps to two smaller rows under a slimmer plate). */
 function nameHead(v: MeterView): string {
@@ -120,14 +124,16 @@ function nameHead(v: MeterView): string {
 export function renderButtonFader(v: MeterView, role: FaderRole): string {
 	const vertical = role === 'top' || role === 'bottom'
 	const high = role === 'top' || role === 'right'
-	const part: [number, number] = high ? [0.5, 1] : [0, 0.5]
+	const split = vertical ? SEAM : 0.5
+	const part: [number, number] = high ? [split, 1] : [0, split]
 	const u = KEY / 100
 	let b = ''
 	if (vertical) {
 		const off = high ? 0 : KEY // global y of this key's top
-		const local = (f: number) => AXIS_START + 2 * AXIS_LEN * (1 - f) - off
+		const local = (f: number) => AXIS_START + AXIS_LEN * (1 - f) - off
 		const y = high ? AXIS_START : 0
-		b += bar(28 * u, y, 18 * u, AXIS_LEN, v.left, true, v.muted, part) + bar(54 * u, y, 18 * u, AXIS_LEN, v.right, true, v.muted, part)
+		const h = high ? TOP_LEN : BOTTOM_LEN
+		b += bar(28 * u, y, 18 * u, h, v.left, true, v.muted, part) + bar(54 * u, y, 18 * u, h, v.right, true, v.muted, part)
 		for (const db of [6, 0, -6, -12, -24]) {
 			const f = dbToAxis(db)
 			if (f >= part[0] && f <= part[1]) b += `<line x1="${74 * u}" y1="${local(f)}" x2="${80 * u}" y2="${local(f)}" stroke="${TICK}" stroke-width="2"/>`
@@ -137,19 +143,21 @@ export function renderButtonFader(v: MeterView, role: FaderRole): string {
 		const off = high ? KEY : 0
 		const local = (f: number) => H_START + 2 * H_LEN * f - off
 		const x = high ? 0 : H_START
-		b += bar(x, 82, H_LEN, 14, v.left, false, v.muted, part) + bar(x, 100, H_LEN, 14, v.right, false, v.muted, part)
+		b += bar(x, H_BAR[0], H_LEN, 12, v.left, false, v.muted, part) + bar(x, H_BAR[1], H_LEN, 12, v.right, false, v.muted, part)
 		for (const db of [6, 0, -6, -12, -24]) {
 			const f = dbToAxis(db)
-			if (f >= part[0] && f <= part[1]) b += `<line x1="${local(f)}" y1="118" x2="${local(f)}" y2="124" stroke="${TICK}" stroke-width="2"/>`
+			if (f >= part[0] && f <= part[1]) b += `<line x1="${local(f)}" y1="136" x2="${local(f)}" y2="141" stroke="${TICK}" stroke-width="2"/>`
 		}
-		if (v.fader !== undefined && Math.abs(local(v.fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(local(v.fader), 98, CAP, 44, false)
+		if (v.fader !== undefined && Math.abs(local(v.fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(local(v.fader), 121, CAP, 36, false)
 	}
-	// Name rows on the top / left key; the dB value (MUTED when muted) on the bottom / right key.
-	if (role === 'top' || role === 'left') b = nameHead(v) + b
-	else {
-		const s = vertical ? 20 * u : fitSize(v.faderDb, 32, 128, 10)
-		const cy = vertical ? 83 * u : 45
-		b += v.muted ? plainText(72, base(cy, s), 'MUTED', { size: s, fill: RED }) : plainText(72, base(cy, s), fitText(v.faderDb, s, 128), { size: s, fill: WHITE })
-	}
+	// Rows per role: top = name + fader dB, bottom = level dB; left = name + level dB, right = fader dB.
+	// Muted: the dB values hide and MUTED shows on the bottom / right key. No level dB for a channel without a meter.
+	const row = (t: string, cy: number, size: number, fill: string) => plainText(72, base(cy, size), fitText(t, size, 128), { size, fill })
+	const level = (cy: number) => (v.muted || v.levelDb === '' ? '' : row(v.levelDb, cy, 22, DIM))
+	const muted = (cy: number, size: number) => plainText(72, base(cy, size), 'MUTED', { size, fill: RED })
+	if (role === 'top') b = nameHead(v) + (v.muted ? '' : row(v.faderDb, 87, 22, WHITE)) + b
+	else if (role === 'left') b = nameHead(v) + level(88) + b
+	else if (role === 'bottom') b += v.muted ? muted(129, 22) : level(129)
+	else b += v.muted ? muted(50, 32) : row(v.faderDb, 50, fitSize(v.faderDb, 32, 128, 10), WHITE)
 	return frame(KEY, KEY, b, v.overlay)
 }
