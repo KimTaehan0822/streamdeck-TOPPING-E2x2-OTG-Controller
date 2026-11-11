@@ -25,7 +25,7 @@ export abstract class VolKeyAction extends E2x2Action<JsonObject> {
 		if (!v || !faderOp(settings)) return SETUP_KEY
 		const s = this.connection.state
 		const raw = v.raw(s)
-		const pair = v.target && meterOf(v.target, s)
+		const pair = v.target && meterOf(v.target)
 		const [left, right] = pair ? pair.map((c) => this.connection.meters.get(c) ?? 0) : [0, 0]
 		return renderValueKey({
 			name: ctx.userTitle ? '' : v.name,
@@ -63,7 +63,7 @@ abstract class MeterAction extends E2x2Action<JsonObject> {
 		return { ...meterView(v, this.connection.state, this.connection.meters, peek), overlay: ctx.overlay }
 	}
 
-	private key = (s: JsonObject) => JSON.stringify([s.kind, s.mix, s.channel, s.side])
+	private key = (s: JsonObject) => JSON.stringify([s.kind, s.mix, s.channel])
 
 	/** Starts the peek window and redraws once more when it ends, so MUTED returns. */
 	protected adjust(settings: JsonObject, change: () => void): void {

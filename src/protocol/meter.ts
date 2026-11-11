@@ -1,7 +1,12 @@
 // Meter reports do not fit decodeReport: the value is bytes 8..11 of the 16-byte report (no report ID).
-const BASE = { 0x31: 'out1L', 0x32: 'out2R', 0x33: 'mobileL', 0x34: 'mobileR', 0x5a: 'spdifL', 0x5b: 'spdifR', 0x41: 'aux41L', 0x42: 'aux42R' } as const // shortcut: 41/42 meaning unknown, rename once identified
+// group = channel (ruling from the pb12/pb34 captures). shortcut: 45-48 (PB 5/6, 7/8) and 53-56 (Loopback 3/4, 5/6) are inferred, not yet seen on the device
+const BASE = {
+	0x31: 'out1L', 0x32: 'out2R', 0x33: 'mobileL', 0x34: 'mobileR', 0x5a: 'spdifL', 0x5b: 'spdifR',
+	0x41: 'pb12L', 0x42: 'pb12R', 0x43: 'pb34L', 0x44: 'pb34R', 0x45: 'pb56L', 0x46: 'pb56R', 0x47: 'pb78L', 0x48: 'pb78R',
+	0x51: 'lp12L', 0x52: 'lp12R', 0x53: 'lp34L', 0x54: 'lp34R', 0x55: 'lp56L', 0x56: 'lp56R',
+} as const
 type Base = (typeof BASE)[keyof typeof BASE]
-/** Suffix A = item 01, B = item 02. shortcut: unknown difference (maybe pre/post output volume), identical in the capture. */
+/** Suffix A = item 01 (the one shown), B = item 02. shortcut: item 02 is an unknown variant, parsed but not displayed. */
 export type MeterChannel = `${Base}_${'A' | 'B'}`
 
 export type Meter = { channel: MeterChannel; db: number; level: number }

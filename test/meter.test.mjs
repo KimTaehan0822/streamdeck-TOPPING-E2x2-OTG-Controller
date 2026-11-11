@@ -33,7 +33,7 @@ test('dbToLevel', () => {
 test('burst maps to channels, second 33 01 is Mobile R', () => {
 	const first = rows.findIndex((r) => r.bytes[5] === 0x5a)
 	const names = rows.slice(first, first + 12).map((r, i) => meters[first + i].channel)
-	assert.deepEqual(names, ['spdifL_B', 'spdifR_B', 'out1L_A', 'out2R_A', 'mobileL_A', 'mobileR_A', 'out1L_B', 'out2R_B', 'mobileL_B', 'mobileR_B', 'aux41L_A', 'aux42R_A'])
+	assert.deepEqual(names, ['spdifL_B', 'spdifR_B', 'out1L_A', 'out2R_A', 'mobileL_A', 'mobileR_A', 'out1L_B', 'out2R_B', 'mobileL_B', 'mobileR_B', 'pb12L_A', 'pb12R_A'])
 })
 
 test('silence reads level 0', () => {
@@ -55,4 +55,31 @@ test('0 dBFS left only', () => {
 	const s = seg(39500, 43500)
 	for (const ch of ['out1L_A', 'mobileL_A', 'spdifL_B']) assert.ok(Math.abs(med(s, ch)) < 0.3, ch)
 	for (const ch of ['out2R_A', 'mobileR_A', 'spdifR_B']) assert.equal(dbToLevel(med(s, ch)), 0, ch)
+})
+
+const load = (file) => {
+	const p = createMeterParser()
+	return readFileSync(new URL(`./fixtures/${file}.tsv`, import.meta.url), 'utf8')
+		.split('\n')
+		.filter((l) => l.trim())
+		.map((l) => {
+			const [, ms, hex] = l.trim().split('\t')
+			return { ms: +ms, ...p(Uint8Array.from(Buffer.from(hex, 'hex'))) }
+		})
+}
+
+test('tone on PB 1/2 shows in the pb12 channel, not pb34', () => {
+	const s = seg(20500, 27500)
+	assert.ok(Math.abs(med(s, 'pb12L_A') - -20) < 0.3)
+	assert.ok(Math.abs(med(s, 'pb12R_A') - -20) < 0.3)
+	assert.ok(meters.every((m) => !m.channel.startsWith('pb34') && !m.channel.startsWith('lp')))
+})
+
+test('tone on PB 3/4 only: pb34 follows it, loopback 1/2 follows, pb12 is silent', () => {
+	const all = load('meter-pb34')
+	const level = (ch, a, b) => median(all.filter((m) => m.channel === ch && m.ms >= a && m.ms <= b).map((m) => m.db))
+	const t0 = all.find((m) => m.channel === 'pb34L_A' && m.db > -30).ms // first audible report
+	for (const ch of ['pb34L_A', 'pb34R_A', 'lp12L_A', 'lp12R_A']) assert.ok(Math.abs(level(ch, t0 + 500, t0 + 5000) - -20) < 0.5, ch)
+	assert.ok(all.every((m) => m.channel && !m.channel.startsWith('pb12')))
+	assert.ok(all.some((m) => m.channel === 'out1L_A'))
 })

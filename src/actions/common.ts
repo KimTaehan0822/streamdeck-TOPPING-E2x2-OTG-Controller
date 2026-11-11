@@ -7,3 +7,5 @@ export const int = (v: unknown, min: number, max = Number.MAX_SAFE_INTEGER): num
 }
 export const pick = <T extends string>(v: unknown, labels: Record<T, unknown>): T | undefined =>
 	typeof v === 'string' && Object.hasOwn(labels, v) ? (v as T) : undefined
+/** The key's own name (setting `name`, trimmed, at most 24 characters), or the default when it is empty. */
+export const nameOf = (settings: { name?: unknown }, fallback: string): string => (typeof settings.name === 'string' && settings.name.trim().slice(0, 24).trim()) || fallback

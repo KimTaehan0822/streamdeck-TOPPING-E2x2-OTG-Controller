@@ -112,3 +112,14 @@ test('specs read live state for the key face', () => {
 	const spec = muteSpec({ kind: 'mix', mix: 1, channel: 'otg' })
 	assert.deepEqual([spec.title, spec.label, spec.mix, spec.color, spec.read(conn.state)], ['MUTE', 'OTG', 1, 'red', false])
 })
+
+test('a custom name replaces the key label on every toggle spec; blank keeps the default', () => {
+	assert.equal(muteSpec({ kind: 'mix', mix: 0, channel: 'pb12', side: 'L', name: ' Music ' }).label, 'Music')
+	assert.equal(muteSpec({ kind: 'mix', mix: 0, channel: 'pb12', side: 'L', name: '' }).label, 'PB 1/2 L')
+	assert.equal(soloSpec({ mix: 1, channel: 'otg', name: 'Phone' }).label, 'Phone')
+	assert.equal(linkSpec({ mix: 1, channel: 'pb12', name: 'Game' }).label, 'Game')
+	assert.equal(inputOptionSpec({ input: 'in1', option: 'p48v', name: 'Vocal' }).label, 'Vocal')
+	assert.equal(outputRoomSpec({ button: 'hp', name: 'Cans' }).label, 'Cans')
+	assert.equal(outputRoomSpec({ button: 'gain', output: 'mobile', name: 'Phone out' }).label, 'Phone out')
+	assert.equal(outputRoomSpec({ button: 'hp' }).label, 'Phones')
+})

@@ -2,7 +2,7 @@ import type { JsonObject } from '@elgato/utils'
 import type { E2x2Connection } from '../connection.js'
 import type { KeyColor, Mix } from '../render/theme.js'
 import { setLink, type MixerState } from '../state/mixer-state.js'
-import { pick } from './common.js'
+import { nameOf, pick } from './common.js'
 import { effectiveSide, targetName, targetOf, type Side, type Target } from './target.js'
 
 // Pure key logic (no Stream Deck SDK), so tests can drive it with a fake connection.
@@ -39,7 +39,7 @@ function flagSpec(settings: JsonObject, prefix: 'mute' | 'solo', title: string, 
 	return {
 		title,
 		mix: mixOf(t),
-		label: targetName(t),
+		label: nameOf(settings, targetName(t)),
 		color,
 		read: (s) => sideFlags(prefix, effectiveSide(t, s), holder(s, t)),
 		write: (s, on) => void sideFlags(prefix, effectiveSide(t, s), holder(s, t), on),
@@ -58,7 +58,7 @@ export function inputOptionSpec(settings: JsonObject): ToggleSpec | undefined {
 	if (!input || !option) return undefined
 	return {
 		title: OPTIONS[option],
-		label: INPUTS[input],
+		label: nameOf(settings, INPUTS[input]),
 		color: 'blue',
 		read: (s) => s.inputs[input][option],
 		write: (s, on) => void (s.inputs[input][option] = on),
@@ -72,7 +72,7 @@ export function linkSpec(settings: JsonObject): ToggleSpec | undefined {
 	return {
 		title: 'LINK',
 		mix: t.mix,
-		label: targetName(t),
+		label: nameOf(settings, targetName(t)),
 		color: 'blue',
 		read: (s) => s.mixes[t.mix].channels[t.channel].link,
 		write: (s, on) => setLink(s, t.mix, t.channel, on),
@@ -87,11 +87,11 @@ export function outputRoomSpec(settings: JsonObject): ToggleSpec | undefined {
 	if (!button) return undefined
 	if (button !== 'gain') {
 		// HP / TRS / AUX are one set of phone buttons, not per output.
-		return { title: BUTTONS[button], label: 'Phones', color: 'blue', read: (s) => s.phones[button], write: (s, on) => void (s.phones[button] = on) }
+		return { title: BUTTONS[button], label: nameOf(settings, 'Phones'), color: 'blue', read: (s) => s.phones[button], write: (s, on) => void (s.phones[button] = on) }
 	}
 	const output = pick(settings.output, OUTPUTS)
 	if (!output) return undefined
-	return { title: 'GAIN', label: OUTPUTS[output], color: 'blue', read: (s) => !!s.outputs[output].gainBtn, write: (s, on) => void (s.outputs[output].gainBtn = on) }
+	return { title: 'GAIN', label: nameOf(settings, OUTPUTS[output]), color: 'blue', read: (s) => !!s.outputs[output].gainBtn, write: (s, on) => void (s.outputs[output].gainBtn = on) }
 }
 
 /** Key press: toggle flips what the key shows; on/off force it. Only changed reports are sent. */

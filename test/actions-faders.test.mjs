@@ -60,18 +60,15 @@ test('set mode goes to the level; above the maximum is clamped', () => {
 	assert.deepEqual(faderOp({}), { set: false, db: 1 })
 })
 
-test('pair moves both sides; a single side moves one with LINK off and the pair with LINK on', () => {
+test('a volume spec always moves both sides, LINKed or not (a side setting is ignored)', () => {
 	const mix = (link) => (s) => {
 		for (const ch of Object.values(s.mixes[0].channels)) ch.volL = ch.volR = dbToRaw(-20)
 		s.mixes[0].channels.in12.link = link
 		s.mixes[0].channels.pb12.link = link
 	}
 	const off = setup(mix(false))
-	stepVol(off.conn, volSpec({ kind: 'mix', mix: 0, channel: 'in12', side: 'L' }), 3)
-	near(off.conn.state.mixes[0].channels.in12.volL, dbToRaw(-17))
-	assert.equal(off.conn.state.mixes[0].channels.in12.volR, dbToRaw(-20))
 	stepVol(off.conn, volSpec({ kind: 'mix', mix: 0, channel: 'in12' }), 1)
-	near(off.conn.state.mixes[0].channels.in12.volL, dbToRaw(-16))
+	near(off.conn.state.mixes[0].channels.in12.volL, dbToRaw(-19))
 	near(off.conn.state.mixes[0].channels.in12.volR, dbToRaw(-19))
 
 	const on = setup(mix(true))
@@ -89,29 +86,43 @@ test('mute through a fader spec toggles, and the muted state is read back', () =
 	assert.equal(v.muted(conn.state), false)
 })
 
-test('VU dial view draws the output meters; a mix uses the first output it feeds; loopbacks stay empty', () => {
-	const { conn } = setup((s) => {
-		s.outputs.out12.source = 0x0b // Mix A
-		s.outputs.mobile.source = 0x0c // Mix B
-		s.outputs.spdif.source = 0x0c
-	})
-	const meters = new Map([['out1L_A', 0.84], ['out2R_A', 0.44], ['mobileL_A', 0.68], ['mobileR_A', 0.2]])
+test('VU dial view: a mix channel shows its own playback meter, loopback its 5x, output its own, inputs stay empty', () => {
+	const { conn } = setup()
+	const meters = new Map([['out1L_A', 0.84], ['out2R_A', 0.44], ['mobileL_A', 0.68], ['mobileR_A', 0.2], ['pb12L_A', 0.3], ['pb12R_A', 0.31], ['pb34L_A', 0.5], ['pb34R_A', 0.52], ['lp12L_A', 0.7], ['lp12R_A', 0.71]])
+	const lr = (settings) => {
+		const view = meterView(volSpec(settings), conn.state, meters, false)
+		return [view.left, view.right]
+	}
 	let view = meterView(volSpec({ kind: 'output', channel: 'out12' }), conn.state, meters, false)
 	assert.deepEqual([view.left, view.right], [0.84, 0.44])
 	assert.equal(view.levelDb, '-6 dB')
 	assert.equal(view.faderDb, '0.0 dB')
-	view = meterView(volSpec({ kind: 'output', channel: 'mobile' }), conn.state, meters, false)
-	assert.deepEqual([view.left, view.right], [0.68, 0.2])
-	view = meterView(volSpec({ kind: 'mix', mix: 0, channel: 'pb12' }), conn.state, meters, false) // Mix A -> out12
-	assert.equal(view.mix, 0)
-	assert.deepEqual([view.left, view.right], [0.84, 0.44])
-	view = meterView(volSpec({ kind: 'mix', mix: 1, channel: 'pb12' }), conn.state, meters, false) // Mix B -> mobile (before spdif)
-	assert.deepEqual([view.left, view.right], [0.68, 0.2])
-	assert.equal(meterOf({ kind: 'mix', mix: 2, channel: 'pb12', side: 'pair' }, conn.state), undefined)
-	view = meterView(volSpec({ kind: 'mix', mix: 2, channel: 'pb12' }), conn.state, meters, false)
-	assert.deepEqual([view.left, view.right, view.levelDb], [0, 0, '-∞'])
-	view = meterView(volSpec({ kind: 'loopback', channel: 'lp12' }), conn.state, meters, false)
-	assert.deepEqual([view.left, view.right], [0, 0])
+	assert.deepEqual(lr({ kind: 'output', channel: 'mobile' }), [0.68, 0.2])
+	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'pb12' }), [0.3, 0.31])
+	assert.deepEqual(lr({ kind: 'mix', mix: 3, channel: 'pb34' }), [0.5, 0.52]) // any mix: the channel's own meter
+	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'pb56' }), [0, 0])
+	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'in12' }), [0, 0])
+	assert.deepEqual(lr({ kind: 'loopback', channel: 'lp12' }), [0.7, 0.71])
+	assert.equal(meterOf({ kind: 'mix', mix: 2, channel: 'otg', side: 'pair' }), undefined)
+	assert.deepEqual(meterOf({ kind: 'mix', mix: 2, channel: 'pb78', side: 'pair' }), ['pb78L_A', 'pb78R_A'])
+})
+
+test('fader, button fader and VU dial ignore a saved L/R side: they act on the pair', () => {
+	const { conn } = setup()
+	const v = volSpec({ kind: 'mix', mix: 0, channel: 'pb12', side: 'L' })
+	stepVol(conn, v, -6)
+	const c = conn.state.mixes[0].channels.pb12
+	near(c.volL, c.volR)
+	assert.ok(c.volR < dbToRaw(0))
+	assert.equal(v.name, 'PB 1/2')
+})
+
+test('a custom name replaces the channel name; blank keeps the default; long names are cut to 24', () => {
+	assert.equal(volSpec({ kind: 'mix', mix: 0, channel: 'pb12', name: '  Music ' }).name, 'Music')
+	assert.equal(volSpec({ kind: 'mix', mix: 0, channel: 'pb12', name: '   ' }).name, 'PB 1/2')
+	assert.equal(gainSpec({ input: 'in1', name: 'Mic' }).name, 'Mic')
+	assert.equal(panSpec({ mix: 0, channel: 'pb12', name: 'Pan me' }).name, 'Pan me')
+	assert.equal(volSpec({ kind: 'mix', mix: 0, channel: 'pb12', name: 'x'.repeat(40) }).name.length, 24)
 })
 
 test('a muted VU view shows MUTED, and peek lets the fader dB through for a moment', () => {

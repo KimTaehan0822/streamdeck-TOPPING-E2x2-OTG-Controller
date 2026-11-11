@@ -17,12 +17,13 @@ const select = (setting, label, items, extra = '') =>
 const text = (setting, label, placeholder, def = '') =>
 	`<sdpi-item label="${label}"><sdpi-textfield setting="${setting}" placeholder="${placeholder}" ${def ? `default="${def}"` : ''}></sdpi-textfield></sdpi-item>`
 
-/** Target fields (mix kinds only when `mixOnly`). s = the saved settings. */
-function targetHtml(s, mixOnly = false) {
+/** Target fields (mix kinds only when `mixOnly`; no Side choice when `noSide`). s = the saved settings. */
+function targetHtml(s, mixOnly = false, noSide = false) {
 	const kind = mixOnly ? 'mix' : (s.kind ?? 'mix')
 	let html = mixOnly ? '' : select('kind', 'Target', KINDS, 'default="mix"')
 	if (kind === 'mix') html += select('mix', 'Mix', MIXES, 'default="0"')
-	return html + select('channel', 'Channel', CHANNELS[kind], 'placeholder="Select channel"') + select('side', 'Side', SIDES, 'default="pair"')
+	html += select('channel', 'Channel', CHANNELS[kind], 'placeholder="Select channel"')
+	return html + (noSide ? '' : select('side', 'Side', SIDES, 'default="pair"')) + nameField(CHANNELS[kind][s.channel])
 }
 
 /** Draws build(type, settings) into #fields; a change of any `watch` setting saves it and redraws (a new target kind clears the channel). */

@@ -66,11 +66,12 @@
 					html += select('button', 'Button', BUTTONS, 'placeholder="Select"')
 					if (s.button === 'gain' || !s.button) html += select('output', 'Output', OUTPUTS, 'placeholder="Select"')
 				}
-				html += select('op', 'Operation', OP, 'default="toggle"')
+				const fallback = type.kinds ? CHANNELS[s.kind ?? 'mix']?.[s.channel] : type.input ? INPUTS[s.input] : s.button && s.button !== 'gain' ? 'Phones' : OUTPUTS[s.output]
+				html += nameField(fallback) + select('op', 'Operation', OP, 'default="toggle"')
 				fields.innerHTML = html
 				initFields(fields)
 				// A new target kind needs a new channel list, and these fields change what else is shown.
-				for (const name of ['kind', 'option', 'button']) {
+				for (const name of ['kind', 'option', 'button', 'channel', 'input', 'output']) {
 					fields.querySelector(`[setting="${name}"]`)?.addEventListener('valuechange', async (e) => {
 						if (e.target.value === s[name]) return
 						const next = { ...(await saved()), [name]: e.target.value }

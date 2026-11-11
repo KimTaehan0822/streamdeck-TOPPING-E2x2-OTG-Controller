@@ -12,11 +12,11 @@
 		// Digital gain key and dial (inputs only). The action UUID picks the fields.
 		const MODES = { step: 'Step', set: 'Set' }
 		mountPI((type, s) => {
-			let html = select('input', 'Input', INPUTS, 'placeholder="Select"')
+			let html = select('input', 'Input', INPUTS, 'placeholder="Select"') + nameField(INPUTS[s.input])
 			if (type === 'gain-dial') return html + text('step', 'Step per tick (dB)', '1', '1')
 			html += select('mode', 'Mode', MODES, 'default="step"')
 			return html + (s.mode === 'set' ? text('db', 'Gain (dB, max +6)', '0') : text('step', 'Step (dB, negative = down)', '1', '1'))
-		}, ['mode'])
+		}, ['mode', 'input'])
 	</script>
 </body>
 </html>

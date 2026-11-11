@@ -13,7 +13,7 @@
 		const MODES = { step: 'Step', set: 'Set' }
 		const ROLES = { top: 'Top key (raises)', bottom: 'Bottom key (lowers)' }
 		mountPI((type, s) => {
-			let html = targetHtml(s, type === 'pan')
+			let html = targetHtml(s, type === 'pan', type !== 'pan')
 			if (type === 'button-fader') {
 				html += select('role', 'Role', ROLES, 'placeholder="Select"') + text('step', 'Step (dB)', '1', '1')
 			} else {
@@ -23,7 +23,7 @@
 				else html += set ? text('db', 'Level (dB, -60 or lower = silence, max +6)', '0') : text('step', 'Step (dB, negative = down)', '1', '1')
 			}
 			return html
-		}, ['kind', 'mode'])
+		}, ['kind', 'mode', 'channel'])
 	</script>
 </body>
 </html>

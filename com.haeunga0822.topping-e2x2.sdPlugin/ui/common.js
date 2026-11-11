@@ -23,6 +23,10 @@ const NOTICE = `
 </div>`
 document.body.insertAdjacentHTML('afterbegin', NOTICE)
 
+/** Custom key name field (empty = the default name, shown as the placeholder). */
+const nameField = (placeholder) =>
+	`<sdpi-item label="Name"><sdpi-textfield setting="name" maxlength="24" placeholder="${placeholder || 'Channel name'}"></sdpi-textfield></sdpi-item>`
+
 // Fields a page adds from script miss what sdpi picks up while the page loads: sdpi-select only sees options
 // added after it is on the page, and saved settings only reach fields that existed at connect. Redo both.
 async function initFields(root) {

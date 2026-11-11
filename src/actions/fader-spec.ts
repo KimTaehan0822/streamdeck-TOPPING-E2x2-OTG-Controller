@@ -1,12 +1,11 @@
 import type { JsonObject } from '@elgato/utils'
 import type { E2x2Connection } from '../connection.js'
-import { SOURCES } from '../model/e2x2.js'
 import { dbToLevel, type MeterChannel } from '../protocol/meter.js'
 import { dbToRaw, rawToDb } from '../protocol/report.js'
 import type { MeterView } from '../render/meter.js'
 import type { Mix } from '../render/theme.js'
 import type { MixerState } from '../state/mixer-state.js'
-import { num, pick } from './common.js'
+import { nameOf, num, pick } from './common.js'
 import { effectiveSide, targetName, targetOf, type OutputId, type Target } from './target.js'
 import { holder, INPUTS, muteSpec } from './toggle-spec.js'
 
@@ -46,17 +45,17 @@ export interface Vol {
 	setMuted: (s: MixerState, on: boolean) => void
 }
 
-/** Mix channel, loopback or output volume; a pair moves both sides, a single side moves one (or the pair when LINKed). */
+/** Mix channel, loopback or output volume; always both sides (L/R levels are not split, so a saved side is ignored). */
 export function volSpec(settings: JsonObject): Vol | undefined {
 	// A freshly dropped key has no kind or mix saved yet: the screen shows Mix A of a mix channel.
-	const merged = { kind: 'mix', mix: 0, ...settings }
+	const merged = { kind: 'mix', mix: 0, ...settings, side: 'pair' }
 	const t = targetOf(merged)
 	const mute = muteSpec(merged)
 	if (!t || !mute) return undefined
 	const sides = (s: MixerState) => (effectiveSide(t, s) === 'pair' ? (['L', 'R'] as const) : ([effectiveSide(t, s)] as ('L' | 'R')[]))
 	const vols = (s: MixerState) => holder(s, t) as unknown as Record<string, number>
 	return {
-		name: targetName(t),
+		name: nameOf(settings, targetName(t)),
 		mix: t.kind === 'mix' ? t.mix : undefined,
 		target: t,
 		raw: (s) => Math.max(...sides(s).map((x) => vols(s)['vol' + x])),
@@ -72,7 +71,7 @@ export function gainSpec(settings: JsonObject): Vol | undefined {
 	const id = pick(settings.input, INPUTS)
 	if (!id) return undefined
 	return {
-		name: INPUTS[id],
+		name: nameOf(settings, INPUTS[id]),
 		raw: (s) => s.inputs[id].gain,
 		map: (s, f) => void (s.inputs[id].gain = f(s.inputs[id].gain)),
 		muted: (s) => s.inputs[id].mute,
@@ -97,21 +96,21 @@ export const pressFader = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: FaderO
 export const setMute = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: 'toggle' | 'on' | 'off'): void =>
 	c.update((s) => v.setMuted(s, op === 'toggle' ? !v.muted(s) : op === 'on'))
 
-// --- VU meters: the device only measures its outputs ---
+// --- VU meters: per channel (playback, loopback, output), item 01 ---
 
-const PAIRS: Record<OutputId, [MeterChannel, MeterChannel]> = {
+const OUT_PAIRS: Record<OutputId, [MeterChannel, MeterChannel]> = {
 	out12: ['out1L_A', 'out2R_A'],
 	mobile: ['mobileL_A', 'mobileR_A'],
 	spdif: ['spdifL_A', 'spdifR_A'],
 }
 
-/** Output -> its own pair; mix -> the pair of the first output (out12, mobile, spdif) fed by that mix; loopback -> none. */
-export function meterOf(t: Target, s: MixerState): [MeterChannel, MeterChannel] | undefined {
-	// shortcut: loopbacks have no meter on the device, so they show empty bars; upgrade only if a loopback meter report is ever found
-	if (t.kind === 'loopback') return undefined
-	if (t.kind === 'output') return PAIRS[t.id]
-	const id = (Object.keys(PAIRS) as OutputId[]).find((o) => s.outputs[o].source === SOURCES.mixA + t.mix)
-	return id && PAIRS[id]
+/** A mix channel shows its own channel meter (playbacks only), a loopback its 5x meter, an output its own. */
+export function meterOf(t: Target): [MeterChannel, MeterChannel] | undefined {
+	if (t.kind === 'output') return OUT_PAIRS[t.id]
+	if (t.kind === 'loopback') return [`${t.id}L_A`, `${t.id}R_A`]
+	// shortcut: inputs (in12) and OTG have no known meter codes, so they show empty bars; upgrade once captured
+	const c = t.channel
+	return c === 'in12' || c === 'otg' ? undefined : [`${c}L_A`, `${c}R_A`]
 }
 
 /** Inverse of dbToLevel, by bisection (the scale is monotonic). */
@@ -131,7 +130,7 @@ export const levelText = (level: number): string => (level <= 0 ? '-∞' : `${Ma
 
 /** What a VU strip or button fader draws. `peek` shows the fader dB instead of MUTED for a moment after an adjustment. */
 export function meterView(v: Vol, s: MixerState, meters: ReadonlyMap<MeterChannel, number>, peek: boolean): MeterView {
-	const pair = v.target && meterOf(v.target, s)
+	const pair = v.target && meterOf(v.target)
 	const [left, right] = pair ? pair.map((c) => meters.get(c) ?? 0) : [0, 0]
 	const raw = v.raw(s)
 	return {
@@ -168,7 +167,7 @@ export function panSpec(settings: JsonObject): Pan | undefined {
 	}
 	const values = (s: MixerState) => pans(s).map(([k, c]) => c[k])
 	return {
-		name: targetName(t),
+		name: nameOf(settings, targetName(t)),
 		mix: t.mix,
 		read: (s) => {
 			const v = values(s)

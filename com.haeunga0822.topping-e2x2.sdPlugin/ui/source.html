@@ -15,12 +15,12 @@
 		// Same order as the plugin cycles in.
 		const SOURCES = { mixA: 'MIX A', mixB: 'MIX B', mixC: 'MIX C', mixD: 'MIX D', in1: 'Input 1', in2: 'Input 2', in12: 'Input 1+2', mobile: 'Mobile In', pb12: 'Playback 1+2', pb34: 'Playback 3+4', pb56: 'Playback 5+6', pb78: 'Playback 7+8' }
 		mountPI((type, s) => {
-			let html = select('target', 'Target', TARGETS, 'placeholder="Select"') + select('mode', 'Mode', MODES, 'default="cycleMix"')
+			let html = select('target', 'Target', TARGETS, 'placeholder="Select"') + nameField(TARGETS[s.target]) + select('mode', 'Mode', MODES, 'default="cycleMix"')
 			if (s.mode === 'cycleList')
 				html += `<sdpi-item label="Sources"><sdpi-checkbox-list setting="list" columns="1">${Object.entries(SOURCES).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</sdpi-checkbox-list></sdpi-item>`
 			if (s.mode === 'toggle') html += select('a', 'Source 1', SOURCES, 'placeholder="Select"') + select('b', 'Source 2', SOURCES, 'placeholder="Select"')
 			return html
-		}, ['mode'])
+		}, ['mode', 'target'])
 	</script>
 </body>
 </html>
