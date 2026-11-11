@@ -1,4 +1,4 @@
-# TOPPING E2x2 OTG Controller (Stream Deck プラグイン)
+# Controller for TOPPING E2x2 OTG (Stream Deck プラグイン)
 
 [한국어](README.md) | [English](README.en.md) | **日本語**
 
@@ -32,7 +32,7 @@ Elgato Stream Deck のキーとダイヤルで **TOPPING E2x2 OTG** ミキサー
 
 ## インストール
 
-`com.haeunga0822.topping-e2x2.streamDeckPlugin` をダブルクリックし、Stream Deck がインストールするか尋ねたら承認します。インストールすると、アクション一覧に **TOPPING E2x2 OTG Controller** カテゴリーが追加されます。設定画面は韓国語・英語・日本語で表示でき、画面の一番上の **Language** で選びます (すべてのアクションに共通です)。画面の一番上には、上の制限事項の警告が常に表示されます。
+`com.haeunga0822.topping-e2x2.streamDeckPlugin` をダブルクリックし、Stream Deck がインストールするか尋ねたら承認します。インストールすると、アクション一覧に **Controller for TOPPING E2x2 OTG** カテゴリーが追加されます。設定画面は韓国語・英語・日本語で表示でき、画面の一番上の **Language** で選びます (すべてのアクションに共通です)。画面の一番上には、上の制限事項の警告が常に表示されます。
 
 ## アクション
 

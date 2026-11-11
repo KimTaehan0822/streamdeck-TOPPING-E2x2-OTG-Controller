@@ -1,4 +1,4 @@
-# TOPPING E2x2 OTG Controller (Stream Deck plugin)
+# Controller for TOPPING E2x2 OTG (Stream Deck plugin)
 
 [한국어](README.md) | **English** | [日本語](README.ja.md)
 
@@ -32,7 +32,7 @@ After that, use Stream Deck as your main control. If you change values in the ap
 
 ## Installation
 
-Double-click `com.haeunga0822.topping-e2x2.streamDeckPlugin` and approve when the Stream Deck software asks to install it. The action list then gets a **TOPPING E2x2 OTG Controller** category. The settings screens come in Korean, English and Japanese: choose the language with **Language** at the top of the screen (it applies to every action). The limitation warning above is always shown at the very top.
+Double-click `com.haeunga0822.topping-e2x2.streamDeckPlugin` and approve when the Stream Deck software asks to install it. The action list then gets a **Controller for TOPPING E2x2 OTG** category. The settings screens come in Korean, English and Japanese: choose the language with **Language** at the top of the screen (it applies to every action). The limitation warning above is always shown at the very top.
 
 ## Actions
 

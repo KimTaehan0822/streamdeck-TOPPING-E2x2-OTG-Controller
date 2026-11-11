@@ -15,7 +15,7 @@ const same = (a: string, b: string) => resolve(a).toLowerCase() === resolve(b).t
 
 /** A reason the save key would refuse this name, or undefined. */
 export function saveProblem(dir: string, name: unknown): string | undefined {
-	if (!validName(name)) return 'Invalid name: use 1-60 characters without \ / : * ? " < > | or "..".'
+	if (!validName(name)) return 'Invalid name: use 1-60 characters without \\ / : * ? " < > | or "..".'
 	const current = currentWorkspacePath(dir)
 	if (current && same(current, pathOf(dir, name))) return 'The TOPPING app is using this workspace. Pick another name.'
 	return undefined
