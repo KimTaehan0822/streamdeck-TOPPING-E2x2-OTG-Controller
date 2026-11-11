@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+</head>
+<body>
+	<div id="fields"></div>
+	<script src="common.js"></script>
+	<script>
+		// One page for all on/off keys; the action UUID picks the fields.
+		const OP = { toggle: 'Toggle', on: 'On', off: 'Off' }
+		const KINDS = { mix: 'Mix channel', loopback: 'Loopback', output: 'Output' }
+		const MIXES = { 0: 'MIX A', 1: 'MIX B', 2: 'MIX C', 3: 'MIX D' }
+		const MIX_CH = { in12: 'IN 1/2', otg: 'OTG', pb12: 'PB 1/2', pb34: 'PB 3/4', pb56: 'PB 5/6', pb78: 'PB 7/8' }
+		const CHANNELS = {
+			mix: MIX_CH,
+			loopback: { lp12: 'Loop 1/2', lp34: 'Loop 3/4', lp56: 'Loop 5/6' },
+			output: { out12: 'Out 1/2', mobile: 'Mobile Out', spdif: 'S/PDIF' },
+		}
+		const SIDES = { pair: 'Both (pair)', L: 'L only', R: 'R only' }
+		const INPUTS = { in1: 'IN 1', in2: 'IN 2', mobile: 'Mobile' }
+		const OPTIONS = { p48v: '48V', inst: 'INST', phase: 'Ø (phase invert)' }
+		const BUTTONS = { gain: 'Gain', hp: 'HP', trs: 'TRS', aux: 'AUX' }
+		const OUTPUTS = { out12: 'Out 1/2', mobile: 'Mobile Out' }
+		const WARN_48V = `<div class="notice danger"><b>48V phantom power:</b> it can damage ribbon and some dynamic microphones, and it can pop speakers.
+			Turn it on only with a condenser microphone connected, and turn the monitor level down first. The plugin sends it to the device straight away.</div>`
+
+		const select = (setting, label, items, extra = '') =>
+			`<sdpi-item label="${label}"><sdpi-select setting="${setting}" ${extra}>${Object.entries(items)
+				.map(([value, text]) => `<option value="${value}">${text}</option>`)
+				.join('')}</sdpi-select></sdpi-item>`
+
+		// Fixed kinds: 'mix' keys have no kind choice (solo and LINK only make sense on a mix channel).
+		const TYPES = {
+			mute: { kinds: ['mix', 'loopback', 'output'], mix: true },
+			solo: { kinds: ['mix'], mix: true },
+			link: { kinds: ['mix'], mix: true, noSide: true },
+			'input-option': { input: true },
+			'output-room': { room: true },
+		}
+
+		async function main() {
+			const client = SDPIComponents.streamDeckClient
+			const { actionInfo } = await client.getConnectionInfo()
+			const type = TYPES[actionInfo.action.split('.').pop()]
+			if (!type) return
+			const fields = document.getElementById('fields')
+			const saved = async () => (await client.getSettings()).settings ?? {}
+			let s = await saved()
+
+			const draw = () => {
+				let html = ''
+				if (type.kinds) {
+					const kind = s.kind ?? 'mix'
+					if (type.kinds.length > 1) html += select('kind', 'Target', Object.fromEntries(type.kinds.map((k) => [k, KINDS[k]])), 'default="mix"')
+					if (kind === 'mix') html += select('mix', 'Mix', MIXES, 'default="0"')
+					html += select('channel', 'Channel', CHANNELS[kind] ?? MIX_CH, 'placeholder="Select channel"')
+					if (!type.noSide) html += select('side', 'Side', SIDES, 'default="pair"')
+				}
+				if (type.input) {
+					html += select('input', 'Input', INPUTS, 'placeholder="Select"') + select('option', 'Option', OPTIONS, 'placeholder="Select"')
+					if (s.option === 'p48v') html += WARN_48V
+				}
+				if (type.room) {
+					html += select('button', 'Button', BUTTONS, 'placeholder="Select"')
+					if (s.button === 'gain' || !s.button) html += select('output', 'Output', OUTPUTS, 'placeholder="Select"')
+				}
+				html += select('op', 'Operation', OP, 'default="toggle"')
+				fields.innerHTML = html
+				initFields(fields)
+				// A new target kind needs a new channel list, and these fields change what else is shown.
+				for (const name of ['kind', 'option', 'button']) {
+					fields.querySelector(`[setting="${name}"]`)?.addEventListener('valuechange', async (e) => {
+						if (e.target.value === s[name]) return
+						const next = { ...(await saved()), [name]: e.target.value }
+						if (name === 'kind') next.channel = undefined
+						await client.setSettings(next)
+						s = next
+						draw()
+					})
+				}
+			}
+			draw()
+		}
+		main()
+	</script>
+</body>
+</html>

@@ -21,5 +21,96 @@
 	"Software": {
 		"MinimumVersion": "7.3"
 	},
-	"Actions": []
+	"Actions": [
+		{
+			"Name": "Mute",
+			"UUID": "com.haeunga0822.topping-e2x2.mute",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/toggle.html",
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Image": "imgs/channel"
+				},
+				{
+					"Image": "imgs/channel"
+				}
+			]
+		},
+		{
+			"Name": "Solo",
+			"UUID": "com.haeunga0822.topping-e2x2.solo",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/toggle.html",
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Image": "imgs/channel"
+				},
+				{
+					"Image": "imgs/channel"
+				}
+			]
+		},
+		{
+			"Name": "Input option (48V, INST, Ø)",
+			"UUID": "com.haeunga0822.topping-e2x2.input-option",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/toggle.html",
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Image": "imgs/channel"
+				},
+				{
+					"Image": "imgs/channel"
+				}
+			]
+		},
+		{
+			"Name": "LINK",
+			"UUID": "com.haeunga0822.topping-e2x2.link",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/toggle.html",
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Image": "imgs/channel"
+				},
+				{
+					"Image": "imgs/channel"
+				}
+			]
+		},
+		{
+			"Name": "출력 컨트롤룸",
+			"UUID": "com.haeunga0822.topping-e2x2.output-room",
+			"Icon": "imgs/global",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/toggle.html",
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Image": "imgs/global"
+				},
+				{
+					"Image": "imgs/global"
+				}
+			]
+		}
+	]
 }
