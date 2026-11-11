@@ -154,7 +154,7 @@ export interface Pan {
 	mix: Mix
 	/** 0..1, the mean of the sides it acts on. */
 	read: (s: MixerState) => number
-	/** Moves the sides together by d (0..1 scale), stopping when one reaches an end, so a pair keeps its width. */
+	/** Moves the pan by d (0..1 scale of the mean). LINKed strip: balance; two monos as a pair: both sides together, stopping at an end so the width is kept. */
 	shift: (s: MixerState, d: number) => void
 }
 
@@ -175,6 +175,15 @@ export function panSpec(settings: JsonObject): Pan | undefined {
 			return v.reduce((a, b) => a + b, 0) / v.length
 		},
 		shift: (s, d) => {
+			const c = s.mixes[t.mix].channels[t.channel]
+			if (c.link && effectiveSide(t, s) === 'pair') {
+				// shortcut: TOPPING app's real LINK pan curve not captured, verify on device
+				// LINKed strip: balance p = panL + panR - 1 in -1..1 (the mean is (p+1)/2, so d on the mean moves p by 2d); centre is setLink's (0, 1)
+				const b = Math.max(-1, Math.min(1, c.panL + c.panR - 1 + 2 * d))
+				c.panL = Math.max(0, b)
+				c.panR = Math.min(1, 1 + b)
+				return
+			}
 			const v = values(s)
 			const moved = Math.max(-Math.min(...v), Math.min(1 - Math.max(...v), d))
 			for (const [k, c] of pans(s)) c[k] = Math.min(1, Math.max(0, c[k] + moved))
