@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+</head>
+<body>
+	<div id="fields"></div>
+	<script src="common.js"></script>
+	<script src="target.js"></script>
+	<script>
+		// Workspace key. Load: pick a saved workspace (the plugin lists the folder). Save: type a new name.
+		const MODES = { load: 'Load', save: 'Save' }
+		mountPI((type, s) => {
+			let html = select('mode', 'Mode', MODES, 'default="load"')
+			if (s.mode === 'save')
+				html += text('name', 'New workspace name', 'e.g. Streaming') + '<div id="warning" class="notice danger" hidden><b>Cannot save:</b> <span id="warningText"></span></div>'
+			else html += `<sdpi-item label="Workspace"><sdpi-select setting="name" datasource="workspaces" placeholder="Select"></sdpi-select></sdpi-item>`
+			return html
+		}, ['mode'])
+		// The plugin tells us when the chosen name is not allowed.
+		SDPIComponents.streamDeckClient.sendToPropertyInspector.subscribe((m) => {
+			if (m.payload?.event !== 'warning') return
+			const box = document.getElementById('warning')
+			if (!box) return
+			document.getElementById('warningText').textContent = m.payload.text
+			box.hidden = !m.payload.text
+		})
+	</script>
+</body>
+</html>

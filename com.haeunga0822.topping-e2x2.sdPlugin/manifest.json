@@ -231,6 +231,34 @@
 					"Image": "imgs/dial"
 				}
 			]
+		},
+		{
+			"Name": "Source select",
+			"UUID": "com.haeunga0822.topping-e2x2.source",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/source.html",
+			"States": [
+				{
+					"Image": "imgs/channel"
+				}
+			]
+		},
+		{
+			"Name": "Workspace load/save",
+			"UUID": "com.haeunga0822.topping-e2x2.workspace",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/workspace.html",
+			"States": [
+				{
+					"Image": "imgs/channel"
+				}
+			]
 		}
 	]
 }

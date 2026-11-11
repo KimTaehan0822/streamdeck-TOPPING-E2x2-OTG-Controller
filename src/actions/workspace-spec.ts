@@ -1,0 +1,39 @@
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import type { E2x2Connection } from '../connection.js'
+import { currentWorkspacePath, parseWorkspace, writeWorkspace } from '../workspace/tpwork.js'
+
+// Pure workspace load/save (no Stream Deck SDK). `dir` is the TOPPING folder; tests pass a temp dir.
+
+/** The name becomes a file name: no separators, no '..', no Windows-forbidden characters, trimmed, sane length. */
+export function validName(name: unknown): name is string {
+	return typeof name === 'string' && name.length > 0 && name.length <= 60 && name === name.trim() && !name.includes('..') && !name.endsWith('.') && !/[\\/:*?"<>|\x00-\x1f]/.test(name)
+}
+
+const pathOf = (dir: string, name: string) => join(dir, 'E2X2_OTG', `E2X2_OTG_${name}.TPwork`)
+const same = (a: string, b: string) => resolve(a).toLowerCase() === resolve(b).toLowerCase() // Windows paths are case-insensitive
+
+/** A reason the save key would refuse this name, or undefined. */
+export function saveProblem(dir: string, name: unknown): string | undefined {
+	if (!validName(name)) return 'Invalid name: use 1-60 characters without \ / : * ? " < > | or "..".'
+	const current = currentWorkspacePath(dir)
+	if (current && same(current, pathOf(dir, name))) return 'The TOPPING app is using this workspace. Pick another name.'
+	return undefined
+}
+
+export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown): void {
+	if (!validName(name)) throw new Error('invalid workspace name')
+	conn.loadState(parseWorkspace(readFileSync(pathOf(dir, name), 'utf8')))
+}
+
+/** Writes the plugin's state as a new workspace, using the app's current file as the template for fields we do not model. */
+export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown): string {
+	const problem = saveProblem(dir, name)
+	if (problem) throw new Error(problem)
+	const template = currentWorkspacePath(dir)
+	if (!template) throw new Error('No workspace is open in the TOPPING app to use as a template.')
+	const path = pathOf(dir, name as string)
+	mkdirSync(join(dir, 'E2X2_OTG'), { recursive: true })
+	writeFileSync(path, writeWorkspace(conn.state, readFileSync(template, 'utf8')))
+	return path
+}

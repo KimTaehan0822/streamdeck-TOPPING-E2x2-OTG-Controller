@@ -26,7 +26,7 @@ document.body.insertAdjacentHTML('afterbegin', NOTICE)
 // Fields a page adds from script miss what sdpi picks up while the page loads: sdpi-select only sees options
 // added after it is on the page, and saved settings only reach fields that existed at connect. Redo both.
 async function initFields(root) {
-	for (const s of root.querySelectorAll('sdpi-select')) s.append(...s.querySelectorAll('option'))
+	for (const s of root.querySelectorAll('sdpi-select, sdpi-checkbox-list')) s.append(...s.querySelectorAll('option'))
 	await Promise.all([...root.querySelectorAll('[setting]')].map((e) => e.updateComplete))
 	await SDPIComponents.streamDeckClient.getSettings()
 }

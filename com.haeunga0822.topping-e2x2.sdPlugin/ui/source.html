@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+</head>
+<body>
+	<div id="fields"></div>
+	<script src="common.js"></script>
+	<script src="target.js"></script>
+	<script>
+		// Source select key: pick the output/loopback and how a press changes its source.
+		const TARGETS = { lp12: 'Loop 1/2', lp34: 'Loop 3/4', lp56: 'Loop 5/6', out12: 'Out 1/2', mobile: 'Mobile Out', spdif: 'S/PDIF' }
+		const MODES = { cycleMix: 'Cycle MIX A-D', cycleList: 'Cycle chosen sources', toggle: 'Toggle between two' }
+		// Same order as the plugin cycles in.
+		const SOURCES = { mixA: 'MIX A', mixB: 'MIX B', mixC: 'MIX C', mixD: 'MIX D', in1: 'Input 1', in2: 'Input 2', in12: 'Input 1+2', mobile: 'Mobile In', pb12: 'Playback 1+2', pb34: 'Playback 3+4', pb56: 'Playback 5+6', pb78: 'Playback 7+8' }
+		mountPI((type, s) => {
+			let html = select('target', 'Target', TARGETS, 'placeholder="Select"') + select('mode', 'Mode', MODES, 'default="cycleMix"')
+			if (s.mode === 'cycleList')
+				html += `<sdpi-item label="Sources"><sdpi-checkbox-list setting="list" columns="1">${Object.entries(SOURCES).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</sdpi-checkbox-list></sdpi-item>`
+			if (s.mode === 'toggle') html += select('a', 'Source 1', SOURCES, 'placeholder="Select"') + select('b', 'Source 2', SOURCES, 'placeholder="Select"')
+			return html
+		}, ['mode'])
+	</script>
+</body>
+</html>
