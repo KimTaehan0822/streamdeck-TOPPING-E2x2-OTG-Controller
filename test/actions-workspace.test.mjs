@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
-import { loadWorkspace, saveProblem, saveWorkspace, validName } from '../dist/actions/workspace-spec.js'
+import { loadWorkspace, overwriteNotice, saveProblem, saveWorkspace, validName } from '../dist/actions/workspace-spec.js'
 import { E2x2Connection } from '../dist/connection.js'
 import { decodeReport } from '../dist/protocol/report.js'
 import { stateReports } from '../dist/state/crosspoints.js'
@@ -96,6 +96,22 @@ test('bad names are rejected and nothing is written', () => {
 		assert.equal(existsSync(join(t.dir, 'x')), false)
 		assert.equal(validName('Streaming 2'), true)
 		assert.equal(validName('방송용'), true)
+	} finally {
+		t.done()
+	}
+})
+
+test('saving over another existing workspace is noticed, still works, and leaves no temp file', () => {
+	const t = setup()
+	try {
+		assert.match(overwriteNotice(t.dir, 'Other'), /exists/)
+		assert.equal(overwriteNotice(t.dir, 'Brand New'), undefined)
+		assert.equal(overwriteNotice(t.dir, 'App'), undefined) // refused instead
+		assert.equal(saveProblem(t.dir, 'Other'), undefined)
+		t.conn.update((s) => (s.inputs.in2.gain = 555))
+		const path = saveWorkspace(t.conn, t.dir, 'Other')
+		assert.deepEqual(parseWorkspace(readFileSync(path, 'utf8')), t.conn.state)
+		assert.deepEqual(readdirSync(join(t.dir, 'E2X2_OTG')).sort(), ['E2X2_OTG_App.TPwork', 'E2X2_OTG_Other.TPwork'])
 	} finally {
 		t.done()
 	}

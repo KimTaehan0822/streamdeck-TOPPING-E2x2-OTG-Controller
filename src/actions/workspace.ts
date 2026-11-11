@@ -4,9 +4,9 @@ import type { E2x2Connection } from '../connection.js'
 import { renderWorkspaceKey } from '../render/keys.js'
 import { E2x2Action, type RenderContext } from '../runtime/base-action.js'
 import { listWorkspaces, WORKSPACE_DIR } from '../workspace/tpwork.js'
-import { loadWorkspace, saveProblem, saveWorkspace } from './workspace-spec.js'
+import { loadWorkspace, overwriteNotice, saveProblem, saveWorkspace } from './workspace-spec.js'
 
-const warn = (text: string) => streamDeck.ui.sendToPropertyInspector({ event: 'warning', text })
+const warn = (text: string, level: 'danger' | 'info' = 'danger') => streamDeck.ui.sendToPropertyInspector({ event: 'warning', text, level })
 
 @action({ UUID: 'com.haeunga0822.topping-e2x2.workspace' })
 class WorkspaceAction extends E2x2Action<JsonObject> {
@@ -27,8 +27,10 @@ class WorkspaceAction extends E2x2Action<JsonObject> {
 	override onKeyDown(ev: KeyDownEvent<JsonObject>): void {
 		const { mode, name } = ev.payload.settings
 		try {
-			if (mode === 'save') saveWorkspace(this.connection, this.dir, name)
-			else {
+			if (mode === 'save') {
+				saveWorkspace(this.connection, this.dir, name)
+				void ev.action.showOk()
+			} else {
 				loadWorkspace(this.connection, this.dir, name) // loadState redraws every key
 				this.loaded = name as string
 			}
@@ -40,7 +42,10 @@ class WorkspaceAction extends E2x2Action<JsonObject> {
 	}
 
 	private warnAbout(settings: JsonObject): void {
-		void warn(settings.mode === 'save' ? (saveProblem(this.dir, settings.name) ?? '') : '')
+		if (settings.mode !== 'save') return void warn('')
+		const problem = saveProblem(this.dir, settings.name)
+		const notice = overwriteNotice(this.dir, settings.name)
+		void warn(problem ?? notice ?? '', problem ? 'danger' : 'info')
 	}
 
 	override onDidReceiveSettings(ev: DidReceiveSettingsEvent<JsonObject>): void {

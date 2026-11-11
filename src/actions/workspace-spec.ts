@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { E2x2Connection } from '../connection.js'
 import { currentWorkspacePath, parseWorkspace, writeWorkspace } from '../workspace/tpwork.js'
@@ -21,6 +21,11 @@ export function saveProblem(dir: string, name: unknown): string | undefined {
 	return undefined
 }
 
+/** A notice (not a refusal) when saving would replace another saved workspace. */
+export function overwriteNotice(dir: string, name: unknown): string | undefined {
+	return validName(name) && !saveProblem(dir, name) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it.' : undefined
+}
+
 export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown): void {
 	if (!validName(name)) throw new Error('invalid workspace name')
 	conn.loadState(parseWorkspace(readFileSync(pathOf(dir, name), 'utf8')))
@@ -34,6 +39,9 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 	if (!template) throw new Error('No workspace is open in the TOPPING app to use as a template.')
 	const path = pathOf(dir, name as string)
 	mkdirSync(join(dir, 'E2X2_OTG'), { recursive: true })
-	writeFileSync(path, writeWorkspace(conn.state, readFileSync(template, 'utf8')))
+	// temp file in the same folder, then rename: a crash never leaves a truncated workspace (the dot prefix keeps it out of the list)
+	const tmp = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.tmp`)
+	writeFileSync(tmp, writeWorkspace(conn.state, readFileSync(template, 'utf8')))
+	renameSync(tmp, path)
 	return path
 }
