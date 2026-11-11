@@ -58,6 +58,7 @@ export function stateReports(s: MixerState): Report[] {
 		),
 		...inputs.map(([id, group]) => {
 			const i = s.inputs[id]
+			// shortcut: input solo has no observed USB effect yet, model it once captured
 			return { group, item: INPUT_ITEMS.gain, value: i.mute ? 0 : ((i.phase ? -1 : 1) * i.gain) | 0 }
 		}),
 	]

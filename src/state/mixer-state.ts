@@ -26,7 +26,7 @@ export const MIX_CHANNELS = {
 } as const
 export type MixChannelId = keyof typeof MIX_CHANNELS
 
-export type Input = { gain: number; mute: boolean; phase: boolean; p48v: boolean; inst: boolean; mon: boolean }
+export type Input = { gain: number; mute: boolean; solo: boolean; phase: boolean; p48v: boolean; inst: boolean; mon: boolean }
 export type Output = { volL: number; volR: number; muteL: boolean; muteR: boolean; link: boolean; source: number; gainBtn?: boolean }
 export type Loopback = Omit<Output, 'gainBtn'>
 
@@ -55,7 +55,7 @@ const strip = (link: boolean): MixChannel => ({
 })
 
 const out = (source: number): Loopback => ({ volL: UNITY, volR: UNITY, muteL: false, muteR: false, link: true, source })
-const input = (): Input => ({ gain: UNITY, mute: false, phase: false, p48v: false, inst: false, mon: false })
+const input = (): Input => ({ gain: UNITY, mute: false, solo: false, phase: false, p48v: false, inst: false, mon: false })
 
 /** Mixes silent, everything else at 0 dB with the app's default routing. */
 export function emptyState(): MixerState {

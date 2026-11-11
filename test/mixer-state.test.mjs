@@ -118,3 +118,10 @@ test('mix channel phase inverts, output mute zeroes the volume report', () => {
 	assert.equal(valueOf(r, 0x32, 3), 0)
 	assert.deepEqual(JSON.parse(JSON.stringify(s)), s)
 })
+
+test('input solo is stored but sends nothing yet', () => {
+	const a = emptyState()
+	const b = clone(a)
+	b.inputs.in1.solo = true
+	assert.deepEqual(diffReports(a, b), [])
+})
