@@ -69,13 +69,14 @@ test('currentWorkspacePath and listWorkspaces', () => {
 function harness(dir) {
 	const listeners = []
 	const closed = []
+	const errors = []
 	const timers = new Map()
 	let id = 0
 	const deps = {
 		dir,
 		watch: (path, cb) => {
 			listeners.push({ path, cb })
-			return { close: () => closed.push(path) }
+			return { close: () => closed.push(path), on: (ev, fn) => (errors.push(fn), undefined) }
 		},
 		setTimeout: (fn, ms) => (timers.set(++id, { fn, ms }), id),
 		clearTimeout: (t) => timers.delete(t),
@@ -84,6 +85,7 @@ function harness(dir) {
 		deps,
 		listeners,
 		closed,
+		errors,
 		timers,
 		change: (i = 0, name = 'E2X2_OTG_Mine.TPwork') => listeners[i].cb('change', name),
 		fire: () => [...timers.values()].splice(0).forEach((t) => t.fn()) || timers.clear(),
@@ -137,4 +139,27 @@ test('keeps previous state when the file is broken', () => {
 	} finally {
 		rmSync(dir, { recursive: true })
 	}
+})
+
+test('a watcher error is swallowed and closes that watcher', () => {
+	const dir = fakeDir()
+	try {
+		const h = harness(dir)
+		watchWorkspace(() => {}, h.deps)
+		assert.equal(h.errors.length, 2)
+		assert.doesNotThrow(() => h.errors[0](new Error('EPERM')))
+		assert.deepEqual(h.closed, [h.listeners[0].path])
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
+
+test('display ints follow 90 + dB and survive a write of the fixture', () => {
+	const s = parseWorkspace(file)
+	assert.deepEqual(JSON.parse(writeWorkspace(s, file)), JSON.parse(file))
+	s.mixes[0].channels.pb12.volL = Math.round(10 ** (-6 / 20) * 0x02000000)
+	s.mixes[0].channels.pb12.volR = 0
+	const w = JSON.parse(writeWorkspace(s, file)).MixSaveA
+	assert.equal(w['MixParmeter_3.Mix_volume_L'], 84)
+	assert.equal(w['MixParmeter_3.Mix_volume_R'], 0)
 })

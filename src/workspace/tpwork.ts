@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { rawToDb } from '../protocol/report.js'
 import { emptyState, type MixChannelId, type MixerState } from '../state/mixer-state.js'
 
 export const WORKSPACE_DIR = 'C:\\Program Files\\TOPPING Pro\\TOPPING Professional Control Center'
@@ -14,6 +15,9 @@ const LOOPBACK_KEYS = { lp12: 'Loopback12', lp34: 'Loopback34', lp56: 'Loopback5
 const MIX_SCALE = 100
 
 type Obj = Record<string, any>
+
+/** The app's dB display int next to each raw volume: 90 + dB, never below 0, 0 for silence. */
+const display = (raw: number) => (raw <= 0 ? 0 : Math.max(0, 90 + Math.round(rawToDb(raw))))
 
 /** Throws on broken JSON or a missing section, so callers can keep their previous state. */
 export function parseWorkspace(json: string): MixerState {
@@ -78,6 +82,8 @@ export function writeWorkspace(s: MixerState, template: string): string {
 			const p = `MixParmeter_${i + 1}.`
 			const c = s.mixes[m].channels[id]
 			Object.assign(mix, {
+				[p + 'Mix_volume_L']: display(c.volL),
+				[p + 'Mix_volume_R']: display(c.volR),
 				[p + 'Mix_volume_Lnum']: Math.round(c.volL / MIX_SCALE),
 				[p + 'Mix_volume_Rnum']: Math.round(c.volR / MIX_SCALE),
 				[p + 'LinkEnable']: c.link,
@@ -96,7 +102,7 @@ export function writeWorkspace(s: MixerState, template: string): string {
 		Object.assign(need(w, key), { IN_volumenum: i.gain, MUTEEnable: i.mute, SOLOEnable: i.solo, ANTIEnable: i.phase, P48VEnable: i.p48v, INSTEnable: i.inst, MONIEnable: i.mon })
 	}
 	const route = (o: Obj, r: MixerState['loopbacks']['lp12']) =>
-		Object.assign(o, { OUT_volume_Lnum: r.volL, OUT_volume_Rnum: r.volR, MUTEEnable_L: r.muteL, MUTEEnable_R: r.muteR, LinkEnable: r.link, ChannelOUT_mode: r.source })
+		Object.assign(o, { OUT_volume_L: display(r.volL), OUT_volume_R: display(r.volR), OUT_volume_Lnum: r.volL, OUT_volume_Rnum: r.volR, MUTEEnable_L: r.muteL, MUTEEnable_R: r.muteR, LinkEnable: r.link, ChannelOUT_mode: r.source })
 	for (const [id, key] of Object.entries(OUTPUT_KEYS) as [keyof typeof OUTPUT_KEYS, string][]) route(need(w, key), s.outputs[id])
 	for (const [id, key] of Object.entries(LOOPBACK_KEYS) as [keyof typeof LOOPBACK_KEYS, string][]) route(need(w, key), s.loopbacks[id])
 	w.Gain1_Enable = !!s.outputs.out12.gainBtn

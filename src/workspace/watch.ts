@@ -5,7 +5,7 @@ import { currentWorkspacePath, parseWorkspace, WORKSPACE_DIR } from './tpwork.js
 
 export type WatchDeps = {
 	dir: string
-	watch: (path: string, cb: (event: string, filename: string | null) => void) => Pick<FSWatcher, 'close'>
+	watch: (path: string, cb: (event: string, filename: string | null) => void) => Pick<FSWatcher, 'close' | 'on'>
 	setTimeout: (fn: () => void, ms: number) => unknown
 	clearTimeout: (t: unknown) => void
 }
@@ -34,7 +34,7 @@ export function watchWorkspace(onState: (s: MixerState) => void, deps: Partial<W
 			}
 		}, SETTLE_MS)
 	}
-	const watchers: Pick<FSWatcher, 'close'>[] = []
+	const watchers: Pick<FSWatcher, 'close' | 'on'>[] = []
 	// the root folder also holds Run.log etc., so only the config file counts there
 	const targets: [string, string | undefined][] = [
 		[join(d.dir, 'E2X2_OTG'), undefined],
@@ -42,7 +42,13 @@ export function watchWorkspace(onState: (s: MixerState) => void, deps: Partial<W
 	]
 	for (const [path, only] of targets) {
 		try {
-			watchers.push(d.watch(path, (_e, name) => (only === undefined || name === only) && changed()))
+			const w = d.watch(path, (_e, name) => (only === undefined || name === only) && changed())
+			// folder deleted or EPERM: an unhandled 'error' would kill the plugin
+			w.on('error', (err) => {
+				console.error('workspace watch failed', path, err)
+				w.close()
+			})
+			watchers.push(w)
 		} catch {
 			// folder missing (app not installed): nothing to watch
 		}
