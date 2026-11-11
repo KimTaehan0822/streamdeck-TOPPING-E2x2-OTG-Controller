@@ -1,8 +1,10 @@
+import { readFileSync } from 'node:fs'
 import { createMeterParser, type MeterChannel } from './protocol/meter.js'
 import { encodeReport } from './protocol/report.js'
 import { diffReports, stateReports } from './state/crosspoints.js'
 import { emptyState, type MixerState } from './state/mixer-state.js'
 import { openE2x2, type HidPort } from './usb/hid-device.js'
+import { currentWorkspacePath, parseWorkspace } from './workspace/tpwork.js'
 import { watchWorkspace } from './workspace/watch.js'
 
 export type ConnectionDeps = {
@@ -11,6 +13,8 @@ export type ConnectionDeps = {
 	setTimeout?: (fn: () => void, ms: number) => unknown
 	now?: () => number
 	/** Reports the workspace the TOPPING app has open; returns the stop function. */
+	/** Reads the workspace the app has open right now; undefined when there is none. */
+	read?: () => MixerState | undefined
 	watch?: (onState: (s: MixerState) => void) => () => void
 }
 
@@ -28,6 +32,8 @@ export class E2x2Connection {
 	private queue: Buffer[] = []
 	private pumping = false
 	private timers: unknown[] = []
+	// false until a real workspace is known: pushing defaults would overwrite the device's mix
+	private loaded = false
 	private stopWatch?: () => void
 	private lastMeterAt = 0
 	private parse = createMeterParser()
@@ -35,6 +41,7 @@ export class E2x2Connection {
 	private readonly setIntervalFn: NonNullable<ConnectionDeps['setInterval']>
 	private readonly setTimeoutFn: NonNullable<ConnectionDeps['setTimeout']>
 	private readonly now: () => number
+	private readonly read: NonNullable<ConnectionDeps['read']>
 	private readonly watch: NonNullable<ConnectionDeps['watch']>
 
 	constructor(deps: ConnectionDeps = {}) {
@@ -42,6 +49,12 @@ export class E2x2Connection {
 		this.setIntervalFn = deps.setInterval ?? ((fn, ms) => setInterval(fn, ms))
 		this.setTimeoutFn = deps.setTimeout ?? ((fn, ms) => setTimeout(fn, ms))
 		this.now = deps.now ?? Date.now
+		this.read =
+			deps.read ??
+			(() => {
+				const path = currentWorkspacePath()
+				return path ? parseWorkspace(readFileSync(path, 'utf8')) : undefined
+			})
 		this.watch = deps.watch ?? ((cb) => watchWorkspace(cb))
 	}
 
@@ -53,13 +66,20 @@ export class E2x2Connection {
 	/** Connects, then follows the app's workspace; the device already holds what the app sent, so that state is not sent. */
 	start(): void {
 		this.stop()
+		try {
+			const s = this.read()
+			if (s) (this.state = s), (this.loaded = true)
+		} catch (err) {
+			console.error('could not read the workspace', err)
+		}
 		this.connect()
 		this.stopWatch = this.watch((s) => {
 			this.state = s
+			this.loaded = true
 			this.emit()
 		})
 		this.timers.push(
-			this.setIntervalFn(() => !this.port && this.connect() && this.send(stateReports(this.state)), RECONNECT_MS),
+			this.setIntervalFn(() => !this.port && this.connect() && this.loaded && this.send(stateReports(this.state)), RECONNECT_MS),
 			this.setIntervalFn(() => this.checkMeters(), METER_CHECK_MS),
 		)
 	}
@@ -69,12 +89,12 @@ export class E2x2Connection {
 		this.timers = []
 		this.stopWatch?.()
 		this.stopWatch = undefined
-		this.port?.close()
 		this.offline()
 	}
 
 	loadState(s: MixerState): void {
 		this.state = s
+		this.loaded = true
 		this.send(stateReports(s))
 		this.emit()
 	}
@@ -93,14 +113,19 @@ export class E2x2Connection {
 		this.port = port
 		this.online = true
 		this.lastMeterAt = this.now()
-		port.onData((buf) => this.onData(buf))
-		port.onError(() => this.offline())
+		port.onData((buf) => this.port === port && this.onData(buf))
+		port.onError(() => this.port === port && this.offline())
 		this.emit()
 		return true
 	}
 
 	private offline(): void {
 		const was = this.online
+		try {
+			this.port?.close()
+		} catch {
+			// already gone
+		}
 		this.port = undefined
 		this.online = false
 		this.queue = []
@@ -119,7 +144,6 @@ export class E2x2Connection {
 		try {
 			this.port.write(buf)
 		} catch {
-			this.port.close?.()
 			return this.offline()
 		}
 		this.pumping = true
