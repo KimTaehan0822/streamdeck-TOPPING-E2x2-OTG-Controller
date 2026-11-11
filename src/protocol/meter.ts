@@ -6,8 +6,19 @@ export type MeterChannel = `${Base}_${'A' | 'B'}`
 
 export type Meter = { channel: MeterChannel; db: number; level: number }
 
-/** 0 at -90 dB or below, otherwise -60 dB..0 dB mapped to 0..1. */
-export const dbToLevel = (db: number): number => (db <= -90 ? 0 : Math.min(1, Math.max(0, (db + 60) / 60)))
+const POINTS = [[0, 1], [-6, 0.84], [-12, 0.68], [-24, 0.44], [-60, 0]] as const
+
+/** The TOPPING app's meter scale: piecewise linear through 0 dB 1, -6 0.84, -12 0.68, -24 0.44, -60 0. */
+export const dbToLevel = (db: number): number => {
+	if (db <= -60) return 0
+	if (db >= 0) return 1
+	for (let i = 1; i < POINTS.length; i++) {
+		const [a, la] = POINTS[i - 1]
+		const [b, lb] = POINTS[i]
+		if (db >= b) return lb + ((db - b) / (a - b)) * (la - lb)
+	}
+	return 0
+}
 
 /** `bytes` = the 16-byte input report without the report ID. */
 export function parseMeter(bytes: Uint8Array): Meter | undefined {

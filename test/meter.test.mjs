@@ -27,7 +27,7 @@ test('dbToLevel', () => {
 	assert.equal(dbToLevel(-90.3), 0)
 	assert.equal(dbToLevel(-96), 0)
 	assert.equal(dbToLevel(0.5), 1)
-	assert.ok(Math.abs(dbToLevel(-20) - 2 / 3) < 1e-9)
+	for (const [db, l] of [[0, 1], [-6, 0.84], [-12, 0.68], [-24, 0.44], [-60, 0], [-20, 0.52], [-3, 0.92], [-70, 0]]) assert.ok(Math.abs(dbToLevel(db) - l) < 1e-9, String(db))
 })
 
 test('burst maps to channels, second 33 01 is Mobile R', () => {
@@ -47,7 +47,7 @@ test('-20 dBFS tone', () => {
 	for (const ch of ['out1L_A', 'out2R_A', 'mobileL_A', 'mobileR_A', 'spdifL_B']) {
 		const d = med(s, ch)
 		assert.ok(Math.abs(d - -20) < 0.3, `${ch} ${d}`)
-		assert.ok(Math.abs(dbToLevel(d) - 2 / 3) < 0.01)
+		assert.ok(Math.abs(dbToLevel(d) - 0.52) < 0.01)
 	}
 })
 
