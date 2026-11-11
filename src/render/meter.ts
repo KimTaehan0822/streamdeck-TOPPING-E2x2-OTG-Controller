@@ -12,6 +12,8 @@ export type MeterView = {
 	faderDb: string
 	levelDb: string
 	muted: boolean
+	/** Muted, but the fader dB shows in the MUTED slot for a moment after an adjustment (the muted look stays). */
+	peek?: boolean
 	overlay: Overlay
 }
 
@@ -87,7 +89,7 @@ export function renderVuStrip(v: MeterView): string {
 		b += `<line x1="${x}" y1="61" x2="${x}" y2="65" stroke="${TICK}" stroke-width="1.5"/>`
 	}
 	if (v.fader !== undefined) b += cap(12 + 176 * v.fader, 46, 12, 34, false)
-	if (v.muted) b += plainText(100, base(83, 19), 'MUTED', { size: 19, fill: RED })
+	if (v.muted) b += v.peek ? plainText(100, base(83, 19), v.faderDb, { size: 19, fill: WHITE }) : plainText(100, base(83, 19), 'MUTED', { size: 19, fill: RED })
 	else b += plainText(6, base(83, 19), v.levelDb, { size: 19, fill: DIM, anchor: 'start' }) + plainText(194, base(83, 19), v.faderDb, { size: 19, fill: WHITE, anchor: 'end' })
 	return frame(200, 100, b, v.overlay)
 }
@@ -157,7 +159,7 @@ export function renderButtonFader(v: MeterView, role: FaderRole): string {
 	const muted = (cy: number, size: number) => plainText(72, base(cy, size), 'MUTED', { size, fill: RED })
 	if (role === 'top') b = nameHead(v) + (v.muted ? '' : row(v.faderDb, 87, 22, WHITE)) + b
 	else if (role === 'left') b = nameHead(v) + level(88) + b
-	else if (role === 'bottom') b += v.muted ? muted(129, 22) : level(129)
-	else b += v.muted ? muted(50, 32) : row(v.faderDb, 50, fitSize(v.faderDb, 32, 128, 10), WHITE)
+	else if (role === 'bottom') b += v.muted ? (v.peek ? row(v.faderDb, 129, 22, WHITE) : muted(129, 22)) : level(129)
+	else b += v.muted && !v.peek ? muted(50, 32) : row(v.faderDb, 50, fitSize(v.faderDb, 32, 128, 10), WHITE)
 	return frame(KEY, KEY, b, v.overlay)
 }

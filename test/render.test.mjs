@@ -62,7 +62,7 @@ Object.assign(samples, PAIRS)
 
 // Level dB contact sheet: every role for short / long / Hangul names, muted, silent and a channel without a meter.
 const LV = {}
-const LVCASES = [['short', { mix: 0 }], ['long', { mix: 2, name: LONG }], ['han', { mix: 1, name: HAN }], ['muted', { mix: 3, muted: true }], ['silent', { mix: 0, left: 0, right: 0, levelDb: '-∞' }], ['nometer', { mix: 0, left: 0, right: 0, levelDb: '' }]]
+const LVCASES = [['peek', { mix: 3, muted: true, peek: true }], ['short', { mix: 0 }], ['long', { mix: 2, name: LONG }], ['han', { mix: 1, name: HAN }], ['muted', { mix: 3, muted: true }], ['silent', { mix: 0, left: 0, right: 0, levelDb: '-∞' }], ['nometer', { mix: 0, left: 0, right: 0, levelDb: '' }]]
 for (const [n, o] of LVCASES)
 	for (const r of ['top', 'bottom', 'left', 'right']) LV[`lv-${n}-${r}`] = renderButtonFader(mv({ fader: 0.62, left: 0.55, right: 0.4, faderDb: '-4.5 dB', levelDb: '-9 dB', ...o }), r)
 Object.assign(samples, LV)
@@ -73,7 +73,7 @@ for (const [n, s] of Object.entries(samples)) writeFileSync(new URL(`./out/${n}.
 	const img = (n) => `<img src="${n}.svg" width="144" style="display:block">`
 	const cell = (n) => `<div style="margin:6px 12px;font:11px sans-serif;color:#888"><div style="display:flex;gap:18px"><div>${img(`lv-${n}-top`)}${img(`lv-${n}-bottom`)}</div><div style="display:flex;align-self:flex-start">${img(`lv-${n}-left`)}${img(`lv-${n}-right`)}</div></div>${n}</div>`
 	const row = (a) => '<div style="display:flex">' + a.map(cell).join('') + '</div>'
-	writeFileSync(new URL('./out/contact-level.html', import.meta.url), '<body style="background:#000;margin:10px">' + row(['short', 'long', 'han']) + row(['muted', 'silent', 'nometer']) + '</body>')
+	writeFileSync(new URL('./out/contact-level.html', import.meta.url), '<body style="background:#000;margin:10px">' + row(['short', 'long', 'han']) + row(['muted', 'silent', 'nometer']) + row(['peek']) + '</body>')
 }
 // Contact sheet: per name and cap position, the vertical pair (top over bottom) and the horizontal pair (left, right).
 {
@@ -224,6 +224,20 @@ test('muted two-key fader hides the dB values and shows MUTED on the bottom / ri
 	assert.deepEqual(rowsOf(LV['lv-muted-left']), ['MIX D', 'PB 1/2'])
 	assert.deepEqual(rowsOf(LV['lv-muted-bottom']), ['MUTED'])
 	assert.deepEqual(rowsOf(LV['lv-muted-right']), ['MUTED'])
+})
+
+test('muted + peek keeps the grey bars, hides the level dB and shows the fader dB in the MUTED slot', () => {
+	for (const r of ['top', 'bottom', 'left', 'right']) assert.ok(!LV[`lv-peek-${r}`].includes('fill="url(#'), r)
+	for (const r of ['bottom', 'left', 'right']) assert.ok(LV[`lv-peek-${r}`].includes('#555'), r)
+	assert.deepEqual(rowsOf(LV['lv-peek-top']), ['MIX D', 'PB 1/2'])
+	assert.deepEqual(rowsOf(LV['lv-peek-left']), ['MIX D', 'PB 1/2'])
+	assert.deepEqual(rowsOf(LV['lv-peek-bottom']), ['-4.5 dB'])
+	assert.deepEqual(rowsOf(LV['lv-peek-right']), ['-4.5 dB'])
+	const strip = (o) => renderVuStrip(mv({ muted: true, faderDb: '-4.5 dB', levelDb: '-9 dB', ...o }))
+	assert.deepEqual(rowsOf(strip({})).filter((t) => /MUTED|dB/.test(t)), ['MUTED'])
+	const pk = strip({ peek: true })
+	assert.deepEqual(rowsOf(pk).filter((t) => /MUTED|dB/.test(t)), ['-4.5 dB'])
+	assert.ok(pk.includes('#555') && !pk.includes('url(#'))
 })
 
 test('the muted two-key fader shows MUTED on the dB key for every role', () => {

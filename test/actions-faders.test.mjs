@@ -131,7 +131,10 @@ test('a muted VU view shows MUTED, and peek lets the fader dB through for a mome
 	const v = volSpec({ kind: 'output', channel: 'out12' })
 	setMute(conn, v, 'on')
 	assert.equal(meterView(v, conn.state, new Map(), false).muted, true)
-	assert.equal(meterView(v, conn.state, new Map(), true).muted, false)
+	assert.ok(!meterView(v, conn.state, new Map(), false).peek)
+	const peeked = meterView(v, conn.state, new Map(), true)
+	assert.equal(peeked.muted, true) // the muted look stays
+	assert.equal(peeked.peek, true)
 })
 
 test('button fader: top key raises, bottom key lowers (both through stepVol)', () => {
