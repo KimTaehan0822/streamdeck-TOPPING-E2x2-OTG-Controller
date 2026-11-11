@@ -23,10 +23,10 @@
 			if (m.payload?.event !== 'warning') return
 			const box = document.getElementById('warning')
 			if (!box) return
-			document.getElementById('warningText').textContent = m.payload.text
+			showText(document.getElementById('warningText'), m.payload.text)
 			box.hidden = !m.payload.text
 			box.classList.toggle('danger', m.payload.level !== 'info')
-			document.getElementById('warningHead').textContent = m.payload.level === 'info' ? 'Note:' : 'Cannot save:'
+			showText(document.getElementById('warningHead'), m.payload.level === 'info' ? 'Note:' : 'Cannot save:')
 		})
 	</script>
 </body>

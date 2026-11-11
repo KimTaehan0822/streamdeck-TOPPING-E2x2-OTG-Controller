@@ -1,5 +1,7 @@
 # TOPPING E2x2 OTG Controller (Stream Deck 플러그인)
 
+**한국어** | [English](README.en.md) | [日本語](README.ja.md)
+
 Elgato Stream Deck의 키와 다이얼로 **TOPPING E2x2 OTG** 믹서를 조작하는 플러그인입니다. 장치와 USB(HID)로 직접 통신하며, 키마다 Mix와 채널을 정해 두면 토핑 앱 화면에 어떤 Mix가 떠 있든 정해 둔 대상만 움직입니다.
 
 ## 먼저 꼭 읽어 주세요 (한계)
@@ -30,7 +32,7 @@ Elgato Stream Deck의 키와 다이얼로 **TOPPING E2x2 OTG** 믹서를 조작�
 
 ## 설치
 
-`com.haeunga0822.topping-e2x2.streamDeckPlugin` 파일을 더블클릭하고, Stream Deck이 설치할지 물으면 승인합니다. 설치 후 액션 목록에 **TOPPING E2x2 OTG Controller** 카테고리가 생깁니다. 설정 화면의 문구는 영어이고, 화면 맨 위에는 위의 한계 경고가 항상 표시됩니다.
+`com.haeunga0822.topping-e2x2.streamDeckPlugin` 파일을 더블클릭하고, Stream Deck이 설치할지 물으면 승인합니다. 설치 후 액션 목록에 **TOPPING E2x2 OTG Controller** 카테고리가 생깁니다. 설정 화면은 한국어, English, 日本語로 볼 수 있습니다(화면 맨 위 **Language**에서 고르며 모든 액션에 공통 적용). 화면 맨 위에는 위의 한계 경고가 항상 표시됩니다.
 
 ## 액션
 

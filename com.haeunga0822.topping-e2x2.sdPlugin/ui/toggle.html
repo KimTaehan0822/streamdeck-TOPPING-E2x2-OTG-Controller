@@ -23,8 +23,7 @@
 		const OPTIONS = { p48v: '48V', inst: 'INST', phase: 'Ø (phase invert)' }
 		const BUTTONS = { gain: 'Gain', hp: 'HP', trs: 'TRS', aux: 'AUX' }
 		const OUTPUTS = { out12: 'Out 1/2', mobile: 'Mobile Out' }
-		const WARN_48V = `<div class="notice danger"><b>48V phantom power:</b> it can damage ribbon and some dynamic microphones, and it can pop speakers.
-			Turn it on only with a condenser microphone connected, and turn the monitor level down first. The plugin sends it to the device straight away.</div>`
+		const WARN_48V = `<div class="notice danger"><b>48V phantom power:</b> <span>it can damage ribbon and some dynamic microphones, and it can pop speakers. Turn it on only with a condenser microphone connected, and turn the monitor level down first. The plugin sends it to the device straight away.</span></div>`
 
 		const select = (setting, label, items, extra = '') =>
 			`<sdpi-item label="${label}"><sdpi-select setting="${setting}" ${extra}>${Object.entries(items)
