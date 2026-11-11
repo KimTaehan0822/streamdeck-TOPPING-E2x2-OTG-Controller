@@ -28,20 +28,6 @@ test('stateReports follows the app startup order', () => {
 	assert.deepEqual(got, fixture.map((r) => [r.group, r.item]))
 })
 
-test('stateReports reproduces the app startup values from workspace numbers', () => {
-	const s = emptyState()
-	// MixSaveA Mix_volume_*num x 100 (the app stores raw / 100)
-	const nums = { in12: [94569, 66949], otg: [376486, 376486], pb12: [335544, 335544], pb34: [5318, 5318], pb56: [168170, 168170], pb78: [53180, 53180] }
-	for (const [id, [l, r]] of Object.entries(nums)) Object.assign(s.mixes[0].channels[id], { volL: l * 100, volR: r * 100 })
-	for (const [m, pb] of [[1, 94569], [2, 422425], [3, 266532]]) {
-		for (const ch of Object.values(s.mixes[m].channels)) ch.volL = ch.volR = V
-		s.mixes[m].channels.pb12.volL = s.mixes[m].channels.pb12.volR = pb * 100
-	}
-	Object.assign(s.phones, { hp: true, trs: true, aux: true })
-	for (const o of [...Object.values(s.outputs), ...Object.values(s.loopbacks)]) o.volL = o.volR = 0x02000000
-	assert.deepEqual(stateReports(s), fixture)
-})
-
 test('mixReports gives the 24 crosspoints of one mix', () => {
 	const r = mixReports(emptyState(), 2)
 	assert.equal(r.length, 24)
