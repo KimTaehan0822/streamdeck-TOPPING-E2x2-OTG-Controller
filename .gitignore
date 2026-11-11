@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.streamDeckPlugin
+test/out/
+.superpowers/
+*.sdPlugin/bin/
+logs/
