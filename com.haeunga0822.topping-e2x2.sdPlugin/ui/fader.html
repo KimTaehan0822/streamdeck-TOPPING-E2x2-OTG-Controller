@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+</head>
+<body>
+	<div id="fields"></div>
+	<script src="common.js"></script>
+	<script src="target.js"></script>
+	<script>
+		// Keys: fader, button-fader, pan. The action UUID picks the fields.
+		const MODES = { step: 'Step', set: 'Set' }
+		const ROLES = { top: 'Top key (raises)', bottom: 'Bottom key (lowers)' }
+		mountPI((type, s) => {
+			let html = targetHtml(s, type === 'pan')
+			if (type === 'button-fader') {
+				html += select('role', 'Role', ROLES, 'placeholder="Select"') + text('step', 'Step (dB)', '1', '1')
+			} else {
+				html += select('mode', 'Mode', MODES, 'default="step"')
+				const set = s.mode === 'set'
+				if (type === 'pan') html += set ? text('pan', 'Pan (-100 L .. 100 R)', '0') : text('step', 'Step (%, negative = left)', '5', '5')
+				else html += set ? text('db', 'Level (dB, -60 or lower = silence, max +6)', '0') : text('step', 'Step (dB, negative = down)', '1', '1')
+			}
+			return html
+		}, ['kind', 'mode'])
+	</script>
+</body>
+</html>

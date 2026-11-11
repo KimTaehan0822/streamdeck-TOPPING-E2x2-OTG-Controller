@@ -1,6 +1,6 @@
 import { dbToLevel } from '../protocol/meter.js'
 import { fitSize, frame, plainText, textBlock, wrapFit, type Overlay } from './svg.js'
-import { DIM, GREEN, MIX_COLORS, MUTED_BAR, PLATE, PLATE_TEXT, RED, TICK, TRACK, WHITE, YELLOW, mixName, type Mix } from './theme.js'
+import { DIM, GREEN, MIX_COLORS, MUTED_BAR, ON, PLATE, PLATE_TEXT, RED, TICK, TRACK, WHITE, YELLOW, mixName, type Mix } from './theme.js'
 
 export type MeterView = {
 	mix?: Mix
@@ -53,17 +53,34 @@ export const plateName = (name: string, cy: number, size: number): string => {
 	return plainText(72, base(cy, s), name, { size: s, fill: PLATE_TEXT })
 }
 
+/** Top plate of a dial strip: MIX X on the left and the name on the right, or just the name. */
+function stripHeader(mix: Mix | undefined, name: string): string {
+	let b = `<rect x="4" y="1" width="192" height="26" rx="5" fill="${PLATE}"/>`
+	if (mix !== undefined) {
+		b += plainText(12, base(14, 22), mixName(mix), { size: 22, fill: MIX_COLORS[mix], anchor: 'start' })
+		const s = fitSize(name, 22, 100, 10)
+		b += plainText(188, base(14, s), name, { size: s, fill: PLATE_TEXT, anchor: 'end' })
+	} else {
+		const s = fitSize(name, 22, 184, 10)
+		b += plainText(100, base(14, s), name, { size: s, fill: PLATE_TEXT })
+	}
+	return b
+}
+
+/** Dial strip 200x100 with one value bar (pan: grows from the centre; gain: from the left) and a big value text; muted greys the bar. */
+export function renderValueStrip(v: { mix?: Mix; name: string; value: string; bar: number; center?: boolean; muted?: boolean; overlay: Overlay }): string {
+	const x = 12 + 176 * clamp(v.bar)
+	const [from, w] = v.center ? [Math.min(x, 100), Math.abs(x - 100)] : [12, x - 12]
+	let b = stripHeader(v.mix, v.name) + `<rect x="12" y="40" width="176" height="14" fill="${TRACK}"/>`
+	if (w > 0) b += `<rect x="${from}" y="40" width="${w}" height="14" fill="${v.muted ? MUTED_BAR : ON}"/>`
+	if (v.center) b += `<rect x="99" y="36" width="2" height="22" fill="${WHITE}"/>`
+	b += plainText(100, base(80, 28), v.muted ? 'MUTED' : v.value, { size: 28, fill: v.muted ? RED : WHITE })
+	return frame(200, 100, b, v.overlay)
+}
+
 /** Dial strip 200x100: plate (MIX X left, name right), L/R bars with a fader cap, tick marks, dB row. */
 export function renderVuStrip(v: MeterView): string {
-	let b = `<rect x="4" y="1" width="192" height="26" rx="5" fill="${PLATE}"/>`
-	if (v.mix !== undefined) {
-		b += plainText(12, base(14, 22), mixName(v.mix), { size: 22, fill: MIX_COLORS[v.mix], anchor: 'start' })
-		const s = fitSize(v.name, 22, 100, 10)
-		b += plainText(188, base(14, s), v.name, { size: s, fill: PLATE_TEXT, anchor: 'end' })
-	} else {
-		const s = fitSize(v.name, 22, 184, 10)
-		b += plainText(100, base(14, s), v.name, { size: s, fill: PLATE_TEXT })
-	}
+	let b = stripHeader(v.mix, v.name)
 	b += bar(12, 32, 176, 12, v.left, false, v.muted) + bar(12, 48, 176, 12, v.right, false, v.muted)
 	for (const db of [0, -6, -12, -24]) {
 		const x = 12 + 176 * dbToLevel(db)

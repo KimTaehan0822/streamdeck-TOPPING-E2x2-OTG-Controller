@@ -111,6 +111,126 @@
 					"Image": "imgs/global"
 				}
 			]
+		},
+		{
+			"Name": "Fader",
+			"UUID": "com.haeunga0822.topping-e2x2.fader",
+			"Icon": "imgs/fader",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/fader.html",
+			"States": [
+				{
+					"Image": "imgs/fader"
+				}
+			]
+		},
+		{
+			"Name": "Button fader (2 keys)",
+			"UUID": "com.haeunga0822.topping-e2x2.button-fader",
+			"Icon": "imgs/fader",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/fader.html",
+			"States": [
+				{
+					"Image": "imgs/fader"
+				}
+			]
+		},
+		{
+			"Name": "VU dial",
+			"UUID": "com.haeunga0822.topping-e2x2.vu-dial",
+			"Icon": "imgs/dial",
+			"Controllers": [
+				"Encoder"
+			],
+			"PropertyInspectorPath": "ui/vu-dial.html",
+			"Encoder": {
+				"layout": "layouts/strip.json",
+				"TriggerDescription": {
+					"Rotate": "Fader +/- step dB",
+					"Push": "Mute",
+					"Touch": "Mute"
+				}
+			},
+			"States": [
+				{
+					"Image": "imgs/dial"
+				}
+			]
+		},
+		{
+			"Name": "Pan",
+			"UUID": "com.haeunga0822.topping-e2x2.pan",
+			"Icon": "imgs/fader",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/fader.html",
+			"States": [
+				{
+					"Image": "imgs/fader"
+				}
+			]
+		},
+		{
+			"Name": "Pan dial",
+			"UUID": "com.haeunga0822.topping-e2x2.pan-dial",
+			"Icon": "imgs/dial",
+			"Controllers": [
+				"Encoder"
+			],
+			"PropertyInspectorPath": "ui/vu-dial.html",
+			"Encoder": {
+				"layout": "layouts/strip.json",
+				"TriggerDescription": {
+					"Rotate": "Pan",
+					"Push": "Centre pan"
+				}
+			},
+			"States": [
+				{
+					"Image": "imgs/dial"
+				}
+			]
+		},
+		{
+			"Name": "디지털 게인",
+			"UUID": "com.haeunga0822.topping-e2x2.gain",
+			"Icon": "imgs/fader",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/gain.html",
+			"States": [
+				{
+					"Image": "imgs/fader"
+				}
+			]
+		},
+		{
+			"Name": "디지털 게인 다이얼",
+			"UUID": "com.haeunga0822.topping-e2x2.gain-dial",
+			"Icon": "imgs/dial",
+			"Controllers": [
+				"Encoder"
+			],
+			"PropertyInspectorPath": "ui/gain.html",
+			"Encoder": {
+				"layout": "layouts/strip.json",
+				"TriggerDescription": {
+					"Rotate": "Digital gain",
+					"Push": "Mute input"
+				}
+			},
+			"States": [
+				{
+					"Image": "imgs/dial"
+				}
+			]
 		}
 	]
 }

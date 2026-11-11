@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<script src="sdpi-components.js"></script>
+</head>
+<body>
+	<div id="fields"></div>
+	<script src="common.js"></script>
+	<script src="target.js"></script>
+	<script>
+		// Dials: vu-dial, pan-dial. The action UUID picks the fields.
+		const PRESS = { mute: 'Mute toggle', recall: 'Recall level' }
+		const TURN = { step: 'Step level', muteToggle: 'Mute toggle', muteOn: 'Mute on', muteOff: 'Mute off', recall: 'Recall level' }
+		// [action setting, dB setting, label, choices, default]
+		const SLOTS = [
+			['pressAction', 'pressDb', 'Press', PRESS, 'mute'],
+			['leftAction', 'leftDb', 'Press + turn left', TURN, 'step'],
+			['rightAction', 'rightDb', 'Press + turn right', TURN, 'step'],
+		]
+		mountPI((type, s) => {
+			if (type === 'pan-dial') return targetHtml(s, true) + text('step', 'Step per tick (%)', '5', '5')
+			return (
+				targetHtml(s) +
+				text('step', 'Step per tick (dB)', '1', '1') +
+				`<sdpi-item label="Touch tap mutes"><sdpi-checkbox setting="touchMute" default="true"></sdpi-checkbox></sdpi-item>` +
+				`<details open><summary>Press actions</summary>${SLOTS.map(
+					([action, db, label, items, def]) =>
+						select(action, label, items, `default="${def}"`) + ((s[action] ?? def) === 'recall' ? text(db, 'Recall level (dB)', 'e.g. -20 or 0') : ''),
+				).join('')}</details>`
+			)
+		}, ['kind', 'pressAction', 'leftAction', 'rightAction'])
+	</script>
+</body>
+</html>

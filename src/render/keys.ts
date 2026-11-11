@@ -102,4 +102,4 @@ export function renderWorkspaceKey(v: { mode: 'load' | 'save'; name: string; act
 	return frame(K, K, b, v.overlay)
 }
 
-export { renderVuStrip, renderButtonFader, type MeterView } from './meter.js'
+export { renderVuStrip, renderValueStrip, renderButtonFader, type MeterView } from './meter.js'

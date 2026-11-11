@@ -29,7 +29,7 @@ function sideFlags(prefix: string, side: Side, o: object, on?: boolean): boolean
 }
 
 const mixOf = (t: Target): Mix | undefined => (t.kind === 'mix' ? t.mix : undefined)
-const holder = (s: MixerState, t: Target): object =>
+export const holder = (s: MixerState, t: Target): object =>
 	t.kind === 'mix' ? s.mixes[t.mix].channels[t.channel] : t.kind === 'loopback' ? s.loopbacks[t.id] : s.outputs[t.id]
 
 function flagSpec(settings: JsonObject, prefix: 'mute' | 'solo', title: string, color: KeyColor): ToggleSpec | undefined {
@@ -49,7 +49,7 @@ function flagSpec(settings: JsonObject, prefix: 'mute' | 'solo', title: string, 
 export const muteSpec = (s: JsonObject) => flagSpec(s, 'mute', 'MUTE', 'red')
 export const soloSpec = (s: JsonObject) => flagSpec(s, 'solo', 'SOLO', 'yellow')
 
-const INPUTS = { in1: 'IN 1', in2: 'IN 2', mobile: 'Mobile' } as const
+export const INPUTS = { in1: 'IN 1', in2: 'IN 2', mobile: 'Mobile' } as const
 const OPTIONS = { p48v: '48V', inst: 'INST', phase: 'Ø' } as const
 
 export function inputOptionSpec(settings: JsonObject): ToggleSpec | undefined {
