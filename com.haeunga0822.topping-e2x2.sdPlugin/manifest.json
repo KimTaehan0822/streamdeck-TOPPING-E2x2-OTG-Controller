@@ -1,0 +1,25 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"SDKVersion": 2,
+	"UUID": "com.haeunga0822.topping-e2x2",
+	"Name": "TOPPING E2x2 OTG Controller",
+	"Version": "0.1.0.0",
+	"Author": "김탄2",
+	"Icon": "imgs/plugin",
+	"Category": "TOPPING E2x2 OTG Controller",
+	"Description": "Control a TOPPING E2x2 OTG audio interface over USB.",
+	"CodePath": "bin/plugin.js",
+	"Nodejs": {
+		"Version": "20"
+	},
+	"OS": [
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Software": {
+		"MinimumVersion": "7.3"
+	},
+	"Actions": []
+}
