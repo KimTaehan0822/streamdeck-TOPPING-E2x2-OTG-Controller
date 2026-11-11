@@ -38,6 +38,20 @@ const f3 = mv({ name: 'Out 1/2', left: lv(-12), right: lv(-12), fader: lv(-6), f
 for (const [n, f] of [['normal', f1], ['muted', f2], ['out', f3]])
 	for (const r of ['top', 'bottom']) samples[`fader-${n}-${r}`] = renderButtonFader(f, r)
 
+const LONG = 'Playback 7/8 Left'
+const HAN = '마이크 입력 채널'
+Object.assign(samples, {
+	'long-toggle-mix': renderToggleKey(tg({ mix: 0, label: LONG })),
+	'long-toggle-nomix': renderToggleKey(tg({ title: '48V', label: HAN, on: true, color: 'blue' })),
+	'long-toggle-both': renderToggleKey(tg({ title: 'Solo Mute', mix: 1, label: LONG, on: true })),
+	'long-value-mix': renderValueKey({ mix: 3, name: LONG, value: '-3.0 dB', meter: { left: 0.6, right: 0.5, fader: 0.8 }, overlay: none }),
+	'long-source': renderSourceKey({ target: 'Out 1/2', source: 'Playback 7/8 Left', overlay: none }),
+	'long-source-han': renderSourceKey({ target: 'Mobile Out', source: HAN, overlay: none }),
+	'long-fader-top': renderButtonFader(mv({ mix: 2, name: LONG }), 'top'),
+	'long-fader-bottom': renderButtonFader(mv({ mix: 2, name: LONG }), 'bottom'),
+	'long-vu': renderVuStrip(mv({ mix: 1, name: LONG })),
+})
+
 mkdirSync(new URL('./out/', import.meta.url), { recursive: true })
 for (const [n, s] of Object.entries(samples)) writeFileSync(new URL(`./out/${n}.svg`, import.meta.url), s)
 
@@ -98,4 +112,29 @@ test('overlay dims the body', () => {
 
 test('dbToLevel follows the app scale', () => {
 	for (const [db, l] of [[0, 1], [-6, 0.84], [-12, 0.68], [-24, 0.44], [-60, 0], [-20, 0.52]]) assert.ok(Math.abs(lv(db) - l) < 1e-9, String(db))
+})
+
+const texts = (svg) => [...svg.matchAll(/font-size="([\d.]+)"[^>]*>([^<]*)</g)].map((m) => ({ size: +m[1], t: m[2] }))
+
+test('long text wraps to two rows instead of shrinking', () => {
+	for (const [n, base, want] of [['long-toggle-mix', 26, ['Playback', '7/8 Left']], ['long-value-mix', 24, ['Playback', '7/8 Left']], ['long-source', 30, ['Playback', '7/8 Left']]]) {
+		const rows = texts(samples[n]).filter((x) => want.some((w) => x.t.includes(w.replace('7/8 Left', 'Left'))))
+		assert.equal(rows.length, 2, n)
+		assert.ok(rows.every((r) => r.size >= base * 0.85), `${n} ${rows.map((r) => r.size)}`)
+	}
+	// Hangul is drawn at 0.82 of the requested size
+	for (const [n, base, w] of [['long-toggle-nomix', 26, ['마이크', '입력 채널']], ['long-source-han', 30, ['마이크', '입력 채널']]]) {
+		const rows = texts(samples[n]).filter((x) => w.includes(x.t))
+		assert.equal(rows.length, 2, n)
+		assert.ok(rows.every((r) => r.size >= base * 0.85 * 0.82 - 0.1), `${n} ${rows.map((r) => r.size)}`)
+	}
+	const fader = texts(samples['long-fader-top']).filter((x) => x.t === 'Playback' || x.t === '7/8 Left')
+	assert.equal(fader.length, 2)
+	assert.ok(fader.every((r) => r.size >= 18)) // capped at 18 by the room under the slim plate
+	assert.equal(texts(samples['long-toggle-both']).filter((x) => x.t === 'Playback' || x.t === '7/8 Left').length, 2)
+})
+
+test('short names keep one row', () => {
+	assert.equal(texts(samples['toggle-mute-off-a']).filter((x) => x.t === 'PB 1/2').length, 1)
+	assert.equal(texts(samples['fader-normal-top']).filter((x) => x.t === 'PB 1/2').length, 1)
 })

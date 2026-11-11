@@ -1,5 +1,5 @@
 import { dbToLevel } from '../protocol/meter.js'
-import { fitSize, frame, plainText, type Overlay } from './svg.js'
+import { fitSize, frame, plainText, textBlock, wrapFit, type Overlay } from './svg.js'
 import { DIM, GREEN, MIX_COLORS, MUTED_BAR, PLATE, PLATE_TEXT, RED, TICK, TRACK, WHITE, YELLOW, mixName, type Mix } from './theme.js'
 
 export type MeterView = {
@@ -94,9 +94,14 @@ export function renderButtonFader(v: MeterView, role: 'top' | 'bottom'): string 
 		b += cap(50 * u, yy, 60 * u, 14 * u, true)
 	}
 	if (high) {
+		// A name too long for one row wraps to two smaller rows under a slimmer plate (the bars start at y=72).
+		const name = v.mix !== undefined ? wrapFit(v.name, 26, 128, 10) : undefined
+		const two = name !== undefined && name.lines.length > 1
 		const head =
 			v.mix !== undefined
-				? plate(21, 34, plainText(72, base(21, 24), mixName(v.mix), { size: 24, fill: MIX_COLORS[v.mix] })) + plainText(72, base(56, fitSize(v.name, 26, 128, 10)), v.name, { size: fitSize(v.name, 26, 128, 10), fill: WHITE })
+				? two
+					? plate(15, 26, plainText(72, base(15, 20), mixName(v.mix), { size: 20, fill: MIX_COLORS[v.mix] })) + textBlock({ lines: name!.lines, size: Math.min(18, name!.size) }, 50, WHITE)
+					: plate(21, 34, plainText(72, base(21, 24), mixName(v.mix), { size: 24, fill: MIX_COLORS[v.mix] })) + textBlock(name!, 56, WHITE)
 				: plate(21, 34, plateName(v.name, 21, 24))
 		b = head + b
 	} else {

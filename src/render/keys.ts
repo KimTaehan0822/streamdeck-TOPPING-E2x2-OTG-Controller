@@ -1,9 +1,23 @@
 import { bar, base, cap, plate, plateName } from './meter.js'
-import { frame, fitSize, plainText, type Overlay } from './svg.js'
+import { fitSize, fitText, frame, plainText, textBlock, textWidth, wrapFit, type Overlay } from './svg.js'
 import { BG, DIM, KEY_COLORS, MIX_COLORS, ON, OUTLINE, PLATE_TEXT, TRACK, WHITE, WORKSPACE_ON_BG, WORKSPACE_ON_TEXT, mixName, type KeyColor, type Mix } from './theme.js'
 
 const K = 144
 const fit = (t: string, size: number, w: number) => fitSize(t, size, w, 10)
+type Block = { lines: string[]; size: number }
+const wrap = (t: string, size: number, w = 128): Block => wrapFit(t, size, w, 10)
+const height = (b: Block) => b.lines.length * b.size * 1.1
+/** Centres of rows stacked around `cc`; the gap shrinks (down to 2) when the rows are tall. */
+function stack(heights: number[], cc: number, gap = 12): number[] {
+	const sum = heights.reduce((a, b) => a + b, 0)
+	const g = sum + gap * (heights.length - 1) > 138 ? Math.max(2, (138 - sum) / (heights.length - 1)) : gap
+	let top = Math.max(3, cc - (sum + g * (heights.length - 1)) / 2)
+	return heights.map((h) => {
+		const c = top + h / 2
+		top += h + g
+		return +c.toFixed(1)
+	})
+}
 const text = (x: number, cy: number, t: string, size: number, fill: string, anchor?: 'start' | 'middle' | 'end') => {
 	const s = fit(t, size, 128)
 	return plainText(x, base(cy, s), t, { size: s, fill, anchor })
@@ -21,8 +35,19 @@ export function renderToggleKey(v: { title: string; mix?: Mix; label: string; on
 	if (!v.on) b += `<rect x="3" y="3" width="${K - 6}" height="${K - 6}" rx="10" fill="none" stroke="${OUTLINE}" stroke-width="2"/>`
 	const tc = v.on ? WHITE : DIM
 	const lc = v.on ? WHITE : PLATE_TEXT
-	if (v.mix !== undefined) b += text(72, 32, v.title, 24, tc) + chip(72, 74, v.mix, 24) + text(72, 114, v.label, 26, lc)
-	else b += plainText(72, 62, v.title, { size: 26, fill: tc }) + text(72, 104, v.label, 26, lc)
+	const mix = v.mix !== undefined
+	// Long text wraps to a second row; if the stack then gets too tall, use slightly smaller base sizes.
+	let sizes = mix ? [24, 26] : [26, 26]
+	let title = wrap(v.title, sizes[0])
+	let label = wrap(v.label, sizes[1])
+	if (mix && height(title) + 30 + height(label) + 8 > 138) {
+		title = wrap(v.title, 22)
+		label = wrap(v.label, 24)
+	}
+	const cy = stack(mix ? [height(title), 30, height(label)] : [height(title), height(label)], mix ? 73 : 83)
+	b += textBlock(title, cy[0], tc)
+	if (mix) b += chip(72, cy[1], v.mix!, 24) + textBlock(label, cy[2], lc)
+	else b += textBlock(label, cy[1], lc)
 	return frame(K, K, b, v.overlay)
 }
 
@@ -36,11 +61,13 @@ export function renderValueKey(v: {
 	overlay: Overlay
 }): string {
 	const m = v.mix !== undefined
+	const name = wrap(v.name, 24)
+	const two = m && name.lines.length > 1
 	let b = m
-		? plate(21, 34, plainText(72, base(21, 24), mixName(v.mix!), { size: 24, fill: MIX_COLORS[v.mix!] })) + text(72, 55, v.name, 24, PLATE_TEXT)
+		? plate(21, 34, plainText(72, base(21, 24), mixName(v.mix!), { size: 24, fill: MIX_COLORS[v.mix!] })) + textBlock(name, two ? 64 : 55, PLATE_TEXT)
 		: plate(21, 34, plateName(v.name, 21, 24))
-	b += text(72, m ? 90 : 76, v.value, m ? 28 : 34, WHITE)
-	const by = m ? 112 : 108
+	b += text(72, two ? 107 : m ? 90 : 76, v.value, two ? 24 : m ? 28 : 34, WHITE)
+	const by = two ? 120 : m ? 112 : 108
 	if (v.meter) {
 		const { left, right, fader, muted = false } = v.meter
 		b += bar(10, by, 124, 6, left, false, muted) + bar(10, by + 8, 124, 6, right, false, muted) + cap(10 + 124 * fader, by + 7, 10, 22, false)
@@ -53,13 +80,16 @@ export function renderValueKey(v: {
 /** Output source key: target in the plate, the source below (in its colour when it is a mix) with a dropdown arrow. */
 export function renderSourceKey(v: { target: string; source: string; sourceMix?: Mix; overlay: Overlay }): string {
 	const col = v.sourceMix === undefined ? WHITE : MIX_COLORS[v.sourceMix]
-	const s = fit(v.source, 30, 112)
-	// Arrow follows the text; the width is the same estimate the mockup used (about 0.62 em per capital).
-	const ax = 64 + (Array.from(v.source).length * s * 0.31 + 4)
-	const b =
-		plate(21, 34, plateName(v.target, 21, 24)) +
-		plainText(64, base(86, s), v.source, { size: s, fill: col }) +
-		`<path d="M${ax} 82 l12 0 l-6 8 z" fill="${col}"/>`
+	const src = wrap(v.source, 30, 112)
+	const step = src.size * 1.1
+	const mid = 86
+	const first = mid - (step * (src.lines.length - 1)) / 2
+	let b = plate(21, 34, plateName(v.target, 21, 24))
+	src.lines.forEach((line, i) => (b += plainText(64, +(first + i * step + src.size * 0.35).toFixed(1), fitText(line, src.size, 112), { size: src.size, fill: col })))
+	// Arrow follows the last line (which is centred on x=64).
+	const lastText = fitText(src.lines[src.lines.length - 1], src.size, 112)
+	const ay = first + (src.lines.length - 1) * step
+	b += `<path d="M${+(64 + textWidth(lastText, src.size) / 2 + 6).toFixed(1)} ${ay - 4} l12 0 l-6 8 z" fill="${col}"/>`
 	return frame(K, K, b, v.overlay)
 }
 
