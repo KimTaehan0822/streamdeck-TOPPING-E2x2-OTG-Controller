@@ -1,15 +1,16 @@
 import { action, type DialDownEvent, type DialRotateEvent, type DialUpEvent, type KeyDownEvent, type TouchTapEvent, type WillDisappearEvent } from '@elgato/streamdeck'
 import type { JsonObject } from '@elgato/utils'
 import type { E2x2Connection } from '../connection.js'
+import { levelToAxis } from '../protocol/meter.js'
 import { renderButtonFader, renderValueKey, renderValueStrip, renderVuStrip } from '../render/keys.js'
 import { E2x2Action, type RenderContext } from '../runtime/base-action.js'
 import { num, pick } from './common.js'
-import { dbText, faderOp, faderPos, meterOf, meterView, panOp, panSpec, panText, pressFader, pressPan, setMute, setPan, setVol, stepPan, stepVol, volSpec, type Vol } from './fader-spec.js'
+import { dbText, faderOp, faderPos, meterOf, meterView, panOp, panSpec, panText, pressFader, pressPan, roleSign, setMute, setPan, setVol, stepPan, stepVol, volSpec, type Vol } from './fader-spec.js'
 
 const ID = 'com.haeunga0822.topping-e2x2.'
 const SETUP_KEY = renderValueKey({ name: '', value: '', overlay: 'setup' })
 const SETUP_STRIP = renderVuStrip({ name: '', left: 0, right: 0, faderDb: '', levelDb: '', muted: false, overlay: 'setup' })
-const ROLES = { top: 1, bottom: 1 }
+const ROLES = { top: 1, bottom: 1, left: 1, right: 1 }
 const PEEK_MS = 700
 const dbStep = (v: unknown, fallback = 1): number => {
 	const n = num(v)
@@ -31,7 +32,7 @@ export abstract class VolKeyAction extends E2x2Action<JsonObject> {
 			name: ctx.userTitle ? '' : v.name,
 			mix: ctx.userTitle ? undefined : v.mix,
 			value: v.muted(s) ? 'MUTED' : dbText(raw),
-			meter: { left, right, fader: faderPos(raw), muted: v.muted(s) },
+			meter: { left: levelToAxis(left), right: levelToAxis(right), fader: faderPos(raw), muted: v.muted(s) },
 			overlay: ctx.overlay,
 		})
 	}
@@ -88,7 +89,7 @@ class ButtonFaderAction extends MeterAction {
 		const v = volSpec(settings)
 		const role = pick(settings.role, ROLES)
 		if (!v || !role) return
-		const db = (role === 'top' ? 1 : -1) * Math.abs(dbStep(settings.step))
+		const db = roleSign(role) * Math.abs(dbStep(settings.step))
 		this.hold(ev.action, () => this.adjust(settings, () => stepVol(this.connection, v, db)))
 	}
 }

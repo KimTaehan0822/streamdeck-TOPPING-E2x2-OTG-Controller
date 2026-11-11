@@ -25,6 +25,13 @@ export const dbToLevel = (db: number): number => {
 	return 0
 }
 
+/** Fader / meter axis: 0..1 from silence up to +MAX_AXIS_DB; 0 dB sits at AXIS_0DB so the bars (which end at 0 dBFS) leave headroom for the fader above it. */
+export const AXIS_0DB = 0.8
+export const MAX_AXIS_DB = 12
+export const dbToAxis = (db: number): number => (db <= 0 ? dbToLevel(db) * AXIS_0DB : AXIS_0DB + (Math.min(db, MAX_AXIS_DB) / MAX_AXIS_DB) * (1 - AXIS_0DB))
+/** A meter level on the app scale, placed on the axis. */
+export const levelToAxis = (level: number): number => level * AXIS_0DB
+
 /** `bytes` = the 16-byte input report without the report ID. */
 export function parseMeter(bytes: Uint8Array): Meter | undefined {
 	if (bytes.length < 16 || bytes[7] !== 0xff || bytes[13] !== 0x66 || bytes[14] !== 0x77) return undefined

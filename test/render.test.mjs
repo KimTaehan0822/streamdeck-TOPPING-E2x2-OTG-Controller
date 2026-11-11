@@ -52,8 +52,23 @@ Object.assign(samples, {
 	'long-vu': renderVuStrip(mv({ mix: 1, name: LONG })),
 })
 
+// Two-key faders: short / long / Hangul / no-mix names, cap at the top, middle (the seam), 0 dB and the bottom, every role.
+const PAIRS = {}
+for (const [n, o] of [['short', { mix: 0 }], ['long', { mix: 2, name: LONG }], ['han', { mix: 1, name: HAN }], ['out', { name: 'Out 1/2' }]])
+	for (const [fn, f] of [['max', 1], ['mid', 0.5], ['0db', 0.8], ['min', 0]])
+		for (const r of ['top', 'bottom', 'left', 'right']) PAIRS[`pair-${n}-${fn}-${r}`] = renderButtonFader(mv({ ...o, fader: f, left: 0.55, right: 0.4, faderDb: '+12.0 dB' }), r)
+Object.assign(samples, PAIRS)
+
 mkdirSync(new URL('./out/', import.meta.url), { recursive: true })
 for (const [n, s] of Object.entries(samples)) writeFileSync(new URL(`./out/${n}.svg`, import.meta.url), s)
+// Contact sheet: per name and cap position, the vertical pair (top over bottom) and the horizontal pair (left, right).
+{
+	const img = (n) => `<img src="${n}.svg" width="144" style="display:block">`
+	const cell = (n, fn) =>
+		`<div style="margin:6px 10px;font:11px sans-serif;color:#888"><div style="display:flex;gap:18px"><div>${img(`pair-${n}-${fn}-top`)}${img(`pair-${n}-${fn}-bottom`)}</div><div style="display:flex;align-self:flex-start">${img(`pair-${n}-${fn}-left`)}${img(`pair-${n}-${fn}-right`)}</div></div>${n} ${fn}</div>`
+	const rows = ['short', 'long', 'han', 'out'].map((n) => '<div style="display:flex">' + ['max', 'mid', '0db', 'min'].map((fn) => cell(n, fn)).join('') + '</div>')
+	writeFileSync(new URL('./out/contact-fader2.html', import.meta.url), '<body style="background:#000;margin:10px">' + rows.join('') + '</body>')
+}
 
 test('every renderer returns an svg', () => {
 	for (const [n, s] of Object.entries(samples)) assert.ok(s.startsWith('<svg'), n)
@@ -137,4 +152,43 @@ test('long text wraps to two rows instead of shrinking', () => {
 test('short names keep one row', () => {
 	assert.equal(texts(samples['toggle-mute-off-a']).filter((x) => x.t === 'PB 1/2').length, 1)
 	assert.equal(texts(samples['fader-normal-top']).filter((x) => x.t === 'PB 1/2').length, 1)
+})
+
+test('the cap never covers the name rows, and the bars start below them', () => {
+	const capY = (svg) => +/<rect x="[\d.-]+" y="([\d.-]+)"[^>]*rx="2" fill="#D8D8D8"/.exec(svg)?.[1]
+	for (const n of ['short', 'long', 'han', 'out']) {
+		assert.ok(capY(PAIRS[`pair-${n}-max-top`]) >= 72, n) // cap at the very top still starts below the name rows (which end at y=72)
+		assert.ok(capY(PAIRS[`pair-${n}-min-left`]) >= 72, n) // horizontal cap sits in the band under the text
+	}
+	for (const r of ['top', 'left']) for (const m of PAIRS[`pair-long-max-${r}`].matchAll(/y="([\d.]+)" font-family="[^"]*" font-size="([\d.]+)"/g)) assert.ok(+m[1] <= 72 + 0.35 * +m[2], r)
+})
+
+test('vertical pair: the bars meet at the seam with equal length and the cap straddles it', () => {
+	const rects = (svg) => [...svg.matchAll(/<rect x="[\d.]+" y="([\d.]+)" width="[\d.]+" height="([\d.]+)" fill="#0F0F0F"/g)].map((m) => [+m[1], +m[2]])
+	const [[ty, th]] = rects(PAIRS['pair-short-mid-top'])
+	const [[by, bh]] = rects(PAIRS['pair-short-mid-bottom'])
+	assert.equal(ty + th, 144) // top box ends at the seam
+	assert.equal(by, 0) // bottom box starts at it
+	assert.equal(th, bh)
+	const capRect = (svg) => svg.includes('rx="2" fill="#D8D8D8"')
+	assert.ok(capRect(PAIRS['pair-short-mid-top']) && capRect(PAIRS['pair-short-mid-bottom'])) // f=0.5 sits on the seam: half in each key
+})
+
+test('horizontal pair: bars continue across the seam, the cap sits in the right half, MIX X and the name are on the left key', () => {
+	const boxes = (svg) => [...svg.matchAll(/<rect x="([\d.]+)" y="82" width="([\d.]+)" height="14" fill="#0F0F0F"/g)].map((m) => [+m[1], +m[2]])
+	const [[lx, lw]] = boxes(PAIRS['pair-short-mid-left'])
+	const [[rx, rw]] = boxes(PAIRS['pair-short-mid-right'])
+	assert.equal(lx + lw, 144) // left bar reaches the seam
+	assert.equal(rx, 0) // right bar starts at it
+	assert.equal(lw, rw)
+	const capRect = (svg) => svg.includes('rx="2" fill="#D8D8D8"')
+	assert.ok(capRect(PAIRS['pair-short-0db-right']) && !capRect(PAIRS['pair-short-0db-left'])) // 0 dB = 0.8 of the axis: right half
+	assert.ok(capRect(PAIRS['pair-short-min-left']) && !capRect(PAIRS['pair-short-min-right']))
+	assert.ok(PAIRS['pair-short-mid-left'].includes('MIX A') && PAIRS['pair-short-mid-left'].includes('PB 1/2'))
+	assert.ok(PAIRS['pair-short-mid-right'].includes('+12.0 dB') && !PAIRS['pair-short-mid-right'].includes('MIX A'))
+})
+
+test('the muted two-key fader shows MUTED on the dB key for every role', () => {
+	for (const r of ['bottom', 'right']) assert.ok(renderButtonFader(mv({ muted: true }), r).includes('MUTED'), r)
+	for (const r of ['top', 'left']) assert.ok(!renderButtonFader(mv({ muted: true }), r).includes('MUTED'), r)
 })

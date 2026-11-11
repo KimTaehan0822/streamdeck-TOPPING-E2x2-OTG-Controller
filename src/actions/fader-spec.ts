@@ -1,6 +1,6 @@
 import type { JsonObject } from '@elgato/utils'
 import type { E2x2Connection } from '../connection.js'
-import { dbToLevel, type MeterChannel } from '../protocol/meter.js'
+import { dbToAxis, dbToLevel, levelToAxis, type MeterChannel } from '../protocol/meter.js'
 import { dbToRaw, rawToDb } from '../protocol/report.js'
 import type { MeterView } from '../render/meter.js'
 import type { Mix } from '../render/theme.js'
@@ -11,17 +11,19 @@ import { holder, INPUTS, muteSpec } from './toggle-spec.js'
 
 // Pure volume / pan logic (no Stream Deck SDK), so tests can drive it with a fake connection.
 
-/** Volume range of every fader: -inf .. +6 dB. The workspace fixture only shows up to +2 dB; +6 is the planned limit. */
-export const MAX_DB = 6
+/** Volume range of mix, loopback and output faders: -inf .. +12 dB (the TOPPING app's limit). */
+export const MAX_DB = 12
+/** Digital gain keeps the older +6 dB cap: nothing in the protocol notes says it may go higher. */
+export const GAIN_MAX_DB = 6
 /** Below this a step down goes to silence (raw 0), and a step up from silence lands here. */
 export const FLOOR_DB = -60
 
-export function stepRaw(raw: number, deltaDb: number): number {
-	const db = Math.min(MAX_DB, rawToDb(raw) + deltaDb) // -inf + delta stays -inf, so silence falls into the floor branch
+export function stepRaw(raw: number, deltaDb: number, maxDb = MAX_DB): number {
+	const db = Math.min(maxDb, rawToDb(raw) + deltaDb) // -inf + delta stays -inf, so silence falls into the floor branch
 	if (db < FLOOR_DB) return deltaDb < 0 ? 0 : dbToRaw(FLOOR_DB)
 	return dbToRaw(db)
 }
-export const setRaw = (db: number): number => (db < FLOOR_DB ? 0 : dbToRaw(Math.min(MAX_DB, db)))
+export const setRaw = (db: number, maxDb = MAX_DB): number => (db < FLOOR_DB ? 0 : dbToRaw(Math.min(maxDb, db)))
 
 const round1 = (x: number) => Math.round(x * 10) / 10
 export const dbText = (raw: number): string => {
@@ -29,13 +31,15 @@ export const dbText = (raw: number): string => {
 	const r = round1(rawToDb(raw))
 	return `${r > 0 ? '+' : ''}${r.toFixed(1)} dB`
 }
-/** Fader position on the meter scale (0..1; +dB sits at the end of the bar). */
-export const faderPos = (raw: number): number => Math.min(1, dbToLevel(rawToDb(raw)))
+/** Fader position on the axis (0..1; 0 dB at 0.8, +12 dB at the top). */
+export const faderPos = (raw: number): number => dbToAxis(rawToDb(raw))
 
 /** Anything a fader or dial can raise and lower: a mix/loopback/output volume or an input's digital gain. */
 export interface Vol {
 	name: string
 	mix?: Mix
+	/** Highest dB this control may reach (default MAX_DB). */
+	maxDb?: number
 	/** Set for mix/loopback/output targets (meters and mute come from it). */
 	target?: Target
 	raw: (s: MixerState) => number
@@ -72,12 +76,16 @@ export function gainSpec(settings: JsonObject): Vol | undefined {
 	if (!id) return undefined
 	return {
 		name: nameOf(settings, INPUTS[id]),
+		maxDb: GAIN_MAX_DB,
 		raw: (s) => s.inputs[id].gain,
 		map: (s, f) => void (s.inputs[id].gain = f(s.inputs[id].gain)),
 		muted: (s) => s.inputs[id].mute,
 		setMuted: (s, on) => void (s.inputs[id].mute = on),
 	}
 }
+
+/** Two-key fader: the top and right keys raise, the bottom and left keys lower. */
+export const roleSign = (role: 'top' | 'bottom' | 'left' | 'right'): 1 | -1 => (role === 'top' || role === 'right' ? 1 : -1)
 
 export type FaderOp = { set: boolean; db: number }
 /** Key settings: mode `set` goes to `db`; anything else steps by `step` dB (negative = down, blank = 1). undefined = `set` without a number. */
@@ -90,8 +98,8 @@ export function faderOp(settings: JsonObject): FaderOp | undefined {
 	return { set: false, db: Number.isFinite(step) && step !== 0 ? step : 1 }
 }
 
-export const stepVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, (raw) => stepRaw(raw, db)))
-export const setVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, () => setRaw(db)))
+export const stepVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, (raw) => stepRaw(raw, db, v.maxDb)))
+export const setVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, () => setRaw(db, v.maxDb)))
 export const pressFader = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: FaderOp): void => (op.set ? setVol(c, v, op.db) : stepVol(c, v, op.db))
 export const setMute = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: 'toggle' | 'on' | 'off'): void =>
 	c.update((s) => v.setMuted(s, op === 'toggle' ? !v.muted(s) : op === 'on'))
@@ -136,8 +144,8 @@ export function meterView(v: Vol, s: MixerState, meters: ReadonlyMap<MeterChanne
 	return {
 		mix: v.mix,
 		name: v.name,
-		left,
-		right,
+		left: levelToAxis(left),
+		right: levelToAxis(right),
 		fader: faderPos(raw),
 		faderDb: dbText(raw),
 		levelDb: levelText(Math.max(left, right)),

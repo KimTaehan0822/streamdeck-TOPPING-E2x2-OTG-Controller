@@ -1,11 +1,11 @@
-import { dbToLevel } from '../protocol/meter.js'
-import { fitSize, frame, plainText, textBlock, wrapFit, type Overlay } from './svg.js'
+import { dbToAxis } from '../protocol/meter.js'
+import { fitSize, fitText, frame, plainText, textBlock, wrapFit, type Overlay } from './svg.js'
 import { DIM, GREEN, MIX_COLORS, MUTED_BAR, ON, PLATE, PLATE_TEXT, RED, TICK, TRACK, WHITE, YELLOW, mixName, type Mix } from './theme.js'
 
 export type MeterView = {
 	mix?: Mix
 	name: string
-	/** Levels and fader position are 0..1 on the app's meter scale (dbToLevel). */
+	/** Levels and fader position are 0..1 on the fader axis (dbToAxis: 0 dB at 0.8, +12 dB at the top). */
 	left: number
 	right: number
 	fader?: number
@@ -28,8 +28,8 @@ export function bar(x: number, y: number, w: number, h: number, level: number, v
 	const dir = vertical ? `x1="0" y1="${y + h}" x2="0" y2="${y}"` : `x1="${x}" y1="0" x2="${x + w}" y2="0"`
 	let d =
 		`<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" ${dir}>` +
-		`<stop offset="${stop(0)}" stop-color="${GREEN}"/><stop offset="${stop(dbToLevel(-12))}" stop-color="${GREEN}"/>` +
-		`<stop offset="${stop(dbToLevel(-3))}" stop-color="${YELLOW}"/><stop offset="${stop(1)}" stop-color="${RED}"/></linearGradient></defs>` +
+		`<stop offset="${stop(0)}" stop-color="${GREEN}"/><stop offset="${stop(dbToAxis(-12))}" stop-color="${GREEN}"/>` +
+		`<stop offset="${stop(dbToAxis(-3))}" stop-color="${YELLOW}"/><stop offset="${stop(dbToAxis(0))}" stop-color="${RED}"/></linearGradient></defs>` +
 		`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${TRACK}"/>`
 	if (f > 0) {
 		const r = vertical ? `x="${x}" y="${y + h * (1 - f)}" width="${w}" height="${h * f}"` : `x="${x}" y="${y}" width="${w * f}" height="${h}"`
@@ -82,8 +82,8 @@ export function renderValueStrip(v: { mix?: Mix; name: string; value: string; ba
 export function renderVuStrip(v: MeterView): string {
 	let b = stripHeader(v.mix, v.name)
 	b += bar(12, 32, 176, 12, v.left, false, v.muted) + bar(12, 48, 176, 12, v.right, false, v.muted)
-	for (const db of [0, -6, -12, -24]) {
-		const x = 12 + 176 * dbToLevel(db)
+	for (const db of [6, 0, -6, -12, -24]) {
+		const x = 12 + 176 * dbToAxis(db)
 		b += `<line x1="${x}" y1="61" x2="${x}" y2="65" stroke="${TICK}" stroke-width="1.5"/>`
 	}
 	if (v.fader !== undefined) b += cap(12 + 176 * v.fader, 46, 12, 34, false)
@@ -92,38 +92,64 @@ export function renderVuStrip(v: MeterView): string {
 	return frame(200, 100, b, v.overlay)
 }
 
-/** Two stacked keys share one fader: 'top' = upper half of the scale + plate, 'bottom' = lower half + dB text. */
-export function renderButtonFader(v: MeterView, role: 'top' | 'bottom'): string {
-	const u = KEY / 100
-	const high = role === 'top'
+export type FaderRole = 'top' | 'bottom' | 'left' | 'right'
+
+/** Name rows (plate, MIX X, name) end at TEXT_END; the fader cap, centred on the end of the axis, then just clears them. */
+const TEXT_END = 72
+const CAP = 14 * (KEY / 100) // cap thickness along the axis, about 20
+const AXIS_START = TEXT_END + CAP / 2 // top key: y of axis 1 (vertical); the axis then runs 2 * AXIS_LEN down through the seam
+const AXIS_LEN = KEY - AXIS_START // length of one key's half of the axis (vertical, 62)
+const H_START = 10 // left key: x of axis 0 (horizontal); the axis runs 2 * H_LEN to the right through the seam
+const H_LEN = KEY - H_START // 134
+
+/** Name block of the top / left key: MIX X plate with the name under it (a long name wraps to two smaller rows under a slimmer plate). */
+function nameHead(v: MeterView): string {
+	if (v.mix === undefined) return plate(21, 34, plateName(v.name, 21, 24))
+	const name = wrapFit(v.name, 26, 128, 10)
+	const mixText = (cy: number, size: number) => plainText(72, base(cy, size), mixName(v.mix!), { size, fill: MIX_COLORS[v.mix!] })
+	return name.lines.length > 1
+		? plate(15, 26, mixText(15, 20)) + textBlock({ lines: name.lines, size: Math.min(18, name.size) }, 50, WHITE)
+		: plate(21, 34, mixText(21, 24)) + textBlock(name, 56, WHITE)
+}
+
+/**
+ * Two keys share one fader. Vertical: 'top' = upper half of the axis + name, 'bottom' = lower half + dB text.
+ * Horizontal: 'left' = lower half + name, 'right' = upper half + dB text. The axis is one continuous line across the seam;
+ * bars and cap are placed in its global coordinates, so the meter and a cap straddling the seam stay seamless.
+ */
+export function renderButtonFader(v: MeterView, role: FaderRole): string {
+	const vertical = role === 'top' || role === 'bottom'
+	const high = role === 'top' || role === 'right'
 	const part: [number, number] = high ? [0.5, 1] : [0, 0.5]
-	const y = high ? 50 * u : 0
-	const h = 50 * u
-	let b = bar(28 * u, y, 18 * u, h, v.left, true, v.muted, part) + bar(54 * u, y, 18 * u, h, v.right, true, v.muted, part)
-	const tick = (db: number) => {
-		const yy = high ? 50 * u + 50 * u * (1 - (dbToLevel(db) - 0.5) / 0.5) : 50 * u * (1 - dbToLevel(db) / 0.5)
-		return `<line x1="${74 * u}" y1="${yy}" x2="${80 * u}" y2="${yy}" stroke="${TICK}" stroke-width="2"/>`
-	}
-	for (const db of high ? [0, -6, -12] : [-24]) b += tick(db)
-	const f = v.fader
-	if (f !== undefined && f >= part[0] && f <= part[1]) {
-		const yy = high ? 50 * u + 50 * u * (1 - (f - 0.5) / 0.5) : 50 * u * (1 - f / 0.5)
-		b += cap(50 * u, yy, 60 * u, 14 * u, true)
-	}
-	if (high) {
-		// A name too long for one row wraps to two smaller rows under a slimmer plate (the bars start at y=72).
-		const name = v.mix !== undefined ? wrapFit(v.name, 26, 128, 10) : undefined
-		const two = name !== undefined && name.lines.length > 1
-		const head =
-			v.mix !== undefined
-				? two
-					? plate(15, 26, plainText(72, base(15, 20), mixName(v.mix), { size: 20, fill: MIX_COLORS[v.mix] })) + textBlock({ lines: name!.lines, size: Math.min(18, name!.size) }, 50, WHITE)
-					: plate(21, 34, plainText(72, base(21, 24), mixName(v.mix), { size: 24, fill: MIX_COLORS[v.mix] })) + textBlock(name!, 56, WHITE)
-				: plate(21, 34, plateName(v.name, 21, 24))
-		b = head + b
+	const u = KEY / 100
+	let b = ''
+	if (vertical) {
+		const off = high ? 0 : KEY // global y of this key's top
+		const local = (f: number) => AXIS_START + 2 * AXIS_LEN * (1 - f) - off
+		const y = high ? AXIS_START : 0
+		b += bar(28 * u, y, 18 * u, AXIS_LEN, v.left, true, v.muted, part) + bar(54 * u, y, 18 * u, AXIS_LEN, v.right, true, v.muted, part)
+		for (const db of [6, 0, -6, -12, -24]) {
+			const f = dbToAxis(db)
+			if (f >= part[0] && f <= part[1]) b += `<line x1="${74 * u}" y1="${local(f)}" x2="${80 * u}" y2="${local(f)}" stroke="${TICK}" stroke-width="2"/>`
+		}
+		if (v.fader !== undefined && Math.abs(local(v.fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(72, local(v.fader), 60 * u, CAP, true)
 	} else {
-		const s = 20 * u
-		b += v.muted ? plainText(72, base(83 * u, s), 'MUTED', { size: s, fill: RED }) : plainText(72, base(83 * u, s), v.faderDb, { size: s, fill: WHITE })
+		const off = high ? KEY : 0
+		const local = (f: number) => H_START + 2 * H_LEN * f - off
+		const x = high ? 0 : H_START
+		b += bar(x, 82, H_LEN, 14, v.left, false, v.muted, part) + bar(x, 100, H_LEN, 14, v.right, false, v.muted, part)
+		for (const db of [6, 0, -6, -12, -24]) {
+			const f = dbToAxis(db)
+			if (f >= part[0] && f <= part[1]) b += `<line x1="${local(f)}" y1="118" x2="${local(f)}" y2="124" stroke="${TICK}" stroke-width="2"/>`
+		}
+		if (v.fader !== undefined && Math.abs(local(v.fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(local(v.fader), 98, CAP, 44, false)
+	}
+	// Name rows on the top / left key; the dB value (MUTED when muted) on the bottom / right key.
+	if (role === 'top' || role === 'left') b = nameHead(v) + b
+	else {
+		const s = vertical ? 20 * u : fitSize(v.faderDb, 32, 128, 10)
+		const cy = vertical ? 83 * u : 45
+		b += v.muted ? plainText(72, base(cy, s), 'MUTED', { size: s, fill: RED }) : plainText(72, base(cy, s), fitText(v.faderDb, s, 128), { size: s, fill: WHITE })
 	}
 	return frame(KEY, KEY, b, v.overlay)
 }

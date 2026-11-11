@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { faderOp, gainSpec, meterOf, meterView, panOp, panSpec, panText, pressFader, pressPan, setMute, setPan, stepPan, stepRaw, stepVol, volSpec, MAX_DB, FLOOR_DB } from '../dist/actions/fader-spec.js'
+import { faderOp, gainSpec, meterOf, meterView, panOp, panSpec, panText, pressFader, pressPan, setMute, setPan, stepPan, stepRaw, stepVol, volSpec, MAX_DB, GAIN_MAX_DB, FLOOR_DB, faderPos, roleSign } from '../dist/actions/fader-spec.js'
 import { E2x2Connection } from '../dist/connection.js'
 import { dbToRaw, decodeReport } from '../dist/protocol/report.js'
 import { emptyState } from '../dist/state/mixer-state.js'
@@ -30,8 +30,9 @@ test('step +1 dB raises the output volume to the matching raw value and sends it
 })
 
 test('stepping stops at the maximum, and below the floor goes to silence', () => {
-	assert.equal(MAX_DB, 6)
-	const { conn } = setup(at(5.5))
+	assert.equal(MAX_DB, 12)
+	assert.ok(dbToRaw(MAX_DB) < 2 ** 31) // +12 dB must fit the signed 32-bit raw value
+	const { conn } = setup(at(11.5))
 	const v = volSpec({ kind: 'output', channel: 'out12' })
 	stepVol(conn, v, 1)
 	near(conn.state.outputs.out12.volL, dbToRaw(MAX_DB))
@@ -55,7 +56,7 @@ test('set mode goes to the level; above the maximum is clamped', () => {
 	pressFader(conn, v, faderOp({ mode: 'set', db: '-6' }))
 	near(conn.state.loopbacks.lp12.volL, dbToRaw(-6))
 	pressFader(conn, v, faderOp({ mode: 'set', db: 20 }))
-	near(conn.state.loopbacks.lp12.volR, dbToRaw(6))
+	near(conn.state.loopbacks.lp12.volR, dbToRaw(12))
 	assert.equal(faderOp({ mode: 'set', db: ' ' }), undefined)
 	assert.deepEqual(faderOp({}), { set: false, db: 1 })
 })
@@ -94,15 +95,15 @@ test('VU dial view: a mix channel shows its own playback meter, loopback its 5x,
 		return [view.left, view.right]
 	}
 	let view = meterView(volSpec({ kind: 'output', channel: 'out12' }), conn.state, meters, false)
-	assert.deepEqual([view.left, view.right], [0.84, 0.44])
+	assert.deepEqual([view.left, view.right], [0.84 * 0.8, 0.44 * 0.8].map((x) => x)) // meter levels sit on the axis (0 dB = 0.8)
 	assert.equal(view.levelDb, '-6 dB')
 	assert.equal(view.faderDb, '0.0 dB')
-	assert.deepEqual(lr({ kind: 'output', channel: 'mobile' }), [0.68, 0.2])
-	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'pb12' }), [0.3, 0.31])
-	assert.deepEqual(lr({ kind: 'mix', mix: 3, channel: 'pb34' }), [0.5, 0.52]) // any mix: the channel's own meter
+	assert.deepEqual(lr({ kind: 'output', channel: 'mobile' }), [0.68 * 0.8, 0.2 * 0.8])
+	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'pb12' }), [0.3 * 0.8, 0.31 * 0.8])
+	assert.deepEqual(lr({ kind: 'mix', mix: 3, channel: 'pb34' }), [0.5 * 0.8, 0.52 * 0.8]) // any mix: the channel's own meter
 	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'pb56' }), [0, 0])
 	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'in12' }), [0, 0])
-	assert.deepEqual(lr({ kind: 'loopback', channel: 'lp12' }), [0.7, 0.71])
+	assert.deepEqual(lr({ kind: 'loopback', channel: 'lp12' }), [0.7 * 0.8, 0.71 * 0.8])
 	assert.equal(meterOf({ kind: 'mix', mix: 2, channel: 'otg', side: 'pair' }), undefined)
 	assert.deepEqual(meterOf({ kind: 'mix', mix: 2, channel: 'pb78', side: 'pair' }), ['pb78L_A', 'pb78R_A'])
 })
@@ -149,6 +150,7 @@ test('digital gain steps, stops at the maximum and mutes the input', () => {
 	near(conn.state.inputs.in1.gain, dbToRaw(1))
 	assert.deepEqual(sent(), [{ group: 0x21, item: 5, value: conn.state.inputs.in1.gain }])
 	stepVol(conn, g, 20)
+	assert.equal(GAIN_MAX_DB, 6)
 	near(conn.state.inputs.in1.gain, dbToRaw(6))
 	clear()
 	setMute(conn, g, 'toggle')
@@ -193,4 +195,12 @@ test('pan steps one mono side, and a pair keeps its width at the ends', () => {
 	pressPan(conn, panSpec({ mix: 0, channel: 'in12', side: 'R' }), panOp({ mode: 'set', pan: -100 }))
 	assert.equal(conn.state.mixes[0].channels.in12.panR, 0)
 	assert.equal(panSpec({ mix: 0 }), undefined)
+})
+
+test('fader axis: 0 dB at 0.8, +12 dB at the top; presses go up on top/right and down on bottom/left', () => {
+	assert.ok(Math.abs(faderPos(dbToRaw(0)) - 0.8) < 1e-9)
+	assert.ok(Math.abs(faderPos(dbToRaw(12)) - 1) < 1e-9)
+	assert.ok(Math.abs(faderPos(dbToRaw(6)) - 0.9) < 1e-9)
+	assert.equal(faderPos(0), 0)
+	assert.deepEqual(['top', 'bottom', 'left', 'right'].map(roleSign), [1, -1, -1, 1])
 })
