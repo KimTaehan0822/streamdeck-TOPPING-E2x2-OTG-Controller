@@ -198,7 +198,7 @@ export function panSpec(settings: JsonObject): Pan | undefined {
 		shift: (s, d) => {
 			const c = s.mixes[t.mix].channels[t.channel]
 			if (c.link && effectiveSide(t, s) === 'pair') {
-				// shortcut: TOPPING app's real LINK pan curve not captured, verify on device
+				// same as the app (checked 2026-11-13): right moves only the L channel toward the right, left moves only the R channel
 				// LINKed strip: balance p = panL + panR - 1 in -1..1 (the mean is (p+1)/2, so d on the mean moves p by 2d); centre is setLink's (0, 1)
 				const b = Math.max(-1, Math.min(1, c.panL + c.panR - 1 + 2 * d))
 				c.panL = Math.max(0, b)

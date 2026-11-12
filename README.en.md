@@ -72,7 +72,7 @@ Saving a workspace never overwrites the file the TOPPING app is currently using 
 ## Known limitations
 
 - **Solo** on an input has no effect on the device.
-- Volume goes up to **+12 dB** and digital gain runs **0 to +20 dB**, both checked on the device. The **Pan curve while LINK is on** has not been compared with the TOPPING app yet.
+- Volume goes up to **+12 dB** and digital gain runs **0 to +20 dB**, and **Pan while LINK is on** works like the TOPPING app; all three were checked on the device.
 - For **48V**, the settings screen only shows a warning when you pick it. Pressing the key turns it on right away, so be careful not to turn it on with a non-condenser microphone or other equipment connected.
 - This plugin does not change the device's USB driver. It only uses HID communication that the official driver allows.
 
