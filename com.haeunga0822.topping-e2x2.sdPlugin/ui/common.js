@@ -104,7 +104,7 @@ const TEXT = {
 	'Level (dB, -60 or lower = silence, max +12)': ['볼륨 (dB, -60 이하 = 무음, 최대 +12)', '音量 (dB、-60 以下 = 無音、最大 +12)'],
 	'Step per tick (dB)': ['한 칸당 (dB)', '1クリックごと (dB)'],
 	'Step per tick (%)': ['한 칸당 (%)', '1クリックごと (%)'],
-	'Gain (dB, max +6)': ['게인 (dB, 최대 +6)', 'ゲイン (dB、最大 +6)'],
+	'Gain (dB, 0 to +20)': ['게인 (dB, 0 ~ +20)', 'ゲイン (dB、0 〜 +20)'],
 	'Cycle MIX A-D': ['MIX A~D 번갈아 선택', 'MIX A〜D を順に切り替え'],
 	'Cycle chosen sources': ['고른 소스 안에서 번갈아 선택', '選んだソースを順に切り替え'],
 	'Toggle between two': ['두 소스 사이 토글', '2つのソースを切り替え'],

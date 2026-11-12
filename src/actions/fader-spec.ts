@@ -13,17 +13,23 @@ import { holder, INPUTS, muteSpec } from './toggle-spec.js'
 
 /** Volume range of mix, loopback and output faders: -inf .. +12 dB (the TOPPING app's limit). */
 export const MAX_DB = 12
-/** Digital gain keeps the older +6 dB cap: nothing in the protocol notes says it may go higher. */
-export const GAIN_MAX_DB = 6
+/** Digital gain runs 0 .. +20 dB, like the TOPPING app's input knob (checked in the app 2026-11-13). */
+export const GAIN_MAX_DB = 20
+export const GAIN_MIN_DB = 0
 /** Below this a step down goes to silence (raw 0), and a step up from silence lands here. */
 export const FLOOR_DB = -60
 
-export function stepRaw(raw: number, deltaDb: number, maxDb = MAX_DB): number {
+/** `minDb` set: the value never goes below it (and never to silence). */
+export function stepRaw(raw: number, deltaDb: number, maxDb = MAX_DB, minDb?: number): number {
 	const db = Math.min(maxDb, rawToDb(raw) + deltaDb) // -inf + delta stays -inf, so silence falls into the floor branch
+	if (minDb !== undefined) return dbToRaw(Math.max(minDb, db))
 	if (db < FLOOR_DB) return deltaDb < 0 ? 0 : dbToRaw(FLOOR_DB)
 	return dbToRaw(db)
 }
-export const setRaw = (db: number, maxDb = MAX_DB): number => (db < FLOOR_DB ? 0 : dbToRaw(Math.min(maxDb, db)))
+export const setRaw = (db: number, maxDb = MAX_DB, minDb?: number): number =>
+	minDb !== undefined ? dbToRaw(Math.min(maxDb, Math.max(minDb, db))) : db < FLOOR_DB ? 0 : dbToRaw(Math.min(maxDb, db))
+/** Digital gain bar: 0 at 0 dB, 1 at +20 dB. */
+export const gainBar = (raw: number): number => Math.max(0, Math.min(1, (rawToDb(raw) - GAIN_MIN_DB) / (GAIN_MAX_DB - GAIN_MIN_DB)))
 
 const round1 = (x: number) => Math.round(x * 10) / 10
 export const dbText = (raw: number): string => {
@@ -40,6 +46,8 @@ export interface Vol {
 	mix?: Mix
 	/** Highest dB this control may reach (default MAX_DB). */
 	maxDb?: number
+	/** Lowest dB (default: down to silence). */
+	minDb?: number
 	/** Set for mix/loopback/output targets (meters and mute come from it). */
 	target?: Target
 	raw: (s: MixerState) => number
@@ -77,6 +85,7 @@ export function gainSpec(settings: JsonObject): Vol | undefined {
 	return {
 		name: nameOf(settings, INPUTS[id]),
 		maxDb: GAIN_MAX_DB,
+		minDb: GAIN_MIN_DB,
 		raw: (s) => s.inputs[id].gain,
 		map: (s, f) => void (s.inputs[id].gain = f(s.inputs[id].gain)),
 		muted: (s) => s.inputs[id].mute,
@@ -98,8 +107,8 @@ export function faderOp(settings: JsonObject): FaderOp | undefined {
 	return { set: false, db: Number.isFinite(step) && step !== 0 ? step : 1 }
 }
 
-export const stepVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, (raw) => stepRaw(raw, db, v.maxDb)))
-export const setVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, () => setRaw(db, v.maxDb)))
+export const stepVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, (raw) => stepRaw(raw, db, v.maxDb, v.minDb)))
+export const setVol = (c: Pick<E2x2Connection, 'update'>, v: Vol, db: number): void => c.update((s) => v.map(s, () => setRaw(db, v.maxDb, v.minDb)))
 export const pressFader = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: FaderOp): void => (op.set ? setVol(c, v, op.db) : stepVol(c, v, op.db))
 export const setMute = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: 'toggle' | 'on' | 'off'): void =>
 	c.update((s) => v.setMuted(s, op === 'toggle' ? !v.muted(s) : op === 'on'))

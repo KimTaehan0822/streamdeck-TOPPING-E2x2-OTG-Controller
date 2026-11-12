@@ -4,7 +4,7 @@ import type { E2x2Connection } from '../connection.js'
 import { renderValueStrip } from '../render/keys.js'
 import { E2x2Action, type RenderContext } from '../runtime/base-action.js'
 import { num } from './common.js'
-import { dbText, faderPos, gainSpec, setMute, stepVol } from './fader-spec.js'
+import { dbText, gainBar, gainSpec, setMute, stepVol } from './fader-spec.js'
 import { VolKeyAction } from './faders.js'
 
 const ID = 'com.haeunga0822.topping-e2x2.'
@@ -21,7 +21,7 @@ class GainDialAction extends E2x2Action<JsonObject> {
 		if (!v) return renderValueStrip({ name: '', value: '', bar: 0, overlay: 'setup' })
 		const s = this.connection.state
 		const raw = v.raw(s)
-		return renderValueStrip({ name: v.name, value: dbText(raw), bar: faderPos(raw), muted: v.muted(s), overlay: ctx.overlay })
+		return renderValueStrip({ name: v.name, value: dbText(raw), bar: gainBar(raw), muted: v.muted(s), overlay: ctx.overlay })
 	}
 
 	override onDialRotate(ev: DialRotateEvent<JsonObject>): void {

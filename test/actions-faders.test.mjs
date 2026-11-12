@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { faderOp, gainSpec, meterOf, meterView, panOp, panSpec, panText, pressFader, pressPan, setMute, setPan, stepPan, stepRaw, stepVol, volSpec, MAX_DB, GAIN_MAX_DB, FLOOR_DB, faderPos, roleSign } from '../dist/actions/fader-spec.js'
+import { faderOp, gainSpec, meterOf, meterView, panOp, panSpec, panText, pressFader, pressPan, setMute, setPan, stepPan, stepRaw, stepVol, setVol, gainBar, volSpec, MAX_DB, GAIN_MAX_DB, FLOOR_DB, faderPos, roleSign } from '../dist/actions/fader-spec.js'
 import { E2x2Connection } from '../dist/connection.js'
 import { dbToRaw, decodeReport } from '../dist/protocol/report.js'
 import { emptyState } from '../dist/state/mixer-state.js'
@@ -153,9 +153,17 @@ test('digital gain steps, stops at the maximum and mutes the input', () => {
 	stepVol(conn, g, 1)
 	near(conn.state.inputs.in1.gain, dbToRaw(1))
 	assert.deepEqual(sent(), [{ group: 0x21, item: 5, value: conn.state.inputs.in1.gain }])
-	stepVol(conn, g, 20)
-	assert.equal(GAIN_MAX_DB, 6)
-	near(conn.state.inputs.in1.gain, dbToRaw(6))
+	// the TOPPING app's input knob runs 0 .. +20 dB (checked in the app 2026-11-13)
+	stepVol(conn, g, 30)
+	assert.equal(GAIN_MAX_DB, 20)
+	near(conn.state.inputs.in1.gain, dbToRaw(20))
+	stepVol(conn, g, -50) // stops at 0 dB, never silence
+	near(conn.state.inputs.in1.gain, dbToRaw(0))
+	setVol(conn, g, -10)
+	near(conn.state.inputs.in1.gain, dbToRaw(0))
+	assert.equal(gainBar(dbToRaw(0)), 0)
+	assert.equal(gainBar(dbToRaw(20)), 1)
+	near(gainBar(dbToRaw(10)), 0.5, 1e-6)
 	clear()
 	setMute(conn, g, 'toggle')
 	assert.deepEqual(sent(), [{ group: 0x21, item: 5, value: 0 }])
