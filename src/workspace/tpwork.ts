@@ -97,6 +97,9 @@ export function writeWorkspace(s: MixerState, template: string): string {
 			if (!c.link) Object.assign(mix, { [p + 'Mix_channel_L']: Math.round(c.panL * 100), [p + 'Mix_channel_R']: Math.round(c.panR * 100) })
 		})
 	})
+	// "Mixer" is the app's copy of the selected mix (MixSave[Mixer_main]) and wins on load; a stale copy undoes the saved values
+	const selected: Obj | undefined = w[MIX_KEYS[Number(w.Mixer_main)] ?? '']
+	if (selected && w.Mixer) for (const k of Object.keys(w.Mixer)) if (k in selected) w.Mixer[k] = selected[k]
 	for (const [id, key] of Object.entries(INPUT_KEYS) as [keyof typeof INPUT_KEYS, string][]) {
 		const i = s.inputs[id]
 		Object.assign(need(w, key), { IN_volumenum: i.gain, MUTEEnable: i.mute, SOLOEnable: i.solo, ANTIEnable: i.phase, P48VEnable: i.p48v, INSTEnable: i.inst, MONIEnable: i.mon })

@@ -181,3 +181,17 @@ test('a save to another workspace file does not re-read the open one', () => {
 		rmSync(dir, { recursive: true })
 	}
 })
+
+test('the Mixer section follows the selected mix, as the app reads it on load', () => {
+	// the app shows (and re-saves) the selected mix from "Mixer", a copy of MixSave[Mixer_main]
+	for (const main of [0, 2]) {
+		const t = JSON.parse(file)
+		t.Mixer_main = main
+		const s = parseWorkspace(JSON.stringify(t))
+		s.mixes[main].channels.pb12.volL = 9457 * 3.5
+		s.mixes[main].channels.pb12.muteR = true
+		const w = JSON.parse(writeWorkspace(s, JSON.stringify(t)))
+		const active = w[['MixSaveA', 'MixSaveB', 'MixSaveC', 'MixSaveD'][main]]
+		for (const k of Object.keys(w.Mixer)) if (k in active) assert.deepEqual(w.Mixer[k], active[k], `${main} ${k}`)
+	}
+})
