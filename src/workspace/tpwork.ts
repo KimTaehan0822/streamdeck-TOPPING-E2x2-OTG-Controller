@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { rawToDb } from '../protocol/report.js'
 import { emptyState, type MixChannelId, type MixerState } from '../state/mixer-state.js'
+import { loggedWorkspace } from './applog.js'
 
 export const WORKSPACE_DIR = 'C:\\Program Files\\TOPPING Pro\\TOPPING Professional Control Center'
 
@@ -115,8 +116,11 @@ export function writeWorkspace(s: MixerState, template: string): string {
 	return JSON.stringify(w, null, 4)
 }
 
-/** The workspace the app has open for the E2x2 OTG, if the config names one that exists. */
+/** The workspace the app has open for the E2x2 OTG: the one its Run.log last switched to, else the one its config names; undefined when that file does not exist. */
 export function currentWorkspacePath(dir = WORKSPACE_DIR): string | undefined {
+	const logged = loggedWorkspace(dir)
+	const fromLog = logged === undefined ? undefined : join(dir, 'E2X2_OTG', `E2X2_OTG_${logged}.TPwork`)
+	if (fromLog && existsSync(fromLog)) return fromLog
 	try {
 		const name = JSON.parse(readFileSync(join(dir, 'sound_card_workspace_file.TPconfig'), 'utf8')).LastWorkspaceOpened_E2x2_OTG
 		const path = join(dir, 'E2X2_OTG', `E2X2_OTG_${name}.TPwork`)

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, appendFileSync, rmSync, openSync, writeSync, closeSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { readFileSync } from 'node:fs'
@@ -8,6 +8,7 @@ import { decodeReport } from '../dist/protocol/report.js'
 import { stateReports } from '../dist/state/crosspoints.js'
 import { currentWorkspacePath, listWorkspaces, parseWorkspace, writeWorkspace } from '../dist/workspace/tpwork.js'
 import { watchWorkspace } from '../dist/workspace/watch.js'
+import { lastOpenedInLog, loggedWorkspace } from '../dist/workspace/applog.js'
 
 const file = readFileSync(new URL('./fixtures/workspace.TPwork', import.meta.url), 'utf8')
 const startup = readFileSync(new URL('./fixtures/app-startup-reports.tsv', import.meta.url), 'utf8')
@@ -71,6 +72,7 @@ function harness(dir) {
 	const closed = []
 	const errors = []
 	const timers = new Map()
+	const polls = []
 	let id = 0
 	const deps = {
 		dir,
@@ -80,6 +82,8 @@ function harness(dir) {
 		},
 		setTimeout: (fn, ms) => (timers.set(++id, { fn, ms }), id),
 		clearTimeout: (t) => timers.delete(t),
+		setInterval: (fn, ms) => (polls.push({ fn, ms }), polls.length),
+		clearInterval: () => polls.splice(0),
 	}
 	return {
 		deps,
@@ -89,6 +93,8 @@ function harness(dir) {
 		timers,
 		change: (i = 0, name = 'E2X2_OTG_Mine.TPwork') => listeners[i].cb('change', name),
 		fire: () => [...timers.values()].splice(0).forEach((t) => t.fn()) || timers.clear(),
+		polls,
+		poll: () => polls.forEach((p) => p.fn()),
 	}
 }
 
@@ -212,4 +218,93 @@ test('a linked strip keeps its pan: L channel = 100 - left value, R channel = ri
 	w = JSON.parse(writeWorkspace(s, JSON.stringify(t)))
 	assert.equal(w.MixSaveA['MixParmeter_5.Mix_channel_L'], 100)
 	assert.equal(w.MixSaveA['MixParmeter_5.Mix_channel_R'], 100)
+})
+
+// Real Run.log lines (2026-11-13): the app logs the save path of the workspace it leaves, then the name it opens; a plain save has no name line.
+const P = 'C:/Program Files/TOPPING Pro/TOPPING Professional Control Center'
+const switchTo = (from, to) => `2026-11-13 05:00:22 ?? ? "${P}/E2X2_OTG/E2X2_OTG_${from}.TPwork"\n2026-11-13 05:00:22 ?前?? "${to}"\n2026-11-13 05:00:22  parmeterint->Gain1_Enable  false\n`
+
+test('lastOpenedInLog: the name line after an E2X2_OTG save path, last one wins', () => {
+	assert.equal(lastOpenedInLog(switchTo('Streaming', 'test')), 'test')
+	assert.equal(lastOpenedInLog(switchTo('A', 'B') + switchTo('B', 'C')), 'C')
+	// a plain save (no name line) and other models' paths do not count
+	assert.equal(lastOpenedInLog(`2026-11-13 04:48:39 ?? ? "${P}/E2X2_OTG/E2X2_OTG_Streaming.TPwork"\n2026-11-13 04:48:39 Current number of devices   1\n`), undefined)
+	assert.equal(lastOpenedInLog(`2026-11-13 03:29:09 ?? ? "${P}/E1X2_OTG/E1X2_New1.TPwork"\n2026-11-13 03:29:09 ?前?? "New1"\n`), undefined)
+})
+
+test('the workspace the app switched to (Run.log) wins over the config, which the app only writes on exit', () => {
+	const dir = fakeDir()
+	try {
+		writeFileSync(join(dir, 'Run.log'), switchTo('Mine', 'Other'))
+		assert.equal(currentWorkspacePath(dir), join(dir, 'E2X2_OTG', 'E2X2_OTG_Other.TPwork'))
+		// a logged name without a file falls back to the config
+		appendFileSync(join(dir, 'Run.log'), switchTo('Other', 'Gone'))
+		assert.equal(currentWorkspacePath(dir), join(dir, 'E2X2_OTG', 'E2X2_OTG_Mine.TPwork'))
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
+
+test('a workspace switch logged in Run.log reloads the state', () => {
+	const dir = fakeDir()
+	try {
+		const other = JSON.parse(file)
+		other.IN1.MUTEEnable = true
+		writeFileSync(join(dir, 'E2X2_OTG', 'E2X2_OTG_Other.TPwork'), JSON.stringify(other))
+		writeFileSync(join(dir, 'Run.log'), '2026-11-13 04:53:06 Run app\n')
+		const h = harness(dir)
+		const seen = []
+		watchWorkspace((s) => seen.push(s), h.deps)
+		// Windows sends no change events for Run.log (the app keeps it open), so the watcher polls it every second
+		assert.equal(h.polls.length, 1)
+		assert.equal(h.polls[0].ms, 1000)
+		h.poll() // a log line that is not a switch: nothing to do
+		assert.equal(h.timers.size, 0)
+		appendFileSync(join(dir, 'Run.log'), switchTo('Mine', 'Other'))
+		h.poll()
+		assert.equal(h.timers.size, 1)
+		h.fire()
+		assert.equal(seen.length, 1)
+		assert.equal(seen[0].inputs.in1.mute, true)
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
+
+test('Run.log bytes the app has reserved but not written yet (zeros) are read again later', () => {
+	const dir = fakeDir()
+	try {
+		const log = join(dir, 'Run.log')
+		writeFileSync(log, '2026-11-13 05:19:37 Current number of devices   1\n')
+		assert.equal(loggedWorkspace(dir), undefined)
+		const block = switchTo('Mine', 'Other')
+		// seen 2026-11-13: the file grew before its text landed; a read in between got zeros
+		// ... and the end of the new bytes may already hold a line break
+		appendFileSync(log, Buffer.concat([Buffer.alloc(Buffer.byteLength(block)), Buffer.from('devices   1\r\n2026-11-13 05:19:39 Current number of devices   1\r\n')]))
+		assert.equal(loggedWorkspace(dir), undefined)
+		const fd = openSync(log, 'r+')
+		writeSync(fd, block, Buffer.byteLength('2026-11-13 05:19:37 Current number of devices   1\n'))
+		closeSync(fd)
+		assert.equal(loggedWorkspace(dir), 'Other')
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
+
+test('a switch written over earlier Run.log lines (a second app instance started) is still found', () => {
+	const dir = fakeDir()
+	try {
+		const log = join(dir, 'Run.log')
+		const head = '2026-11-13 05:24:09 Current number of devices   1\n'
+		const block = switchTo('Mine', 'Other')
+		// seen 2026-11-13: a second instance appended its start-up lines, then the running app wrote its switch over them
+		writeFileSync(log, head + 'x'.repeat(Buffer.byteLength(block) - 1) + '\n')
+		assert.equal(loggedWorkspace(dir), undefined)
+		const fd = openSync(log, 'r+')
+		writeSync(fd, block, Buffer.byteLength(head))
+		closeSync(fd)
+		assert.equal(loggedWorkspace(dir), 'Other')
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
 })
