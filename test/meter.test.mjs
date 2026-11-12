@@ -83,3 +83,11 @@ test('tone on PB 3/4 only: pb34 follows it, loopback 1/2 follows, pb12 is silent
 	assert.ok(all.every((m) => m.channel && !m.channel.startsWith('pb12')))
 	assert.ok(all.some((m) => m.channel === 'out1L_A'))
 })
+
+test('input meters: 21 04 is IN 1, 23 04 is IN 2 (capture 2026-11-13, sound into IN 1 then IN 2)', () => {
+	const in1 = parseMeter(Uint8Array.from(Buffer.from('22332001012104FFFFFD7ED875667700', 'hex')))
+	assert.equal(in1.channel, 'in1L_A')
+	assert.ok(Math.abs(in1.db - -64.1) < 0.1)
+	const in2 = parseMeter(Uint8Array.from(Buffer.from('22332001012304FFFFFC796834667700', 'hex')))
+	assert.equal(in2.channel, 'in2R_A')
+})

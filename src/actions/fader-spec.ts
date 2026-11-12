@@ -104,7 +104,7 @@ export const pressFader = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: FaderO
 export const setMute = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: 'toggle' | 'on' | 'off'): void =>
 	c.update((s) => v.setMuted(s, op === 'toggle' ? !v.muted(s) : op === 'on'))
 
-// --- VU meters: per channel (playback, loopback, output), item 01 ---
+// --- VU meters: per channel (input, playback, loopback, output), item 01 (inputs 04) ---
 
 const OUT_PAIRS: Record<OutputId, [MeterChannel, MeterChannel]> = {
 	out12: ['out1L_A', 'out2R_A'],
@@ -116,9 +116,10 @@ const OUT_PAIRS: Record<OutputId, [MeterChannel, MeterChannel]> = {
 export function meterOf(t: Target): [MeterChannel, MeterChannel] | undefined {
 	if (t.kind === 'output') return OUT_PAIRS[t.id]
 	if (t.kind === 'loopback') return [`${t.id}L_A`, `${t.id}R_A`]
-	// shortcut: inputs (in12) and OTG have no known meter codes, so they show empty bars; upgrade once captured
 	const c = t.channel
-	return c === 'in12' || c === 'otg' ? undefined : [`${c}L_A`, `${c}R_A`]
+	if (c === 'in12') return ['in1L_A', 'in2R_A']
+	// shortcut: OTG has no known meter code, so it shows empty bars; upgrade once captured
+	return c === 'otg' ? undefined : [`${c}L_A`, `${c}R_A`]
 }
 
 /** Inverse of dbToLevel, by bisection (the scale is monotonic). */
