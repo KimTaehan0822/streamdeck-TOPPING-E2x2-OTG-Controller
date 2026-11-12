@@ -172,9 +172,9 @@ test('the cap never covers the name rows, and the bars start below them', () => 
 	const capY = (svg) => +/<rect x="[\d.-]+" y="([\d.-]+)"[^>]*rx="2" fill="#D8D8D8"/.exec(svg)?.[1]
 	for (const n of ['short', 'long', 'han', 'out']) {
 		assert.ok(capY(PAIRS[`pair-${n}-max-top`]) >= 100, n) // cap at the very top still starts below the name rows (which end at y=100)
-		assert.ok(capY(PAIRS[`pair-${n}-min-left`]) >= 100, n) // horizontal cap sits in the band under the text
+		assert.ok(capY(PAIRS[`pair-${n}-min-left`]) >= 96, n) // horizontal cap sits in the band under the text (raised off the key's bottom bezel)
 	}
-	for (const r of ['top', 'left']) for (const m of PAIRS[`pair-long-max-${r}`].matchAll(/y="([\d.]+)" font-family="[^"]*" font-size="([\d.]+)"/g)) assert.ok(+m[1] <= 100 + 0.35 * +m[2], r)
+	for (const [r, end] of [['top', 100], ['left', 96]]) for (const m of PAIRS[`pair-long-max-${r}`].matchAll(/y="([\d.]+)" font-family="[^"]*" font-size="([\d.]+)"/g)) assert.ok(+m[1] <= end + 0.35 * +m[2], r)
 })
 
 test('vertical pair: the bars meet at the seam with equal length and the cap straddles it', () => {
@@ -190,7 +190,7 @@ test('vertical pair: the bars meet at the seam with equal length and the cap str
 })
 
 test('horizontal pair: bars continue across the seam, the cap sits in the right half, MIX X and the name are on the left key', () => {
-	const boxes = (svg) => [...svg.matchAll(/<rect x="([\d.]+)" y="108" width="([\d.]+)" height="12" fill="#0F0F0F"/g)].map((m) => [+m[1], +m[2]])
+	const boxes = (svg) => [...svg.matchAll(/<rect x="([\d.]+)" y="98" width="([\d.]+)" height="12" fill="#0F0F0F"/g)].map((m) => [+m[1], +m[2]])
 	const [[lx, lw]] = boxes(PAIRS['pair-short-mid-left'])
 	const [[rx, rw]] = boxes(PAIRS['pair-short-mid-right'])
 	assert.equal(lx + lw, 144) // left bar reaches the seam

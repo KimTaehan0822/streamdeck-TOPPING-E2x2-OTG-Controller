@@ -106,7 +106,7 @@ const AXIS_LEN = TOP_LEN + BOTTOM_LEN
 const SEAM = BOTTOM_LEN / AXIS_LEN // axis position of the seam: the bottom key holds 0..SEAM, the top key SEAM..1
 const H_START = 10 // left key: x of axis 0 (horizontal); the axis runs 2 * H_LEN to the right through the seam
 const H_LEN = KEY - H_START // 134
-const H_BAR = [108, 122] as const // horizontal: y of the two bars (12 high); the text rows end above them
+const H_BAR = [98, 112] as const // horizontal: y of the two bars (12 high); the text rows end above them
 
 /** Name block of the top / left key: MIX X plate with the name under it (a long name wraps to two smaller rows under a slimmer plate). */
 function nameHead(v: MeterView): string {
@@ -148,9 +148,9 @@ export function renderButtonFader(v: MeterView, role: FaderRole): string {
 		b += bar(x, H_BAR[0], H_LEN, 12, v.left, false, v.muted, part) + bar(x, H_BAR[1], H_LEN, 12, v.right, false, v.muted, part)
 		for (const db of [6, 0, -6, -12, -24]) {
 			const f = dbToAxis(db)
-			if (f >= part[0] && f <= part[1]) b += `<line x1="${local(f)}" y1="136" x2="${local(f)}" y2="141" stroke="${TICK}" stroke-width="2"/>`
+			if (f >= part[0] && f <= part[1]) b += `<line x1="${local(f)}" y1="126" x2="${local(f)}" y2="131" stroke="${TICK}" stroke-width="2"/>`
 		}
-		if (v.fader !== undefined && Math.abs(local(v.fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(local(v.fader), 121, CAP, 36, false)
+		if (v.fader !== undefined && Math.abs(local(v.fader) - KEY / 2) < KEY / 2 + CAP / 2) b += cap(local(v.fader), 111, CAP, 30, false)
 	}
 	// Rows per role: top = name + fader dB, bottom = level dB; left = name + level dB, right = fader dB.
 	// Muted: the dB values hide and MUTED shows on the bottom / right key. No level dB for a channel without a meter.
@@ -158,7 +158,7 @@ export function renderButtonFader(v: MeterView, role: FaderRole): string {
 	const level = (cy: number) => (v.muted || v.levelDb === '' ? '' : row(v.levelDb, cy, 22, DIM))
 	const muted = (cy: number, size: number) => plainText(72, base(cy, size), 'MUTED', { size, fill: RED })
 	if (role === 'top') b = nameHead(v) + (v.muted ? '' : row(v.faderDb, 87, 22, WHITE)) + b
-	else if (role === 'left') b = nameHead(v) + level(88) + b
+	else if (role === 'left') b = nameHead(v) + level(84) + b
 	else if (role === 'bottom') b += v.muted ? (v.peek ? row(v.faderDb, 129, 22, WHITE) : muted(129, 22)) : level(129)
 	else b += v.muted && !v.peek ? muted(50, 32) : row(v.faderDb, 50, fitSize(v.faderDb, 32, 128, 10), WHITE)
 	return frame(KEY, KEY, b, v.overlay)
