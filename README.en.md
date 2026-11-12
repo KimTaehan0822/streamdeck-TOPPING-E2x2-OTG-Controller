@@ -65,7 +65,7 @@ Saving a workspace never overwrites the file the TOPPING app is currently using 
 
 - A meter moves **only while sound is playing**.
 - There is one meter per channel. A Mix channel key (Playback) shows that channel's own meter, a loopback shows the loopback's meter, and an output shows the output's meter.
-- The meter code for IN 1/2 and OTG is not known yet, so their bars stay empty. Playback 5/6 and 7/8 and Loopback 3/4 and 5/6 are estimates that still need checking on a real device.
+- The meter code for OTG is not known yet, so its bar stays empty.
 - The volume key, the 2-key fader and the VU dial do not let you pick L or R: they always act on both sides (the pair).
 - Every channel key shows the text you type in its **Name** field (empty means the default name, 24 characters at most).
 

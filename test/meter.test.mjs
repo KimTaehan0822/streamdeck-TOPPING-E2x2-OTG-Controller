@@ -90,4 +90,6 @@ test('input meters: 21 04 is IN 1, 23 04 is IN 2 (capture 2026-11-13, sound into
 	assert.ok(Math.abs(in1.db - -64.1) < 0.1)
 	const in2 = parseMeter(Uint8Array.from(Buffer.from('22332001012304FFFFFC796834667700', 'hex')))
 	assert.equal(in2.channel, 'in2R_A')
+	// item 04 elsewhere is unseen: ignored, so it cannot overwrite that channel's item 01 meter
+	assert.equal(parseMeter(Uint8Array.from(Buffer.from('22332001014104FFFFFD7ED875667700', 'hex'))), undefined)
 })

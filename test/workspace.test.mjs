@@ -237,9 +237,29 @@ test('the workspace the app switched to (Run.log) wins over the config, which th
 	try {
 		writeFileSync(join(dir, 'Run.log'), switchTo('Mine', 'Other'))
 		assert.equal(currentWorkspacePath(dir), join(dir, 'E2X2_OTG', 'E2X2_OTG_Other.TPwork'))
-		// a logged name without a file falls back to the config
+		// a logged name without a file is unknown: the config is stale by then, and pushing its workspace would mismatch the app
 		appendFileSync(join(dir, 'Run.log'), switchTo('Other', 'Gone'))
-		assert.equal(currentWorkspacePath(dir), join(dir, 'E2X2_OTG', 'E2X2_OTG_Mine.TPwork'))
+		assert.equal(currentWorkspacePath(dir), undefined)
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
+
+// the log is in CP949; Node's 'euc-kr' decoder misreads CP949-only syllables such as 똠 (8C 63), so the file is matched by shape
+test('Korean names in Run.log (CP949, incl. syllables outside EUC-KR, and ? for unwritable characters) find their file', () => {
+	const dir = fakeDir()
+	try {
+		const log = (nameBytes) => Buffer.concat([Buffer.from(switchTo('Mine', 'X').split('"X"')[0] + '"'), Buffer.from(nameBytes), Buffer.from('"\n')])
+		writeFileSync(join(dir, 'E2X2_OTG', 'E2X2_OTG_가똠1.TPwork'), file)
+		writeFileSync(join(dir, 'Run.log'), log([0xb0, 0xa1, 0x8c, 0x63, 0x31]))
+		assert.equal(currentWorkspacePath(dir), join(dir, 'E2X2_OTG', 'E2X2_OTG_가똠1.TPwork'))
+		writeFileSync(join(dir, 'E2X2_OTG', 'E2X2_OTG_aŝ.TPwork'), file)
+		appendFileSync(join(dir, 'Run.log'), log([0x61, 0x3f]))
+		assert.equal(currentWorkspacePath(dir), join(dir, 'E2X2_OTG', 'E2X2_OTG_aŝ.TPwork'))
+		// two files of the same shape: unknown rather than a guess
+		writeFileSync(join(dir, 'E2X2_OTG', 'E2X2_OTG_나똠1.TPwork'), file)
+		appendFileSync(join(dir, 'Run.log'), log([0xb3, 0xaa, 0x8c, 0x63, 0x31]))
+		assert.equal(currentWorkspacePath(dir), undefined)
 	} finally {
 		rmSync(dir, { recursive: true })
 	}

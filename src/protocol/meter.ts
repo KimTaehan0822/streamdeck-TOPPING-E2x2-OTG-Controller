@@ -38,7 +38,8 @@ export function parseMeter(bytes: Uint8Array): Meter | undefined {
 	if (bytes.length < 16 || bytes[7] !== 0xff || bytes[13] !== 0x66 || bytes[14] !== 0x77) return undefined
 	if ([0x22, 0x33, 0x20, 0x01, 0x01].some((b, i) => bytes[i] !== b)) return undefined
 	const base = BASE[bytes[5] as keyof typeof BASE]
-	if (!base || ![1, 2, 4].includes(bytes[6])) return undefined
+	// item 04 is seen only for the inputs (21 04, 23 04)
+	if (!base || !(bytes[6] === 4 ? bytes[5] === 0x21 || bytes[5] === 0x23 : bytes[6] === 1 || bytes[6] === 2)) return undefined
 	const db = new DataView(bytes.buffer, bytes.byteOffset, bytes.length).getInt32(8) / 2560
 	return { channel: `${base}_${bytes[6] === 2 ? 'B' : 'A'}`, db, level: dbToLevel(db) }
 }

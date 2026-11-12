@@ -1,4 +1,4 @@
-import { closeSync, fstatSync, openSync, readSync } from 'node:fs'
+import { closeSync, fstatSync, openSync, readdirSync, readSync } from 'node:fs'
 import { join } from 'node:path'
 
 // The TOPPING app writes its open workspace to the TPconfig only when it exits. Its Run.log, though, records every start and
@@ -20,9 +20,28 @@ export function lastOpenedInLog(text: string): string | undefined {
 
 let decoder: TextDecoder
 try {
-	decoder = new TextDecoder('euc-kr')
+	decoder = new TextDecoder('euc-kr') // strict EUC-KR: CP949-only syllables (똠, 햏) decode wrongly, so resolveName also matches by shape
 } catch {
-	decoder = new TextDecoder('latin1') // shortcut: a Node without ICU reads non-ASCII names wrongly; ASCII names still work
+	decoder = new TextDecoder('latin1') // a Node without ICU: resolveName still finds the file by shape
+}
+
+/** The file name for the raw (latin1) name bytes: the decoded name, else the one workspace file of the same shape. */
+function resolveName(dir: string, raw: string): string {
+	const bytes = Buffer.from(raw, 'latin1')
+	const name = decoder.decode(bytes)
+	let files: string[]
+	try {
+		files = readdirSync(join(dir, 'E2X2_OTG'))
+	} catch {
+		return name
+	}
+	// each two-byte code-page character is one non-ASCII character; '?' is one the app could not write in the code page
+	let shape = ''
+	for (let i = 0; i < bytes.length; i++) shape += bytes[i] >= 0x80 ? (i++, '[^\\x00-\\x7f]') : bytes[i] === 0x3f ? '.' : String.fromCharCode(bytes[i]).replace(/[.*+^${}()|[\]\\]/, '\\$&')
+	const re = new RegExp(`^E2X2_OTG_${shape}\\.TPwork$`, 'i')
+	const hits = files.filter((f) => re.test(f))
+	if (hits.some((f) => f.toLowerCase() === `E2X2_OTG_${name}.TPwork`.toLowerCase())) return name
+	return hits.length === 1 ? hits[0].slice('E2X2_OTG_'.length, -'.TPwork'.length) : name
 }
 
 /** How far back each read looks: the first read finds the switch made at app start, later reads the recent ones. */
@@ -47,11 +66,17 @@ export function loggedWorkspace(dir: string): string | undefined {
 		const buf = Buffer.alloc(len)
 		readSync(fd, buf, 0, len, size - len)
 		const zero = buf.indexOf(0)
-		const name = lastOpenedInLog(decoder.decode(zero < 0 ? buf : buf.subarray(0, zero)))
-		if (name !== undefined) names.set(dir, name)
+		const raw = lastOpenedInLog((zero < 0 ? buf : buf.subarray(0, zero)).toString('latin1'))
+		if (raw !== undefined) names.set(dir, resolveName(dir, raw))
 		else if (!names.has(dir)) names.set(dir, '') // read once: later reads only look at the recent tail
+	} catch {
+		// read error (file locked, I/O): keep the last name; this runs in a timer, where a throw would end the plugin
 	} finally {
-		closeSync(fd)
+		try {
+			closeSync(fd)
+		} catch {
+			// same reason: never throw out of the poll
+		}
 	}
 	return names.get(dir) || undefined
 }

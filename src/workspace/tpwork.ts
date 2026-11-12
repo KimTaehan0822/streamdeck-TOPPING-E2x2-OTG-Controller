@@ -116,11 +116,12 @@ export function writeWorkspace(s: MixerState, template: string): string {
 	return JSON.stringify(w, null, 4)
 }
 
-/** The workspace the app has open for the E2x2 OTG: the one its Run.log last switched to, else the one its config names; undefined when that file does not exist. */
+/** The workspace the app has open for the E2x2 OTG: the one its Run.log last switched to, else (no switch logged) the one its config names; undefined when that file does not exist. */
 export function currentWorkspacePath(dir = WORKSPACE_DIR): string | undefined {
 	const logged = loggedWorkspace(dir)
 	const fromLog = logged === undefined ? undefined : join(dir, 'E2X2_OTG', `E2X2_OTG_${logged}.TPwork`)
-	if (fromLog && existsSync(fromLog)) return fromLog
+	// once the log names a switch the config is stale (written on exit): no file means unknown, never the config's workspace
+	if (fromLog) return existsSync(fromLog) ? fromLog : undefined
 	try {
 		const name = JSON.parse(readFileSync(join(dir, 'sound_card_workspace_file.TPconfig'), 'utf8')).LastWorkspaceOpened_E2x2_OTG
 		const path = join(dir, 'E2X2_OTG', `E2X2_OTG_${name}.TPwork`)
