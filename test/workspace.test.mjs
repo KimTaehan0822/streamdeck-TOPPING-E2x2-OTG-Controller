@@ -195,3 +195,12 @@ test('the Mixer section follows the selected mix, as the app reads it on load', 
 		for (const k of Object.keys(w.Mixer)) if (k in active) assert.deepEqual(w.Mixer[k], active[k], `${main} ${k}`)
 	}
 })
+
+test('a linked strip is written with the 100/100 channel values the app uses', () => {
+	const s = parseWorkspace(file)
+	assert.equal(s.mixes[0].channels.in12.link, false) // MixParmeter_1 is unlinked at 50/50 in the fixture
+	s.mixes[0].channels.in12.link = true
+	const w = JSON.parse(writeWorkspace(s, file))
+	assert.equal(w.MixSaveA['MixParmeter_1.Mix_channel_L'], 100)
+	assert.equal(w.MixSaveA['MixParmeter_1.Mix_channel_R'], 100)
+})

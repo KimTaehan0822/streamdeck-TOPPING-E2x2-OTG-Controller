@@ -94,7 +94,9 @@ export function writeWorkspace(s: MixerState, template: string): string {
 				[p + 'ANTIEnable_L']: c.phaseL,
 				[p + 'ANTIEnable_R']: c.phaseR,
 			})
-			if (!c.link) Object.assign(mix, { [p + 'Mix_channel_L']: Math.round(c.panL * 100), [p + 'Mix_channel_R']: Math.round(c.panR * 100) })
+			// the app stores a linked strip's channel numbers as 100/100
+			if (c.link) Object.assign(mix, { [p + 'Mix_channel_L']: 100, [p + 'Mix_channel_R']: 100 })
+			else Object.assign(mix, { [p + 'Mix_channel_L']: Math.round(c.panL * 100), [p + 'Mix_channel_R']: Math.round(c.panR * 100) })
 		})
 	})
 	// "Mixer" is the app's copy of the selected mix (MixSave[Mixer_main]) and wins on load; a stale copy undoes the saved values
