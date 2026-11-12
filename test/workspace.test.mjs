@@ -163,3 +163,21 @@ test('display ints follow 90 + dB and survive a write of the fixture', () => {
 	assert.equal(w['MixParmeter_3.Mix_volume_L'], 84)
 	assert.equal(w['MixParmeter_3.Mix_volume_R'], 0)
 })
+
+test('a save to another workspace file does not re-read the open one', () => {
+	const dir = fakeDir()
+	try {
+		const h = harness(dir)
+		const seen = []
+		watchWorkspace((s) => seen.push(s), h.deps)
+		// the plugin's save key writes a temp file and renames it to another name; the app's open file did not change
+		h.change(0, '.E2X2_OTG_Backup.tmp')
+		h.change(0, 'E2X2_OTG_Backup.TPwork')
+		h.change(0, null)
+		assert.equal(h.timers.size, 0)
+		h.change(0, 'e2x2_otg_mine.tpwork') // Windows names are case-insensitive
+		assert.equal(h.timers.size, 1)
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
