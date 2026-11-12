@@ -31,9 +31,9 @@ export function parseWorkspace(json: string): MixerState {
 			Object.assign(s.mixes[m].channels[id], {
 				volL: num(mix[p + 'Mix_volume_Lnum']) * MIX_SCALE,
 				volR: num(mix[p + 'Mix_volume_Rnum']) * MIX_SCALE,
-				// linked strips are always hard L / hard R (the channel numbers read 100 there)
-				panL: link ? 0 : num(mix[p + 'Mix_channel_L']) / 100,
-				panR: link ? 1 : num(mix[p + 'Mix_channel_R']) / 100,
+				// linked: the numbers say how far each channel stays on its own side (100/100 = hard L / hard R; capture 2026-11-13)
+				panL: link ? 1 - num(mix[p + 'Mix_channel_L']) / 100 : num(mix[p + 'Mix_channel_L']) / 100,
+				panR: num(mix[p + 'Mix_channel_R']) / 100,
 				muteL: !!mix[p + 'MUTEEnable_L'],
 				muteR: !!mix[p + 'MUTEEnable_R'],
 				soloL: !!mix[p + 'SOLOEnable_L'],
@@ -94,9 +94,8 @@ export function writeWorkspace(s: MixerState, template: string): string {
 				[p + 'ANTIEnable_L']: c.phaseL,
 				[p + 'ANTIEnable_R']: c.phaseR,
 			})
-			// the app stores a linked strip's channel numbers as 100/100
-			if (c.link) Object.assign(mix, { [p + 'Mix_channel_L']: 100, [p + 'Mix_channel_R']: 100 })
-			else Object.assign(mix, { [p + 'Mix_channel_L']: Math.round(c.panL * 100), [p + 'Mix_channel_R']: Math.round(c.panR * 100) })
+			// a linked strip's L number counts from the left (100 = hard left), as parseWorkspace reads it
+			Object.assign(mix, { [p + 'Mix_channel_L']: Math.round((c.link ? 1 - c.panL : c.panL) * 100), [p + 'Mix_channel_R']: Math.round(c.panR * 100) })
 		})
 	})
 	// "Mixer" is the app's copy of the selected mix (MixSave[Mixer_main]) and wins on load; a stale copy undoes the saved values

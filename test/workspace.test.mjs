@@ -196,11 +196,20 @@ test('the Mixer section follows the selected mix, as the app reads it on load', 
 	}
 })
 
-test('a linked strip is written with the 100/100 channel values the app uses', () => {
-	const s = parseWorkspace(file)
-	assert.equal(s.mixes[0].channels.in12.link, false) // MixParmeter_1 is unlinked at 50/50 in the fixture
-	s.mixes[0].channels.in12.link = true
-	const w = JSON.parse(writeWorkspace(s, file))
-	assert.equal(w.MixSaveA['MixParmeter_1.Mix_channel_L'], 100)
-	assert.equal(w.MixSaveA['MixParmeter_1.Mix_channel_R'], 100)
+test('a linked strip keeps its pan: L channel = 100 - left value, R channel = right value (app capture 2026-11-13)', () => {
+	// the app saved Mix A PB 5/6 (LINK on, panned right) as 44/100; on the device the L channel sat at 0.56 (left out x0.44, right out x1.56)
+	const t = JSON.parse(file)
+	Object.assign(t.MixSaveA, { 'MixParmeter_5.LinkEnable': true, 'MixParmeter_5.Mix_channel_L': 44, 'MixParmeter_5.Mix_channel_R': 100 })
+	const s = parseWorkspace(JSON.stringify(t))
+	const c = s.mixes[0].channels.pb56
+	assert.ok(Math.abs(c.panL - 0.56) < 1e-9)
+	assert.equal(c.panR, 1)
+	let w = JSON.parse(writeWorkspace(s, JSON.stringify(t)))
+	assert.equal(w.MixSaveA['MixParmeter_5.Mix_channel_L'], 44)
+	assert.equal(w.MixSaveA['MixParmeter_5.Mix_channel_R'], 100)
+	// centred linked strip: hard L / hard R = 100/100, as every linked strip in the fixture
+	Object.assign(c, { panL: 0, panR: 1 })
+	w = JSON.parse(writeWorkspace(s, JSON.stringify(t)))
+	assert.equal(w.MixSaveA['MixParmeter_5.Mix_channel_L'], 100)
+	assert.equal(w.MixSaveA['MixParmeter_5.Mix_channel_R'], 100)
 })
