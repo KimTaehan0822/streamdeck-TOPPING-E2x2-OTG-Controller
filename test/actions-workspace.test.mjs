@@ -116,3 +116,16 @@ test('saving over another existing workspace is noticed, still works, and leaves
 		t.done()
 	}
 })
+
+test('save refuses without a loaded workspace and writes nothing', () => {
+	const t = setup()
+	try {
+		const conn = new E2x2Connection({ open: () => t.port, read: () => undefined, watch: () => () => {}, setInterval: () => 0, setTimeout: (fn) => fn() })
+		conn.start()
+		assert.equal(conn.loaded, false)
+		assert.throws(() => saveWorkspace(conn, t.dir, 'Brand New'), /No workspace is loaded/)
+		assert.equal(existsSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_Brand New.TPwork')), false)
+	} finally {
+		t.done()
+	}
+})

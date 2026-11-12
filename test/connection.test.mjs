@@ -185,3 +185,34 @@ test('no workspace: the first watched workspace is loaded but not sent', () => {
 	assert.equal(conn.state, s)
 	assert.equal(port.written.length, 0)
 })
+
+test('no workspace: update sends nothing and keeps the state', () => {
+	const { conn, port, advance } = setup((p) => p)
+	conn.start()
+	const before = conn.state
+	conn.update((s) => (s.mixes[0].channels.pb12.volL = 123456))
+	advance(100)
+	assert.equal(conn.loaded, false)
+	assert.equal(conn.state, before)
+	assert.equal(port.written.length, 0)
+})
+
+test('no workspace: the read is retried every 5 s until one loads', () => {
+	let s
+	const { conn, port, advance } = setup((p) => p, () => {
+		if (!s) throw new Error('no file yet')
+		return s
+	})
+	let n = 0
+	conn.start()
+	conn.onChange(() => n++)
+	advance(5000)
+	assert.equal(conn.loaded, false)
+	s = emptyState()
+	s.mixes[0].channels.pb12.volL = 4242
+	advance(5000)
+	assert.equal(conn.loaded, true)
+	assert.equal(conn.state, s)
+	assert.ok(n > 0)
+	assert.equal(port.written.length, 0)
+})

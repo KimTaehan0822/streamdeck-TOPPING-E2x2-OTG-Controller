@@ -15,7 +15,7 @@ import { Redrawer } from './redraw.js'
 
 export interface RenderContext {
 	dial: boolean
-	/** 'offline' while the E2x2 is unreachable, otherwise 'none'; a render may still pick 'setup'/'unsupported'/'config' itself. */
+	/** 'offline' while the E2x2 is unreachable, 'config' while no workspace is loaded, otherwise 'none'; a render may still pick 'setup'/'unsupported'/'config' itself. */
 	overlay: Overlay
 	/** The user set a title for this key's current state in the Stream Deck app, so the drawn text would collide with it. */
 	userTitle: boolean
@@ -119,7 +119,7 @@ export abstract class E2x2Action<S extends JsonObject> extends SingletonAction<S
 			}
 			const ctx: RenderContext = {
 				dial: instance.action.isDial(),
-				overlay: this.connection.online ? 'none' : 'offline',
+				overlay: !this.connection.online ? 'offline' : this.connection.loaded ? 'none' : 'config',
 				userTitle: !!instance.titles[instance.state ?? 0],
 			}
 			instance.redrawer.request(() => svgDataUrl(this.render(instance.settings, ctx)))

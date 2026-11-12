@@ -33,7 +33,7 @@ export class E2x2Connection {
 	private pumping = false
 	private timers: unknown[] = []
 	// false until a real workspace is known: pushing defaults would overwrite the device's mix
-	private loaded = false
+	loaded = false
 	private stopWatch?: () => void
 	private lastMeterAt = 0
 	private parse = createMeterParser()
@@ -66,12 +66,7 @@ export class E2x2Connection {
 	/** Connects, then follows the app's workspace; the device already holds what the app sent, so that state is not sent. */
 	start(): void {
 		this.stop()
-		try {
-			const s = this.read()
-			if (s) (this.state = s), (this.loaded = true)
-		} catch (err) {
-			console.error('could not read the workspace', err)
-		}
+		this.readApp()
 		this.connect()
 		this.stopWatch = this.watch((s) => {
 			// the app wrote its file (save or exit): make the device match it, as the keys will; a first read is what the device already holds
@@ -81,7 +76,10 @@ export class E2x2Connection {
 			this.emit()
 		})
 		this.timers.push(
-			this.setIntervalFn(() => !this.port && this.connect() && this.loaded && this.send(stateReports(this.state)), RECONNECT_MS),
+			this.setIntervalFn(() => {
+				if (!this.loaded && this.readApp()) this.emit()
+				if (!this.port && this.connect() && this.loaded) this.send(stateReports(this.state))
+			}, RECONNECT_MS),
 			this.setIntervalFn(() => this.checkMeters(), METER_CHECK_MS),
 		)
 	}
@@ -101,12 +99,25 @@ export class E2x2Connection {
 		this.emit()
 	}
 
+	/** Does nothing until a workspace is loaded: a step from made-up defaults could jump the device. */
 	update(mutator: (s: MixerState) => void): void {
+		if (!this.loaded) return
 		const next = structuredClone(this.state)
 		mutator(next)
 		this.send(diffReports(this.state, next))
 		this.state = next
 		this.emit()
+	}
+
+	/** Takes the app's workspace if one can be read; true once a state is loaded. */
+	private readApp(): boolean {
+		try {
+			const s = this.read()
+			if (s) (this.state = s), (this.loaded = true)
+		} catch (err) {
+			console.error('could not read the workspace', err)
+		}
+		return this.loaded
 	}
 
 	private connect(): boolean {

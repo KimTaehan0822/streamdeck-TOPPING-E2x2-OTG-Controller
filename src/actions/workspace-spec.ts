@@ -33,6 +33,8 @@ export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 
 /** Writes the plugin's state as a new workspace, using the app's current file as the template for fields we do not model. */
 export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown): string {
+	// without a loaded workspace the state is made-up defaults (all mixes silent)
+	if (!conn.loaded) throw new Error('No workspace is loaded yet. Open one in the TOPPING app or press a Workspace load key.')
 	const problem = saveProblem(dir, name)
 	if (problem) throw new Error(problem)
 	const template = currentWorkspacePath(dir)
