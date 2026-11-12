@@ -23,7 +23,7 @@ export function saveProblem(dir: string, name: unknown): string | undefined {
 
 /** A notice (not a refusal) when saving would replace another saved workspace. */
 export function overwriteNotice(dir: string, name: unknown): string | undefined {
-	return validName(name) && !saveProblem(dir, name) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak. The TOPPING app records its open workspace only when it exits, so do not use the name it has open.' : undefined
+	return validName(name) && !saveProblem(dir, name) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak.' : undefined
 }
 
 export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown): void {

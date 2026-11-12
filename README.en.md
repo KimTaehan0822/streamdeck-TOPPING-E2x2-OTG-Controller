@@ -59,7 +59,7 @@ For Fader, Button fader, VU dial and Mute, the target is one of a **Mix channel*
 
 Source select has three ways to work: cycle the Mix A → B → C → D, cycle through the candidates you choose, or toggle between two candidates.
 
-Saving a workspace never overwrites the file the TOPPING app is currently using (the app writes its own values over it when it closes). The plugin saves under a new name, and you can open it from the app's workspace list. The TOPPING app records its open workspace **only when it exits**, so avoid saving under the name the app has open. A replaced workspace is kept in the same folder as the hidden backup `.E2X2_OTG_<name>.TPwork.bak`.
+Saving a workspace never overwrites the file the TOPPING app is currently using (the app writes its own values over it when it closes). The plugin saves under a new name, and you can open it from the app's workspace list. The plugin reads the TOPPING app's log to know which workspace the app has open, so it refuses that name, and a workspace you load in the app shows on the keys within a few seconds. The app lists a newly saved workspace after it is restarted. A replaced workspace is kept in the same folder as the hidden backup `.E2X2_OTG_<name>.TPwork.bak`.
 
 ## Level meters
 
