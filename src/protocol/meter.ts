@@ -1,5 +1,5 @@
 // Meter reports do not fit decodeReport: the value is bytes 8..11 of the 16-byte report (no report ID).
-// group = channel (ruling from the pb12/pb34 captures). shortcut: 45-48 (PB 5/6, 7/8) and 53-56 (Loopback 3/4, 5/6) are inferred, not yet seen on the device
+// group = channel (captures: pb12/pb34 tones 2026-11-12, pb56/pb78 tones and IN 1/2 sound 2026-11-13; Loopback 3/4 and 5/6 followed their PB 5/6, 7/8 sources).
 const BASE = {
 	0x31: 'out1L', 0x32: 'out2R', 0x33: 'mobileL', 0x34: 'mobileR', 0x5a: 'spdifL', 0x5b: 'spdifR',
 	0x41: 'pb12L', 0x42: 'pb12R', 0x43: 'pb34L', 0x44: 'pb34R', 0x45: 'pb56L', 0x46: 'pb56R', 0x47: 'pb78L', 0x48: 'pb78R',
