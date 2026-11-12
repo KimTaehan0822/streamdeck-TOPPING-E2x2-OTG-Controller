@@ -2,12 +2,13 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { E2x2Connection } from '../dist/connection.js'
 import { decodeReport, encodeReport } from '../dist/protocol/report.js'
-import { stateReports } from '../dist/state/crosspoints.js'
+import { diffReports, stateReports } from '../dist/state/crosspoints.js'
 import { emptyState } from '../dist/state/mixer-state.js'
 
 function setup(openImpl, initial) {
 	let t = 0
 	const timers = []
+	let watched
 	const port = {
 		written: [],
 		fail: false,
@@ -34,8 +35,9 @@ function setup(openImpl, initial) {
 		setInterval: add(true),
 		setTimeout: add(false),
 		now: () => t,
-		read: () => initial,
-		watch: () => () => {},
+		// a function stands in for a read that changes (or throws) over time
+		read: () => (typeof initial === 'function' ? initial() : initial),
+		watch: (cb) => ((watched = cb), () => {}),
 	})
 	const advance = (ms) => {
 		const end = t + ms
@@ -50,11 +52,11 @@ function setup(openImpl, initial) {
 		}
 		t = end
 	}
-	return { conn, port, advance }
+	return { conn, port, advance, watched: (s) => watched(s) }
 }
 
 test('sends only changed crosspoints', () => {
-	const { conn, port, advance } = setup((p) => p)
+	const { conn, port, advance } = setup((p) => p, emptyState())
 	conn.start()
 	conn.update((s) => {
 		s.mixes[0].channels.pb12.volL = 123456
@@ -158,4 +160,28 @@ test('close() throwing does not escape stop() or offline', () => {
 	port.throwOnClose = true
 	assert.doesNotThrow(() => conn.stop())
 	assert.equal(conn.online, false)
+})
+
+test('a watched change sends only the differences', () => {
+	const { conn, port, advance, watched } = setup((p) => p, emptyState())
+	conn.start()
+	const s = emptyState()
+	s.mixes[0].channels.pb12.volL = 4242
+	watched(s)
+	advance(100)
+	assert.ok(port.written.length > 0)
+	assert.deepEqual(port.written.map((b) => decodeReport(b)), diffReports(emptyState(), s))
+	assert.equal(conn.state, s)
+})
+
+test('no workspace: the first watched workspace is loaded but not sent', () => {
+	const { conn, port, advance, watched } = setup((p) => p)
+	conn.start()
+	const s = emptyState()
+	s.mixes[0].channels.pb12.volL = 4242
+	watched(s)
+	advance(100)
+	assert.equal(conn.loaded, true)
+	assert.equal(conn.state, s)
+	assert.equal(port.written.length, 0)
 })

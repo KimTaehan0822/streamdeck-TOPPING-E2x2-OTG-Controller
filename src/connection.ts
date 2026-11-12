@@ -74,6 +74,8 @@ export class E2x2Connection {
 		}
 		this.connect()
 		this.stopWatch = this.watch((s) => {
+			// the app wrote its file (save or exit): make the device match it, as the keys will; a first read is what the device already holds
+			if (this.loaded) this.send(diffReports(this.state, s))
 			this.state = s
 			this.loaded = true
 			this.emit()
