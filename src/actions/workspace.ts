@@ -21,7 +21,9 @@ class WorkspaceAction extends E2x2Action<JsonObject> {
 		const mode = settings.mode === 'save' ? 'save' : 'load'
 		const name = typeof settings.name === 'string' ? settings.name : ''
 		if (!name) return renderWorkspaceKey({ mode, name: '', active: false, overlay: 'setup' })
-		return renderWorkspaceKey({ mode, name, active: mode === 'load' && name === this.loaded, overlay: ctx.overlay })
+		// a load key is the way out of "no workspace loaded", so it does not show that overlay
+		const overlay = mode === 'load' && ctx.overlay === 'config' ? 'none' : ctx.overlay
+		return renderWorkspaceKey({ mode, name, active: mode === 'load' && name === this.loaded, overlay })
 	}
 
 	override onKeyDown(ev: KeyDownEvent<JsonObject>): void {

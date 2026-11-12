@@ -115,10 +115,9 @@ test('saving over another existing workspace is noticed, keeps a hidden backup, 
 		assert.deepEqual(readdirSync(join(t.dir, 'E2X2_OTG')).sort(), ['.E2X2_OTG_Other.TPwork.bak', 'E2X2_OTG_App.TPwork', 'E2X2_OTG_Other.TPwork'])
 		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), old)
 		assert.deepEqual(listWorkspaces(t.dir).sort(), ['App', 'Other'])
-		// a second save replaces the older backup with the file it replaces
-		const first = readFileSync(path, 'utf8')
+		// a second save keeps the original in the backup: repeated saves must not destroy what the backup protects
 		saveWorkspace(t.conn, t.dir, 'Other')
-		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), first)
+		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), old)
 		// a new name has nothing to back up
 		saveWorkspace(t.conn, t.dir, 'Brand New')
 		assert.equal(existsSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Brand New.TPwork.bak')), false)

@@ -44,8 +44,10 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 	// temp file in the same folder, then rename: a crash never leaves a truncated workspace (the dot prefix keeps it out of the list)
 	const tmp = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.tmp`)
 	writeFileSync(tmp, writeWorkspace(conn.state, readFileSync(template, 'utf8')))
-	// the app's config only names its open workspace after it exits, so this may be a file the app still has open: keep the old one (dot prefix: not listed)
-	if (existsSync(path)) copyFileSync(path, join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.TPwork.bak`))
+	// the app's config only names its open workspace after it exits, so this may be a file the app still has open: keep the old one (dot prefix: not listed).
+	// The first backup is never replaced, so repeated saves cannot destroy the original.
+	const bak = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.TPwork.bak`)
+	if (existsSync(path) && !existsSync(bak)) copyFileSync(path, bak)
 	renameSync(tmp, path)
 	return path
 }
