@@ -62,7 +62,10 @@ const TEXT = {
 		'名前が正しくありません。1〜60文字で、\\ / : * ? " < > | と ".." は使えません。',
 	],
 	'The TOPPING app is using this workspace. Pick another name.': ['TOPPING 앱이 이 작업 공간을 사용 중입니다. 다른 이름을 고르세요.', 'TOPPING アプリがこのワークスペースを使用中です。別の名前にしてください。'],
-	'A workspace with this name exists. Pressing the key replaces it.': ['같은 이름의 작업 공간이 이미 있습니다. 키를 누르면 덮어씁니다.', '同じ名前のワークスペースがすでにあります。キーを押すと上書きされます。'],
+	'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak. The TOPPING app records its open workspace only when it exits, so do not use the name it has open.': [
+		'같은 이름의 작업 공간이 이미 있습니다. 키를 누르면 덮어쓰고, 원래 파일은 .E2X2_OTG_<이름>.TPwork.bak 으로 남깁니다. TOPPING 앱은 열어 둔 작업 공간을 앱을 끌 때만 기록하므로, 앱에 열려 있는 이름은 쓰지 마세요.',
+		'同じ名前のワークスペースがすでにあります。キーを押すと上書きし、元のファイルは .E2X2_OTG_<名前>.TPwork.bak として残します。TOPPING アプリは開いているワークスペースを終了時にだけ記録するため、アプリで開いている名前は使わないでください。',
+	],
 	'No workspace is loaded yet. Open one in the TOPPING app or press a Workspace load key.': [
 		'아직 불러온 작업 공간이 없습니다. TOPPING 앱에서 작업 공간을 열거나 Workspace 불러오기 키를 누르세요.',
 		'まだワークスペースが読み込まれていません。TOPPING アプリでワークスペースを開くか、Workspace 読み込みキーを押してください。',

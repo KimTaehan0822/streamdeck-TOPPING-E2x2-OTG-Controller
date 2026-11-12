@@ -8,7 +8,7 @@ import { E2x2Connection } from '../dist/connection.js'
 import { decodeReport } from '../dist/protocol/report.js'
 import { stateReports } from '../dist/state/crosspoints.js'
 import { emptyState } from '../dist/state/mixer-state.js'
-import { parseWorkspace } from '../dist/workspace/tpwork.js'
+import { listWorkspaces, parseWorkspace } from '../dist/workspace/tpwork.js'
 
 const fixture = readFileSync(new URL('./fixtures/workspace.TPwork', import.meta.url), 'utf8')
 
@@ -101,17 +101,27 @@ test('bad names are rejected and nothing is written', () => {
 	}
 })
 
-test('saving over another existing workspace is noticed, still works, and leaves no temp file', () => {
+test('saving over another existing workspace is noticed, keeps a hidden backup, and leaves no temp file', () => {
 	const t = setup()
 	try {
-		assert.match(overwriteNotice(t.dir, 'Other'), /exists/)
+		const old = readFileSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_Other.TPwork'), 'utf8')
+		assert.match(overwriteNotice(t.dir, 'Other'), /exists.*\.E2X2_OTG_<name>\.TPwork\.bak/)
 		assert.equal(overwriteNotice(t.dir, 'Brand New'), undefined)
 		assert.equal(overwriteNotice(t.dir, 'App'), undefined) // refused instead
 		assert.equal(saveProblem(t.dir, 'Other'), undefined)
 		t.conn.update((s) => (s.inputs.in2.gain = 555))
 		const path = saveWorkspace(t.conn, t.dir, 'Other')
 		assert.deepEqual(parseWorkspace(readFileSync(path, 'utf8')), t.conn.state)
-		assert.deepEqual(readdirSync(join(t.dir, 'E2X2_OTG')).sort(), ['E2X2_OTG_App.TPwork', 'E2X2_OTG_Other.TPwork'])
+		assert.deepEqual(readdirSync(join(t.dir, 'E2X2_OTG')).sort(), ['.E2X2_OTG_Other.TPwork.bak', 'E2X2_OTG_App.TPwork', 'E2X2_OTG_Other.TPwork'])
+		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), old)
+		assert.deepEqual(listWorkspaces(t.dir).sort(), ['App', 'Other'])
+		// a second save replaces the older backup with the file it replaces
+		const first = readFileSync(path, 'utf8')
+		saveWorkspace(t.conn, t.dir, 'Other')
+		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), first)
+		// a new name has nothing to back up
+		saveWorkspace(t.conn, t.dir, 'Brand New')
+		assert.equal(existsSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Brand New.TPwork.bak')), false)
 	} finally {
 		t.done()
 	}

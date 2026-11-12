@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import type { E2x2Connection } from '../connection.js'
 import { currentWorkspacePath, parseWorkspace, writeWorkspace } from '../workspace/tpwork.js'
@@ -23,7 +23,7 @@ export function saveProblem(dir: string, name: unknown): string | undefined {
 
 /** A notice (not a refusal) when saving would replace another saved workspace. */
 export function overwriteNotice(dir: string, name: unknown): string | undefined {
-	return validName(name) && !saveProblem(dir, name) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it.' : undefined
+	return validName(name) && !saveProblem(dir, name) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak. The TOPPING app records its open workspace only when it exits, so do not use the name it has open.' : undefined
 }
 
 export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown): void {
@@ -44,6 +44,8 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 	// temp file in the same folder, then rename: a crash never leaves a truncated workspace (the dot prefix keeps it out of the list)
 	const tmp = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.tmp`)
 	writeFileSync(tmp, writeWorkspace(conn.state, readFileSync(template, 'utf8')))
+	// the app's config only names its open workspace after it exits, so this may be a file the app still has open: keep the old one (dot prefix: not listed)
+	if (existsSync(path)) copyFileSync(path, join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.TPwork.bak`))
 	renameSync(tmp, path)
 	return path
 }
