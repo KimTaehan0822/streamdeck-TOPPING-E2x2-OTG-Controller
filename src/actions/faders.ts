@@ -32,7 +32,7 @@ export abstract class VolKeyAction extends E2x2Action<JsonObject> {
 			name: ctx.userTitle ? '' : v.name,
 			mix: ctx.userTitle ? undefined : v.mix,
 			value: v.muted(s) ? 'MUTED' : dbText(raw),
-			meter: { left: levelToAxis(left), right: levelToAxis(right), fader: faderPos(raw), muted: v.muted(s) },
+			meter: { left: levelToAxis(left), right: levelToAxis(right), fader: (v.pos ?? faderPos)(raw), muted: v.muted(s) },
 			overlay: ctx.overlay,
 		})
 	}

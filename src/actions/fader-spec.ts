@@ -48,6 +48,8 @@ export interface Vol {
 	maxDb?: number
 	/** Lowest dB (default: down to silence). */
 	minDb?: number
+	/** Cap position 0..1 (default faderPos, the volume axis). */
+	pos?: (raw: number) => number
 	/** Set for mix/loopback/output targets (meters and mute come from it). */
 	target?: Target
 	raw: (s: MixerState) => number
@@ -86,6 +88,7 @@ export function gainSpec(settings: JsonObject): Vol | undefined {
 		name: nameOf(settings, INPUTS[id]),
 		maxDb: GAIN_MAX_DB,
 		minDb: GAIN_MIN_DB,
+		pos: gainBar,
 		raw: (s) => s.inputs[id].gain,
 		map: (s, f) => void (s.inputs[id].gain = f(s.inputs[id].gain)),
 		muted: (s) => s.inputs[id].mute,
@@ -156,7 +159,7 @@ export function meterView(v: Vol, s: MixerState, meters: ReadonlyMap<MeterChanne
 		name: v.name,
 		left: levelToAxis(left),
 		right: levelToAxis(right),
-		fader: faderPos(raw),
+		fader: (v.pos ?? faderPos)(raw),
 		faderDb: dbText(raw),
 		levelDb: pair ? levelText(Math.max(left, right)) : '', // no meter codes known: show nothing, not -∞
 		muted: v.muted(s),

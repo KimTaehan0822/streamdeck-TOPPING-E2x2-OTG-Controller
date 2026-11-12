@@ -216,3 +216,10 @@ test('fader axis: 0 dB at 0.8, +12 dB at the top; presses go up on top/right and
 	assert.equal(faderPos(0), 0)
 	assert.deepEqual(['top', 'bottom', 'left', 'right'].map(roleSign), [1, -1, -1, 1])
 })
+
+test('digital gain keys place the cap on their own 0 .. +20 dB scale', () => {
+	const g = gainSpec({ input: 'in1' })
+	assert.equal(g.pos(dbToRaw(0)), 0)
+	assert.equal(g.pos(dbToRaw(20)), 1)
+	assert.equal(volSpec({ kind: 'output', channel: 'out12' }).pos, undefined) // volume keys keep the shared axis
+})
