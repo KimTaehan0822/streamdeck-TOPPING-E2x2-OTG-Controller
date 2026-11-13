@@ -11,7 +11,7 @@
 **Spec:** `docs/superpowers/specs/2026-11-11-topping-e2x2-plugin-design.md` / 프로토콜: `docs/usb-protocol.md`
 
 ## Global Constraints
-- 저장소: `C:\Users\Kimtan_StreamPC\streamdeck-topping-e2x2`, 플러그인 ID `com.haeunga0822.topping-e2x2`, 폴더 `com.haeunga0822.topping-e2x2.sdPlugin`, Author `김탄2`.
+- 저장소: `streamdeck-topping-e2x2`, 플러그인 ID `com.haeunga0822.topping-e2x2`, 폴더 `com.haeunga0822.topping-e2x2.sdPlugin`, Author `김탄2`.
 - Windows 10 이상, Stream Deck 앱 7.3 이상, `Nodejs.Version` `20`, `SDKVersion` 2 (토탈믹스 플러그인 manifest와 같다).
 - USB 드라이버를 바꾸지 않는다. 공식 드라이버가 만든 HID 인터페이스 MI_04(VID `0x152A`, PID `0x8756`)만 쓴다. 토핑 앱과 동시에 동작해야 한다.
 - 리포트 형식: `[00] 22 33 20 01 01 [그룹] [항목] [값 4바이트 빅엔디언] 00 00 66 77 00` (리포트 ID 포함 17바이트).

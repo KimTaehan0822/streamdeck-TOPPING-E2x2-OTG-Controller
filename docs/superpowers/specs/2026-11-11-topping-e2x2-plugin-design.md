@@ -94,7 +94,7 @@ USB 분석 결과 장치는 믹서 값을 돌려주지 않는다. 그래서 다�
 
 ## 방법 (선택한 것: A)
 **A. 새 프로젝트로 따로 만든다.**
-- 위치: `C:\Users\Kimtan_StreamPC\streamdeck-topping-e2x2`
+- 위치: `streamdeck-topping-e2x2`
 - 플러그인 ID: `com.haeunga0822.topping-e2x2`
 - 토탈믹스 플러그인에서 복사해 쓰는 부분: `runtime/`(기본 액션, 누르고 있으면 반복, 다시 그리기), `render/svg.ts`의 글자 맞춤 도구(모양은 토핑 앱 스타일로 새로 그림, 아래 "화면 모양"), `ui/`의 설정 화면 틀(`sdpi-components.js`, `common.js`), `layouts/strip.json`, rollup·tsconfig·테스트 방식(`node --test`), 빌드·패키지 스크립트.
 - 새로 만드는 부분: USB 통신 계층(토탈믹스의 `osc/` 자리), 토핑 장비 제어(토탈믹스의 `protocol/controller.ts` 자리), E2x2 OTG 채널 모델(`model/` 자리), 위 액션들.
