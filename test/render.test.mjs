@@ -50,6 +50,7 @@ const samples = {
 	'workspace-save': renderWorkspaceKey({ mode: 'save', name: 'Backup', active: false, overlay: none }),
 	'restart-sync': renderRestartKey({ mode: 'sync', overlay: none }),
 	'restart-plain': renderRestartKey({ mode: 'plain', overlay: none }),
+	'restart-undo': renderRestartKey({ mode: 'undo', overlay: none }),
 	'vu-playing': renderVuStrip(mv({ mix: 0, left: lv(-9), right: lv(-14) })),
 	'vu-input': renderVuStrip(mv({ mix: 2, name: 'IN 1', left: lv(-18), right: lv(-18), fader: lv(-6), levelDb: '-18.0', faderDb: '-6.0 dB' })),
 	'vu-loud': renderVuStrip(mv({ name: 'Out 1/2', left: lv(-1), right: lv(-2), fader: 1, levelDb: '-1.0', faderDb: '0.0 dB' })),
@@ -271,4 +272,5 @@ test('the muted two-key fader shows MUTED on the dB key for every role', () => {
 test('restart key names its mode', () => {
 	assert.ok(samples['restart-sync'].includes('RESTART') && samples['restart-sync'].includes('SYNC'))
 	assert.ok(samples['restart-plain'].includes('APP') && !samples['restart-plain'].includes('SYNC'))
+	assert.ok(samples['restart-undo'].includes('UNDO'))
 })

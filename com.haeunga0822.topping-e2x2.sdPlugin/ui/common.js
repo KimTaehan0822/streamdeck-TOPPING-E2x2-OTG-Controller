@@ -142,6 +142,17 @@ const TEXT = {
 	'Restart the TOPPING app to match': ['토핑 앱 다시 켜서 맞추기', 'TOPPINGアプリを再起動して合わせる'],
 	'Save Stream Deck values, then restart': ['스트림덱 값을 저장하고 다시 켜기', 'Stream Deck の値を保存してから再起動'],
 	'Just restart': ['그냥 다시 켜기', '再起動のみ'],
+	'Undo to the previous version': ['직전으로 되돌리기', '直前に戻す'],
+	'Puts back the version of the open workspace from before the last save, then restarts the TOPPING app with it. Press again to return to the newer version.': [
+		'열린 작업 공간을 마지막 저장 바로 전 값으로 되돌린 뒤, 그 값으로 TOPPING 앱을 다시 켭니다. 한 번 더 누르면 새 값으로 돌아갑니다.',
+		'開いているワークスペースを最後の保存の直前の値に戻し、その値で TOPPING アプリを再起動します。もう一度押すと新しい値に戻ります。',
+	],
+	'Overwrites the workspace:': ['작업 공간을 덮어씁니다:', 'ワークスペースを上書きします:'],
+	'the values saved in the workspace the app has open are replaced by the Stream Deck values. Only the version just before is kept as a backup, and the "Undo to the previous version" mode can put it back.': [
+		'앱이 열고 있는 작업 공간에 저장된 값이 스트림덱 값으로 바뀝니다. 바로 전 값 하나만 백업으로 남고, "직전으로 되돌리기" 모드로 되살릴 수 있습니다.',
+		'アプリが開いているワークスペースに保存された値が Stream Deck の値に置き換わります。直前の値ひとつだけがバックアップとして残り、「直前に戻す」モードで元に戻せます。',
+	],
+	'No earlier version of this workspace is saved.': ['이 작업 공간의 이전 값이 저장되어 있지 않습니다.', 'このワークスペースの以前の値は保存されていません。'],
 	'Saves the Stream Deck values into the workspace the TOPPING app has open, then restarts the app with it.': [
 		'스트림덱 값을 TOPPING 앱이 열고 있는 작업 공간에 저장한 뒤, 그 작업 공간으로 앱을 다시 켭니다.',
 		'Stream Deck の値を TOPPING アプリが開いているワークスペースに保存し、そのワークスペースでアプリを再起動します。',

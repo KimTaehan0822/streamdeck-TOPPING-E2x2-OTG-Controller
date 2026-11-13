@@ -141,9 +141,11 @@ test('saving over another existing workspace is noticed, keeps a hidden backup, 
 		assert.deepEqual(readdirSync(join(t.dir, 'E2X2_OTG')).sort(), ['.E2X2_OTG_Other.TPwork.bak', 'E2X2_OTG_App.TPwork', 'E2X2_OTG_Other.TPwork'])
 		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), old)
 		assert.deepEqual(listWorkspaces(t.dir).sort(), ['App', 'Other'])
-		// a second save keeps the original in the backup: repeated saves must not destroy what the backup protects
+		// a second save backs up the version it replaces (the one just before), so "undo" goes back one step
+		const first = readFileSync(path, 'utf8')
+		t.conn.update((s) => (s.inputs.in2.gain = 666))
 		saveWorkspace(t.conn, t.dir, 'Other')
-		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), old)
+		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Other.TPwork.bak'), 'utf8'), first)
 		// a new name has nothing to back up
 		saveWorkspace(t.conn, t.dir, 'Brand New')
 		assert.equal(existsSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_Brand New.TPwork.bak')), false)
@@ -204,6 +206,26 @@ test('syncOpenWorkspace refuses before a workspace is loaded and leaves the file
 		t.conn.loaded = false
 		assert.throws(() => syncOpenWorkspace(t.conn, t.dir), /No workspace is loaded/)
 		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_App.TPwork'), 'utf8'), fixture)
+	} finally {
+		t.done()
+	}
+})
+
+test("undoOpenWorkspace swaps the app's open workspace with its backup, so a second undo redoes", async () => {
+	const { syncOpenWorkspace, undoOpenWorkspace } = await import('../dist/actions/workspace-spec.js')
+	const t = setup()
+	try {
+		const file = join(t.dir, 'E2X2_OTG', 'E2X2_OTG_App.TPwork')
+		assert.throws(() => undoOpenWorkspace(t.dir), /No earlier version/) // nothing backed up yet
+		t.conn.update((s) => (s.inputs.in1.gain = 4321))
+		syncOpenWorkspace(t.conn, t.dir)
+		const synced = readFileSync(file, 'utf8')
+		assert.equal(undoOpenWorkspace(t.dir), 'App')
+		assert.equal(readFileSync(file, 'utf8'), fixture)
+		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_App.TPwork.bak'), 'utf8'), synced)
+		undoOpenWorkspace(t.dir)
+		assert.equal(readFileSync(file, 'utf8'), synced)
+		assert.ok(!readdirSync(join(t.dir, 'E2X2_OTG')).some((f) => f.endsWith('.tmp')))
 	} finally {
 		t.done()
 	}

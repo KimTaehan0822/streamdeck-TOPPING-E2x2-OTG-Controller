@@ -11,6 +11,7 @@ export function validName(name: unknown): name is string {
 }
 
 const pathOf = (dir: string, name: string) => join(dir, 'E2X2_OTG', `E2X2_OTG_${name}.TPwork`)
+const bakOf = (dir: string, name: string) => join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.TPwork.bak`)
 const same = (a: string, b: string) => resolve(a).toLowerCase() === resolve(b).toLowerCase() // Windows paths are case-insensitive
 
 /** A reason the save key would refuse this name, or undefined. */
@@ -45,10 +46,8 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown, 
 	// temp file in the same folder, then rename: a crash never leaves a truncated workspace (the dot prefix keeps it out of the list)
 	const tmp = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.tmp`)
 	writeFileSync(tmp, writeWorkspace(conn.state, readFileSync(template, 'utf8')))
-	// the app's config only names its open workspace after it exits, so this may be a file the app still has open: keep the old one (dot prefix: not listed).
-	// The first backup is never replaced, so repeated saves cannot destroy the original.
-	const bak = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.TPwork.bak`)
-	if (existsSync(path) && !existsSync(bak)) copyFileSync(path, bak)
+	// the version being replaced becomes the backup (dot prefix: not listed); the restart key's "undo" swaps it back
+	if (existsSync(path)) copyFileSync(path, bakOf(dir, name as string))
 	renameSync(tmp, path)
 	// like the app's "Save the current workspace and download to the device"
 	if (store && !conn.storeOnDevice()) throw new Error('The workspace file was saved, but the device is not connected, so the values were not stored on it.')
@@ -67,5 +66,19 @@ export function syncOpenWorkspace(conn: E2x2Connection, dir: string): string {
 	const name = openWorkspaceName(dir)
 	if (!name) throw new Error('No workspace is open in the TOPPING app to restart with.')
 	saveWorkspace(conn, dir, name, false, true)
+	return name
+}
+
+/** The restart key's "undo": swaps the app's open workspace with its backup (the version before the last save), so pressing again redoes; returns its name. */
+export function undoOpenWorkspace(dir: string): string {
+	const name = openWorkspaceName(dir)
+	if (!name) throw new Error('No workspace is open in the TOPPING app to restart with.')
+	const path = pathOf(dir, name)
+	const bak = bakOf(dir, name)
+	if (!existsSync(bak)) throw new Error('No earlier version of this workspace is saved.')
+	const tmp = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.tmp`)
+	renameSync(bak, tmp)
+	renameSync(path, bak)
+	renameSync(tmp, path)
 	return name
 }

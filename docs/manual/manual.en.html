@@ -108,7 +108,7 @@
 <p><strong>When saving</strong></p>
 <ul>
 <li><p>With <strong>Restart the TOPPING app to match</strong> off, the key does not save under the name of the workspace the TOPPING app has open, because the app writes its own values over it when it exits. If the settings show "Cannot save", enter another name. With the option on, the app is force-closed before it can write over the file, so that name is allowed.</p></li>
-<li><p>A workspace with the same name is replaced. The original stays in the same folder as the hidden file <code>.E2X2_OTG_&lt;name&gt;.TPwork.bak</code>.</p></li>
+<li><p>A workspace with the same name is replaced. <strong>Only the version just before</strong> stays in the same folder as the hidden file <code>.E2X2_OTG_&lt;name&gt;.TPwork.bak</code>. There is one backup per name, and each save replaces it with the version it overwrote.</p></li>
 <li><p>If the device is not connected, only the file is saved; the key shows ⚠ and the settings say so.</p></li>
 </ul>
 <p><strong>Storing on the device from the app:</strong> in the TOPPING app, click the download icon right of the workspace name at the top, pick the first option (save the current workspace and download to the device) and click OK.</p>
@@ -118,7 +118,8 @@
 <section><h2>TOPPING app restart key</h2>
 <p>The TOPPING app saves the values it remembers to its workspace file when it exits, and sends that file to the device when it starts. So values set on Stream Deck jump back after the app is closed and opened. This key force-closes the app (with no exit save) and starts it again to remove that mismatch. Pick it in <strong>Mode</strong>:</p>
 <ul>
-<li><p><strong>Save Stream Deck values, then restart</strong> (default): saves the current key values into the workspace the app has open, then restarts the app. The Stream Deck values win.</p></li>
+<li><p><strong>Save Stream Deck values, then restart</strong> (default): saves the current key values into the workspace the app has open, then restarts the app. The Stream Deck values win. <strong>The values saved in that workspace are overwritten.</strong> Only the version just before is kept as a backup.</p></li>
+<li><p><strong>Undo to the previous version</strong>: puts back the version of the app's open workspace from before the last save (the backup), then restarts the app. Press again to return to the newer version. With no backup the key shows ⚠.</p></li>
 <li><p><strong>Just restart</strong>: restarts the app without saving. The workspace saved in the app wins, and the device and the keys go back to it.</p></li>
 </ul>
 <p>If the app was not running, the key starts it. If the app does not close within 5 seconds, nothing is changed and the key shows ⚠.</p>

@@ -9,13 +9,18 @@
 	<script src="common.js"></script>
 	<script src="target.js"></script>
 	<script>
-		// TOPPING app restart key. Sync: save the Stream Deck values into the app's open workspace, then restart. Plain: just restart.
-		const MODES = { sync: 'Save Stream Deck values, then restart', plain: 'Just restart' }
+		// TOPPING app restart key. Sync: save the Stream Deck values into the app's open workspace, then restart. Undo: put back the version before. Plain: just restart.
+		const MODES = { sync: 'Save Stream Deck values, then restart', undo: 'Undo to the previous version', plain: 'Just restart' }
 		const HELP = {
 			sync: 'Saves the Stream Deck values into the workspace the TOPPING app has open, then restarts the app with it.',
+			undo: 'Puts back the version of the open workspace from before the last save, then restarts the TOPPING app with it. Press again to return to the newer version.',
 			plain: 'Restarts the TOPPING app without saving. The app sends its saved workspace to the device, and the keys follow it.',
 		}
-		mountPI((type, s) => select('mode', 'Mode', MODES, 'default="sync"') + `<div class="notice"><span>${HELP[s.mode === 'plain' ? 'plain' : 'sync']}</span></div>`, ['mode'])
+		const WARN_SYNC = '<div class="notice danger"><b>Overwrites the workspace:</b> <span>the values saved in the workspace the app has open are replaced by the Stream Deck values. Only the version just before is kept as a backup, and the "Undo to the previous version" mode can put it back.</span></div>'
+		mountPI((type, s) => {
+			const m = s.mode === 'plain' || s.mode === 'undo' ? s.mode : 'sync'
+			return select('mode', 'Mode', MODES, 'default="sync"') + `<div class="notice"><span>${HELP[m]}</span></div>` + (m === 'sync' ? WARN_SYNC : '')
+		}, ['mode'])
 	</script>
 </body>
 </html>
