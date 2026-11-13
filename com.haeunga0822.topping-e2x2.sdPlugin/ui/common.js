@@ -6,7 +6,8 @@ const NOTICE = `
 	.notice { margin: 4px 0 12px; padding: 8px 10px; border-left: 3px solid #e2b23a; background: #2d2d2d; color: #d8d8d8; font-size: 9pt; line-height: 1.4; }
 	.notice b { color: #e2b23a; }
 	.notice details { margin-top: 6px; }
-	.notice summary { cursor: pointer; color: #969696; user-select: none; }
+	.notice summary { cursor: pointer; color: #e2b23a; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; user-select: none; }
+	.notice summary:hover { color: #ffd36a; }
 	.notice ol { margin: 6px 0 0; padding-left: 18px; }
 	.notice.danger { border-left-color: #e5483e; }
 	.notice.danger b { color: #e5483e; }
