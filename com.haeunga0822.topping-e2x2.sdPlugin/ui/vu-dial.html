@@ -19,9 +19,9 @@
 			['rightAction', 'rightDb', 'Press + turn right', TURN, 'step'],
 		]
 		mountPI((type, s) => {
-			if (type === 'pan-dial') return targetHtml(s, true) + text('step', 'Step per tick (%)', '5', '5')
+			if (type === 'pan-dial') return targetHtml(s, true, false, true) + text('step', 'Step per tick (%)', '5', '5')
 			return (
-				targetHtml(s, false, true) +
+				targetHtml(s, false, true, true) +
 				text('step', 'Step per tick (dB)', '1', '1') +
 				`<sdpi-item label="Touch tap mutes"><sdpi-checkbox setting="touchMute" default="true"></sdpi-checkbox></sdpi-item>` +
 				`<details open><summary>Press actions</summary>${SLOTS.map(
@@ -29,7 +29,7 @@
 						select(action, label, items, `default="${def}"`) + ((s[action] ?? def) === 'recall' ? text(db, 'Recall level (dB)', 'e.g. -20 or 0') : ''),
 				).join('')}</details>`
 			)
-		}, ['kind', 'pressAction', 'leftAction', 'rightAction', 'channel'])
+		}, ['kind', 'mix', 'pressAction', 'leftAction', 'rightAction', 'channel'])
 	</script>
 </body>
 </html>

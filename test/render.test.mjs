@@ -274,3 +274,8 @@ test('restart key names its mode', () => {
 	assert.ok(samples['restart-plain'].includes('RESTART') && !samples['restart-plain'].includes('SYNC'))
 	assert.ok(samples['restart-undo'].includes('UNDO'))
 })
+
+test('NOT A MIX overlay for a key that follows an output playing something else', () => {
+	const svg = renderValueKey({ name: '', value: '', overlay: 'nomix' })
+	assert.ok(svg.includes('NOT A') && svg.includes('>MIX<'))
+})

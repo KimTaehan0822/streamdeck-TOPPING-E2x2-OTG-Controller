@@ -17,11 +17,11 @@ const select = (setting, label, items, extra = '') =>
 const text = (setting, label, placeholder, def = '') =>
 	`<sdpi-item label="${label}"><sdpi-textfield setting="${setting}" placeholder="${placeholder}" ${def ? `default="${def}"` : ''}></sdpi-textfield></sdpi-item>`
 
-/** Target fields (mix kinds only when `mixOnly`; no Side choice when `noSide`). s = the saved settings. */
-function targetHtml(s, mixOnly = false, noSide = false) {
+/** Target fields (mix kinds only when `mixOnly`; no Side choice when `noSide`; `follow` offers following an output's Mix). s = the saved settings. */
+function targetHtml(s, mixOnly = false, noSide = false, follow = false) {
 	const kind = mixOnly ? 'mix' : (s.kind ?? 'mix')
 	let html = mixOnly ? '' : select('kind', 'Target', KINDS, 'default="mix"')
-	if (kind === 'mix') html += select('mix', 'Mix', MIXES, 'default="0"')
+	if (kind === 'mix') html += follow ? followMixHtml(s, select) : select('mix', 'Mix', MIXES, 'default="0"')
 	html += select('channel', 'Channel', CHANNELS[kind], 'placeholder="Select channel"')
 	return html + (noSide ? '' : select('side', 'Side', SIDES, 'default="pair"')) + nameField(CHANNELS[kind][s.channel])
 }

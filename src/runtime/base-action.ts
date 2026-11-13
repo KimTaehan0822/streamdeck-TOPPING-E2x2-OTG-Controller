@@ -8,6 +8,7 @@ import {
 	type WillDisappearEvent,
 } from '@elgato/streamdeck'
 import type { JsonObject } from '@elgato/utils'
+import { followMix } from '../actions/target.js'
 import type { E2x2Connection } from '../connection.js'
 import { svgDataUrl, type Overlay } from '../render/svg.js'
 import { HoldRepeater } from './hold.js'
@@ -47,6 +48,16 @@ export abstract class E2x2Action<S extends JsonObject> extends SingletonAction<S
 	}
 
 	protected abstract render(settings: S, ctx: RenderContext): string
+
+	/** Settings with a followed output's current Mix filled in (see followMix); undefined when that output plays something other than a Mix. */
+	protected follow(settings: JsonObject): JsonObject | undefined {
+		return followMix(settings, this.connection.state)
+	}
+	/** A key that follows an output which plays something other than a Mix (shown as NOT A MIX). */
+	protected noMix(settings: JsonObject): boolean {
+		return settings.mix === 'follow' && !this.follow(settings)
+	}
+
 	/** Native state for a two-state action, so the user's per-state icon and title follow the mixer. */
 	protected keyState(_settings: S): 0 | 1 | undefined {
 		return undefined

@@ -1,5 +1,5 @@
 import type { JsonObject } from '@elgato/utils'
-import { LOOPBACKS, OUTPUTS } from '../model/e2x2.js'
+import { LOOPBACKS, OUTPUTS, SOURCES } from '../model/e2x2.js'
 import { MIX_CHANNELS, type MixChannelId, type MixerState } from '../state/mixer-state.js'
 import { int, pick } from './common.js'
 
@@ -27,6 +27,16 @@ export function targetOf(settings: JsonObject): Target | undefined {
 	}
 	const id = kind === 'loopback' ? pick(settings.channel, LOOPBACKS) : pick(settings.channel, OUTPUTS)
 	return id ? ({ kind, id, side } as Target) : undefined
+}
+
+const MIX_SOURCES: number[] = [SOURCES.mixA, SOURCES.mixB, SOURCES.mixC, SOURCES.mixD]
+
+/** A key set to follow an output (mix = 'follow', follow = the output, Out 1/2 when unset) gets the Mix that output plays now;
+ *  undefined when it plays something other than a Mix. Settings with a fixed Mix pass through unchanged. */
+export function followMix(settings: JsonObject, s: MixerState): JsonObject | undefined {
+	if (settings.mix !== 'follow') return settings
+	const mix = MIX_SOURCES.indexOf(s.outputs[pick(settings.follow, OUTPUTS) ?? 'out12'].source)
+	return mix < 0 ? undefined : { ...settings, mix }
 }
 
 const NAMES: Record<MixChannelId | LoopbackId | OutputId, string> = {

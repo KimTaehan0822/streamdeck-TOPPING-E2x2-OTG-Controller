@@ -4,7 +4,7 @@ export const KEY = 144
 /** Widest a name may be on a key: the key's edges sit under the device's bezel. */
 export const NAME_WIDTH = KEY - 16
 
-export type Overlay = 'none' | 'offline' | 'unsupported' | 'setup' | 'config'
+export type Overlay = 'none' | 'offline' | 'unsupported' | 'setup' | 'config' | 'nomix'
 
 // Same face, weight and plain fill (no outline) as Elgato's Spotify plugin. One family name only:
 // the Stream Deck SVG renderer is not a browser.
@@ -117,6 +117,9 @@ export function frame(width: number, height: number, body: string, overlay: Over
 				`<g opacity="0.35">${body}</g>` +
 				plainText(cx, cy - 6, 'SET', { size: 26, fill: '#fff' }) +
 				plainText(cx, cy + 24, 'CHANNEL', { size: 26, fill: '#fff' })
+			break
+		case 'nomix':
+			content = `<g opacity="0.25">${body}</g>` + plainText(cx, cy - 6, 'NOT A', { size: 26, fill: '#e2b23a' }) + plainText(cx, cy + 24, 'MIX', { size: 26, fill: '#e2b23a' })
 			break
 		case 'config':
 			content = `<g opacity="0.35">${body}</g>` + plainText(cx, cy + 8, 'SETUP', { size: 26, fill: '#fff' })

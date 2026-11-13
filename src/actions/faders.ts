@@ -10,6 +10,9 @@ import { dbText, faderOp, faderPos, meterOf, meterView, panOp, panSpec, panText,
 const ID = 'com.haeunga0822.topping-e2x2.'
 const SETUP_KEY = renderValueKey({ name: '', value: '', overlay: 'setup' })
 const SETUP_STRIP = renderVuStrip({ name: '', left: 0, right: 0, faderDb: '', levelDb: '', muted: false, overlay: 'setup' })
+// a key that follows an output playing something other than a Mix
+const NOMIX_KEY = renderValueKey({ name: '', value: '', overlay: 'nomix' })
+const NOMIX_STRIP = renderVuStrip({ name: '', left: 0, right: 0, faderDb: '', levelDb: '', muted: false, overlay: 'nomix' })
 const ROLES = { top: 1, bottom: 1, left: 1, right: 1 }
 const PEEK_MS = 700
 const dbStep = (v: unknown, fallback = 1): number => {
@@ -23,7 +26,7 @@ export abstract class VolKeyAction extends E2x2Action<JsonObject> {
 
 	protected render(settings: JsonObject, ctx: RenderContext): string {
 		const v = this.vol(settings)
-		if (!v || !faderOp(settings)) return SETUP_KEY
+		if (!v || !faderOp(settings)) return this.noMix(settings) ? NOMIX_KEY : SETUP_KEY
 		const s = this.connection.state
 		const raw = v.raw(s)
 		const pair = v.target && meterOf(v.target)
@@ -49,7 +52,10 @@ export abstract class VolKeyAction extends E2x2Action<JsonObject> {
 
 @action({ UUID: ID + 'fader' })
 class FaderAction extends VolKeyAction {
-	protected vol = volSpec
+	protected vol(settings: JsonObject): Vol | undefined {
+		const f = this.follow(settings)
+		return f && volSpec(f)
+	}
 }
 
 /** Strip with output meters for fader-like actions; adjusting a muted target shows its dB for a moment instead of MUTED. */
@@ -57,8 +63,14 @@ abstract class MeterAction extends E2x2Action<JsonObject> {
 	private readonly adjusted = new Map<string, number>()
 	private peekTimer?: NodeJS.Timeout
 
+	/** The volume target, with a followed output's current Mix. */
+	protected vol(settings: JsonObject): Vol | undefined {
+		const f = this.follow(settings)
+		return f && volSpec(f)
+	}
+
 	protected view(settings: JsonObject, ctx: RenderContext) {
-		const v = volSpec(settings)
+		const v = this.vol(settings)
 		if (!v) return undefined
 		const peek = Date.now() - (this.adjusted.get(this.key(settings)) ?? -PEEK_MS) < PEEK_MS
 		return { ...meterView(v, this.connection.state, this.connection.meters, peek), overlay: ctx.overlay }
@@ -81,12 +93,12 @@ class ButtonFaderAction extends MeterAction {
 	protected render(settings: JsonObject, ctx: RenderContext): string {
 		const view = this.view(settings, ctx)
 		const role = pick(settings.role, ROLES)
-		return view && role ? renderButtonFader(view, role) : SETUP_KEY
+		return view && role ? renderButtonFader(view, role) : this.noMix(settings) ? NOMIX_KEY : SETUP_KEY
 	}
 
 	override onKeyDown(ev: KeyDownEvent<JsonObject>): void {
 		const settings = ev.payload.settings
-		const v = volSpec(settings)
+		const v = this.vol(settings)
 		const role = pick(settings.role, ROLES)
 		if (!v || !role) return
 		const db = roleSign(role) * Math.abs(dbStep(settings.step))
@@ -105,7 +117,7 @@ class VuDialAction extends MeterAction {
 
 	protected render(settings: JsonObject, ctx: RenderContext): string {
 		const view = this.view(settings, ctx)
-		return view ? renderVuStrip(view) : SETUP_STRIP
+		return view ? renderVuStrip(view) : this.noMix(settings) ? NOMIX_STRIP : SETUP_STRIP
 	}
 
 	override onWillDisappear(ev: WillDisappearEvent<JsonObject>): void {
@@ -127,7 +139,7 @@ class VuDialAction extends MeterAction {
 
 	override onDialRotate(ev: DialRotateEvent<JsonObject>): void {
 		const s = ev.payload.settings
-		const v = volSpec(s)
+		const v = this.vol(s)
 		const id = ev.action.id
 		if (!v || !ev.payload.ticks) return
 		// A held turn with no recorded press (e.g. the plugin restarted mid-hold) starts its own hold.
@@ -144,7 +156,7 @@ class VuDialAction extends MeterAction {
 
 	/** A mute operation or a recall to `db` (nothing when it is not a number). */
 	private run(s: JsonObject, chosen: string, db: unknown): void {
-		const v = volSpec(s)
+		const v = this.vol(s)
 		if (!v) return
 		if (chosen !== 'recall') return setMute(this.connection, v, MUTE_OPS[chosen as keyof typeof MUTE_OPS] ?? 'toggle')
 		const value = num(db)
@@ -153,22 +165,30 @@ class VuDialAction extends MeterAction {
 
 	override onTouchTap(ev: TouchTapEvent<JsonObject>): void {
 		const s = ev.payload.settings
-		const v = volSpec(s)
+		const v = this.vol(s)
 		if (v && s.touchMute !== false && s.touchMute !== 'false') setMute(this.connection, v, 'toggle')
 	}
 }
 
+/** Pan target, with a followed output's current Mix. */
+abstract class PanBase extends E2x2Action<JsonObject> {
+	protected pan(settings: JsonObject) {
+		const f = this.follow(settings)
+		return f && panSpec(f)
+	}
+}
+
 @action({ UUID: ID + 'pan' })
-class PanAction extends E2x2Action<JsonObject> {
+class PanAction extends PanBase {
 	protected render(settings: JsonObject, ctx: RenderContext): string {
-		const p = panSpec(settings)
-		if (!p || !panOp(settings)) return SETUP_KEY
+		const p = this.pan(settings)
+		if (!p || !panOp(settings)) return this.noMix(settings) ? NOMIX_KEY : SETUP_KEY
 		const v = p.read(this.connection.state)
 		return renderValueKey({ name: ctx.userTitle ? '' : p.name, mix: ctx.userTitle ? undefined : p.mix, value: panText(v), bar: v, overlay: ctx.overlay })
 	}
 
 	override onKeyDown(ev: KeyDownEvent<JsonObject>): void {
-		const p = panSpec(ev.payload.settings)
+		const p = this.pan(ev.payload.settings)
 		const op = panOp(ev.payload.settings)
 		if (!p || !op) return
 		if (op.set) pressPan(this.connection, p, op)
@@ -177,22 +197,22 @@ class PanAction extends E2x2Action<JsonObject> {
 }
 
 @action({ UUID: ID + 'pan-dial' })
-class PanDialAction extends E2x2Action<JsonObject> {
+class PanDialAction extends PanBase {
 	protected render(settings: JsonObject, ctx: RenderContext): string {
-		const p = panSpec(settings)
-		if (!p) return renderValueStrip({ name: '', value: '', bar: 0.5, overlay: 'setup' })
+		const p = this.pan(settings)
+		if (!p) return renderValueStrip({ name: '', value: '', bar: 0.5, overlay: this.noMix(settings) ? 'nomix' : 'setup' })
 		const v = p.read(this.connection.state)
 		return renderValueStrip({ mix: p.mix, name: p.name, value: panText(v), bar: v, center: true, overlay: ctx.overlay })
 	}
 
 	override onDialRotate(ev: DialRotateEvent<JsonObject>): void {
-		const p = panSpec(ev.payload.settings)
+		const p = this.pan(ev.payload.settings)
 		if (p && ev.payload.ticks) stepPan(this.connection, p, ev.payload.ticks * dbStep(ev.payload.settings.step, 5))
 	}
 
 	/** Press centres the pan (a LINKed pair keeps its width). */
 	override onDialDown(ev: DialDownEvent<JsonObject>): void {
-		const p = panSpec(ev.payload.settings)
+		const p = this.pan(ev.payload.settings)
 		if (p) setPan(this.connection, p, 0)
 	}
 }

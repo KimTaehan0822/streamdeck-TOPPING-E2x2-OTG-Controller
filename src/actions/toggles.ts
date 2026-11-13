@@ -18,7 +18,7 @@ abstract class ToggleAction extends E2x2Action<JsonObject> {
 
 	protected render(settings: JsonObject, ctx: RenderContext): string {
 		const spec = this.spec(settings)
-		if (!spec) return renderToggleKey({ title: '', label: '', on: false, color: 'blue', overlay: 'setup' })
+		if (!spec) return renderToggleKey({ title: '', label: '', on: false, color: 'blue', overlay: this.noMix(settings) ? 'nomix' : 'setup' })
 		const on = spec.read(this.connection.state)
 		return renderToggleKey({
 			title: spec.title,
@@ -40,7 +40,10 @@ abstract class ToggleAction extends E2x2Action<JsonObject> {
 
 @action({ UUID: ID + 'mute' })
 class MuteAction extends ToggleAction {
-	protected spec = muteSpec
+	protected spec(settings: JsonObject): ToggleSpec | undefined {
+		const f = this.follow(settings)
+		return f && muteSpec(f)
+	}
 }
 
 @action({ UUID: ID + 'solo' })
@@ -55,7 +58,10 @@ class InputOptionAction extends ToggleAction {
 
 @action({ UUID: ID + 'link' })
 class LinkAction extends ToggleAction {
-	protected spec = linkSpec
+	protected spec(settings: JsonObject): ToggleSpec | undefined {
+		const f = this.follow(settings)
+		return f && linkSpec(f)
+	}
 }
 
 @action({ UUID: ID + 'output-room' })

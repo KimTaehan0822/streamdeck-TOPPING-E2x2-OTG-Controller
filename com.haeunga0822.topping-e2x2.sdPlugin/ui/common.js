@@ -38,6 +38,13 @@ const TEXT = {
 		'Stream Deck で変更した値は TOPPING アプリの画面には表示されず、アプリに上書きされることがあります。アプリで Mix の画面を切り替えたり、アプリを再起動したりすると、アプリが覚えている値に戻ります。',
 	],
 	'Same as Stream Deck': ['Stream Deck과 같게', 'Stream Deck と同じ'],
+	'Follow an output (the Mix it plays now)': ['출력이 듣는 Mix 따라가기', '出力が鳴らしている Mix に追従'],
+	'Output to follow': ['따라갈 출력', '追従する出力'],
+	'The Mix can change:': ['Mix가 바뀔 수 있습니다:', 'Mix が変わることがあります:'],
+	'when this output switches to another Mix, the key acts on that Mix instead. Each Mix has its own levels, so the sound can suddenly get louder. Turn the volume down before switching, and listen with care. If the output plays something other than a Mix, the key shows NOT A MIX and does nothing.': [
+		'이 출력이 다른 Mix로 바뀌면 이 키도 그 Mix를 조절합니다. Mix마다 볼륨이 달라 소리가 갑자기 커질 수 있습니다. 바꾸기 전에 볼륨을 낮추고, 들을 때 주의하세요. 출력이 Mix가 아닌 소리를 내보내고 있으면 키에 NOT A MIX가 뜨고 아무것도 하지 않습니다.',
+		'この出力が別の Mix に切り替わると、キーもその Mix を操作します。Mix ごとに音量が違うため、音が急に大きくなることがあります。切り替える前に音量を下げ、聞くときは注意してください。出力が Mix 以外を鳴らしているときは、キーに NOT A MIX と表示され、何もしません。',
+	],
 	'Recommended workflow': ['권장 사용법', 'おすすめの手順'],
 	'Use Stream Deck as your main control.': ['스트림덱 위주로 사용합니다.', 'Stream Deck を中心に使います。'],
 	'(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.': ['(중요) 스트림덱 플러그인과 토핑 컨트롤 센터 앱은 서로 실시간 연동이 되지 않습니다.', '(重要) Stream Deck プラグインと TOPPING Control Center アプリは、お互いにリアルタイムでは連動しません。'],
@@ -218,6 +225,16 @@ Promise.all([SDPIComponents.streamDeckClient.getConnectionInfo().catch(() => und
 })
 
 /** Custom key name field (empty = the default name, shown as the placeholder). */
+/** Mix choice with "Follow an output": the key then acts on the Mix that output plays now. `select` is the page's own field builder. */
+function followMixHtml(s, select) {
+	let html = select('mix', 'Mix', { 0: 'MIX A', 1: 'MIX B', 2: 'MIX C', 3: 'MIX D', follow: "Follow an output (the Mix it plays now)" }, 'default="0"')
+	if (s.mix !== 'follow') return html
+	return (
+		html +
+		select('follow', 'Output to follow', { out12: 'Out 1/2', mobile: 'Mobile Out', spdif: 'S/PDIF' }, 'default="out12"') +
+		'<div class="notice danger"><b>The Mix can change:</b> <span>when this output switches to another Mix, the key acts on that Mix instead. Each Mix has its own levels, so the sound can suddenly get louder. Turn the volume down before switching, and listen with care. If the output plays something other than a Mix, the key shows NOT A MIX and does nothing.</span></div>'
+	)
+}
 const nameField = (placeholder) =>
 	`<sdpi-item label="Name"><sdpi-textfield setting="name" maxlength="24" placeholder="${placeholder || 'Channel name'}"></sdpi-textfield></sdpi-item>`
 

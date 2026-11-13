@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { effectiveSide, targetName, targetOf } from '../dist/actions/target.js'
+import { effectiveSide, followMix, targetName, targetOf } from '../dist/actions/target.js'
 import { emptyState } from '../dist/state/mixer-state.js'
 
 test('targetOf rejects invalid settings', () => {
@@ -52,4 +52,21 @@ test('targetName gives the plain name without the mix', () => {
 	assert.equal(name({ kind: 'output', channel: 'out12' }), 'Out 1/2')
 	assert.equal(name({ kind: 'output', channel: 'mobile', side: 'R' }), 'Mobile Out R')
 	assert.equal(name({ kind: 'output', channel: 'spdif' }), 'S/PDIF')
+})
+
+test('followMix fills in the Mix the chosen output plays now; a non-Mix source gives undefined', async () => {
+	const { SOURCES } = await import('../dist/model/e2x2.js')
+	const { volSpec } = await import('../dist/actions/fader-spec.js')
+	const s = emptyState()
+	const keyed = { kind: 'mix', mix: '1', channel: 'pb12' }
+	assert.equal(followMix(keyed, s), keyed) // a fixed Mix passes through
+	s.outputs.out12.source = SOURCES.mixC
+	s.outputs.mobile.source = SOURCES.mixA
+	assert.deepEqual(followMix({ kind: 'mix', mix: 'follow', channel: 'pb12' }, s), { kind: 'mix', mix: 2, channel: 'pb12' }) // Out 1/2 by default
+	assert.equal(followMix({ kind: 'mix', mix: 'follow', follow: 'mobile', channel: 'pb12' }, s).mix, 0)
+	assert.equal(volSpec(followMix({ kind: 'mix', mix: 'follow', channel: 'otg' }, s)).mix, 2)
+	s.outputs.out12.source = SOURCES.pb34
+	assert.equal(followMix({ kind: 'mix', mix: 'follow', channel: 'pb12' }, s), undefined)
+	// without following, 'follow' is not a Mix number: the key stays unset rather than guessing
+	assert.equal(targetOf({ kind: 'mix', mix: 'follow', channel: 'pb12' }), undefined)
 })

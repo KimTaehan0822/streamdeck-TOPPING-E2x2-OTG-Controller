@@ -31,9 +31,9 @@
 
 		// Fixed kinds: 'mix' keys have no kind choice (solo and LINK only make sense on a mix channel).
 		const TYPES = {
-			mute: { kinds: ['mix', 'loopback', 'output'], mix: true },
+			mute: { kinds: ['mix', 'loopback', 'output'], mix: true, follow: true },
 			solo: { kinds: ['mix'], mix: true },
-			link: { kinds: ['mix'], mix: true, noSide: true },
+			link: { kinds: ['mix'], mix: true, noSide: true, follow: true },
 			'input-option': { input: true },
 			'output-room': { room: true },
 		}
@@ -52,7 +52,7 @@
 				if (type.kinds) {
 					const kind = s.kind ?? 'mix'
 					if (type.kinds.length > 1) html += select('kind', 'Target', Object.fromEntries(type.kinds.map((k) => [k, KINDS[k]])), 'default="mix"')
-					if (kind === 'mix') html += select('mix', 'Mix', MIXES, 'default="0"')
+					if (kind === 'mix') html += type.follow ? followMixHtml(s, select) : select('mix', 'Mix', MIXES, 'default="0"')
 					html += select('channel', 'Channel', CHANNELS[kind] ?? MIX_CH, 'placeholder="Select channel"')
 					if (!type.noSide) html += select('side', 'Side', SIDES, 'default="pair"')
 				}
@@ -68,7 +68,7 @@
 				fields.innerHTML = html
 				initFields(fields)
 				// A new target kind needs a new channel list, and these fields change what else is shown.
-				for (const name of ['kind', 'option', 'button', 'channel', 'input', 'output']) {
+				for (const name of ['kind', 'mix', 'option', 'button', 'channel', 'input', 'output']) {
 					fields.querySelector(`[setting="${name}"]`)?.addEventListener('valuechange', async (e) => {
 						if (e.target.value === s[name]) return
 						const next = { ...(await saved()), [name]: e.target.value }
