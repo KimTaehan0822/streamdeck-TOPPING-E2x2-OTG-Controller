@@ -10,7 +10,9 @@ const NOTICE = `
 	.notice summary:hover { color: #ffd36a; }
 	.notice ol { margin: 6px 0 0; padding-left: 18px; }
 	.notice.danger { border-left-color: #e5483e; }
-	.notice.danger b { color: #e5483e; }
+	.notice.danger b, .notice.danger summary { color: #e5483e; }
+	.notice.danger details { margin-top: 0; }
+	.notice.danger details > span { display: block; margin-top: 6px; }
 </style>
 <div class="notice">
 	<b>Heads up:</b> <span>values changed from Stream Deck are not shown in the TOPPING app, and the app can overwrite them (it goes back to the values it remembers when you change the Mix view or restart it).</span>
@@ -40,7 +42,7 @@ const TEXT = {
 	'Same as Stream Deck': ['Stream Deck과 같게', 'Stream Deck と同じ'],
 	'Follow an output (the Mix it plays now)': ['출력이 듣는 Mix 따라가기', '出力が鳴らしている Mix に追従'],
 	'Output to follow': ['따라갈 출력', '追従する出力'],
-	'The Mix can change:': ['Mix가 바뀔 수 있습니다:', 'Mix が変わることがあります:'],
+	'⚠ The Mix can change: the sound can suddenly get louder': ['⚠ Mix가 바뀌면 소리가 갑자기 커질 수 있습니다', '⚠ Mix が変わると音が急に大きくなることがあります'],
 	'when this output switches to another Mix, the key acts on that Mix instead. Each Mix has its own levels, so the sound can suddenly get louder. Turn the volume down before switching, and listen with care. If the output plays something other than a Mix, the key shows NOT A MIX and does nothing.': [
 		'이 출력이 다른 Mix로 바뀌면 이 키도 그 Mix를 조절합니다. Mix마다 볼륨이 달라 소리가 갑자기 커질 수 있습니다. 바꾸기 전에 볼륨을 낮추고, 들을 때 주의하세요. 출력이 Mix가 아닌 소리를 내보내고 있으면 키에 NOT A MIX가 뜨고 아무것도 하지 않습니다.',
 		'この出力が別の Mix に切り替わると、キーもその Mix を操作します。Mix ごとに音量が違うため、音が急に大きくなることがあります。切り替える前に音量を下げ、聞くときは注意してください。出力が Mix 以外を鳴らしているときは、キーに NOT A MIX と表示され、何もしません。',
@@ -198,6 +200,8 @@ function translate(root) {
 	// sdpi-select reads option text only when options are added, so a changed list is re-added.
 	const selects = new Set()
 	for (const el of all('summary, span, option, b, li')) {
+		// a list item holding its own span/b is translated through them: writing its whole text would wipe them out on the next pass
+		if (el.childElementCount) continue
 		const text = tr((el.dataset.enText ??= el.textContent))
 		if (el.textContent === text) continue
 		el.textContent = text
@@ -232,7 +236,7 @@ function followMixHtml(s, select) {
 	return (
 		html +
 		select('follow', 'Output to follow', { out12: 'Out 1/2', mobile: 'Mobile Out', spdif: 'S/PDIF' }, 'default="out12"') +
-		'<div class="notice danger"><b>The Mix can change:</b> <span>when this output switches to another Mix, the key acts on that Mix instead. Each Mix has its own levels, so the sound can suddenly get louder. Turn the volume down before switching, and listen with care. If the output plays something other than a Mix, the key shows NOT A MIX and does nothing.</span></div>'
+		'<div class="notice danger"><details><summary>⚠ The Mix can change: the sound can suddenly get louder</summary><span>when this output switches to another Mix, the key acts on that Mix instead. Each Mix has its own levels, so the sound can suddenly get louder. Turn the volume down before switching, and listen with care. If the output plays something other than a Mix, the key shows NOT A MIX and does nothing.</span></details></div>'
 	)
 }
 const nameField = (placeholder) =>
