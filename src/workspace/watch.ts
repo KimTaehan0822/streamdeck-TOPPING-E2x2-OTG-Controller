@@ -58,7 +58,8 @@ export function watchWorkspace(onState: (s: MixerState) => void, deps: Partial<W
 	// the root folder also holds Run.log etc., so only the config file counts there
 	const targets: [string, (name: string | null) => boolean][] = [
 		[join(d.dir, 'E2X2_OTG'), isOpen],
-		[d.dir, (name) => name === 'sound_card_workspace_file.TPconfig'],
+		// once the log names the open workspace the config does not decide it: re-reading then would push a stale file to the device
+		[d.dir, (name) => name === 'sound_card_workspace_file.TPconfig' && !loggedWorkspace(d.dir)],
 	]
 	for (const [path, counts] of targets) {
 		try {

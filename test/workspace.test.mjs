@@ -328,3 +328,17 @@ test('a switch written over earlier Run.log lines (a second app instance started
 		rmSync(dir, { recursive: true })
 	}
 })
+
+test('a config change does not count once Run.log names the open workspace (the restart key writes the config while the log still names the old one)', () => {
+	const dir = fakeDir()
+	try {
+		writeFileSync(join(dir, 'Run.log'), switchTo('Mine', 'Other'))
+		const h = harness(dir)
+		const stop = watchWorkspace(() => {}, h.deps)
+		h.change(1, 'sound_card_workspace_file.TPconfig')
+		assert.equal(h.timers.size, 0)
+		stop()
+	} finally {
+		rmSync(dir, { recursive: true })
+	}
+})
