@@ -31,8 +31,8 @@ export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 	conn.loadState(parseWorkspace(readFileSync(pathOf(dir, name), 'utf8')))
 }
 
-/** Writes the plugin's state as a new workspace, using the app's current file as the template for fields we do not model. */
-export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown): string {
+/** Writes the plugin's state as a new workspace, using the app's current file as the template for fields we do not model; `store` also keeps the values on the device. */
+export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown, store = true): string {
 	// without a loaded workspace the state is made-up defaults (all mixes silent)
 	if (!conn.loaded) throw new Error('No workspace is loaded yet. Open one in the TOPPING app or press a Workspace load key.')
 	const problem = saveProblem(dir, name)
@@ -50,6 +50,6 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 	if (existsSync(path) && !existsSync(bak)) copyFileSync(path, bak)
 	renameSync(tmp, path)
 	// like the app's "Save the current workspace and download to the device"
-	if (!conn.storeOnDevice()) throw new Error('The workspace file was saved, but the device is not connected, so the values were not stored on it.')
+	if (store && !conn.storeOnDevice()) throw new Error('The workspace file was saved, but the device is not connected, so the values were not stored on it.')
 	return path
 }

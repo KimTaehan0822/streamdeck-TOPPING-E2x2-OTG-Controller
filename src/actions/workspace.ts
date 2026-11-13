@@ -30,7 +30,7 @@ class WorkspaceAction extends E2x2Action<JsonObject> {
 		const { mode, name } = ev.payload.settings
 		try {
 			if (mode === 'save') {
-				saveWorkspace(this.connection, this.dir, name)
+				saveWorkspace(this.connection, this.dir, name, ev.payload.settings.store !== false && ev.payload.settings.store !== 'false')
 				void ev.action.showOk()
 			} else {
 				loadWorkspace(this.connection, this.dir, name) // loadState redraws every key

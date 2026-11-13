@@ -14,7 +14,7 @@
 		mountPI((type, s) => {
 			let html = select('mode', 'Mode', MODES, 'default="load"')
 			if (s.mode === 'save')
-				html += text('name', 'New workspace name', 'e.g. Streaming') + '<div id="warning" class="notice danger" hidden><b id="warningHead">Cannot save:</b> <span id="warningText"></span></div>'
+				html += text('name', 'New workspace name', 'e.g. Streaming') + '<sdpi-item label="Also store on the device"><sdpi-checkbox setting="store" default="true"></sdpi-checkbox></sdpi-item>' + '<div id="warning" class="notice danger" hidden><b id="warningHead">Cannot save:</b> <span id="warningText"></span></div>'
 			else html += `<sdpi-item label="Workspace"><sdpi-select setting="name" datasource="workspaces" placeholder="Select"></sdpi-select></sdpi-item>`
 			return html
 		}, ['mode'])

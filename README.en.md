@@ -51,7 +51,7 @@ Double-click `com.haeunga0822.topping-e2x2.streamDeckPlugin` and approve when th
 | 디지털 게인 (digital gain) | Digital gain of an input (key) |
 | 디지털 게인 다이얼 (digital gain dial) | Digital gain of an input (dial, press to mute the input) |
 | Source select | Chooses what is sent to the loopbacks and outputs (OUT 1/2, Mobile OUT, S/PDIF OUT) |
-| Workspace load/save | Loads a workspace file, or saves the current values as a new workspace file and stores them on the device (kept after power off) |
+| Workspace load/save | Loads a workspace file, or saves the current values as a new workspace file and, if chosen, stores them on the device (kept after power off; on by default) |
 
 The action names 출력 컨트롤룸, 디지털 게인 and 디지털 게인 다이얼 are shown in Korean in the Stream Deck action list in every language.
 

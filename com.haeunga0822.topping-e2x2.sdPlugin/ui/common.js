@@ -135,6 +135,7 @@ const TEXT = {
 	'Recall level (dB)': ['복귀 볼륨 (dB)', '戻す音量 (dB)'],
 	'e.g. -20 or 0': ['예: -20 또는 0', '例: -20 または 0'],
 	'Touch tap mutes': ['화면 터치로 음소거', 'タッチでミュート'],
+	'Also store on the device': ['장치에도 기록', 'デバイスにも記録'],
 	Load: ['불러오기', '読み込み'],
 	Save: ['저장', '保存'],
 	Workspace: ['작업 공간', 'ワークスペース'],

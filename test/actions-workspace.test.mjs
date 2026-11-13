@@ -76,6 +76,17 @@ test('save writes E2X2_OTG_<name>.TPwork with the plugin state', () => {
 	}
 })
 
+test('save with "Also store on the device" off sends nothing to the device', () => {
+	const t = setup()
+	try {
+		saveWorkspace(t.conn, t.dir, 'FileOnly', false)
+		assert.equal(t.port.written.length, 0)
+		assert.ok(existsSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_FileOnly.TPwork')))
+	} finally {
+		t.done()
+	}
+})
+
 test('save without the device keeps the file but says nothing was stored on the device', () => {
 	const t = setup()
 	try {
