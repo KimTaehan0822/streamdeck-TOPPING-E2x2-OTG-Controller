@@ -65,8 +65,23 @@ test('save writes E2X2_OTG_<name>.TPwork with the plugin state', () => {
 		const path = saveWorkspace(t.conn, t.dir, 'My Mix 2')
 		assert.equal(path, join(t.dir, 'E2X2_OTG', 'E2X2_OTG_My Mix 2.TPwork'))
 		assert.deepEqual(parseWorkspace(readFileSync(path, 'utf8')), t.conn.state)
+		// then the device is told to keep these values (11 05 = 1, the app's download), after the pending change
+		const sent = t.port.written.map((b) => decodeReport(b))
+		assert.deepEqual(sent.at(-1), { group: 0x11, item: 5, value: 1 })
+		assert.equal(sent.length, 2)
 		// the app's own file is untouched
 		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_App.TPwork'), 'utf8'), fixture)
+	} finally {
+		t.done()
+	}
+})
+
+test('save without the device keeps the file but says nothing was stored on the device', () => {
+	const t = setup()
+	try {
+		t.conn.stop() // device gone
+		assert.throws(() => saveWorkspace(t.conn, t.dir, 'Offline'), /not connected/)
+		assert.ok(existsSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_Offline.TPwork')))
 	} finally {
 		t.done()
 	}

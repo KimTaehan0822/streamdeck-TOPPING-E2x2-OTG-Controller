@@ -61,6 +61,10 @@ const TEXT = {
 		'이름이 올바르지 않습니다. 1~60자로 쓰고, \\ / : * ? " < > | 와 ".." 는 쓸 수 없습니다.',
 		'名前が正しくありません。1〜60文字で、\\ / : * ? " < > | と ".." は使えません。',
 	],
+	'The workspace file was saved, but the device is not connected, so the values were not stored on it.': [
+		'작업 공간 파일은 저장했지만 장치가 연결되어 있지 않아 장치에는 기록하지 못했습니다.',
+		'ワークスペースファイルは保存しましたが、デバイスが接続されていないため、デバイスには記録できませんでした。',
+	],
 	'The TOPPING app is using this workspace. Pick another name.': ['TOPPING 앱이 이 작업 공간을 사용 중입니다. 다른 이름을 고르세요.', 'TOPPING アプリがこのワークスペースを使用中です。別の名前にしてください。'],
 	'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak.': [
 		'같은 이름의 작업 공간이 이미 있습니다. 키를 누르면 덮어쓰고, 원래 파일은 .E2X2_OTG_<이름>.TPwork.bak 으로 남깁니다.',

@@ -48,3 +48,5 @@ export const SOURCES = {
 } as const
 
 export const START = { group: 0x11, item: 1, value: 1 } as const
+/** Stores the device's current values in its memory (kept after power off): the app's "Download to device only" sends just this (USBPcap 2026-11-13). */
+export const STORE = { group: 0x11, item: 5, value: 1 } as const

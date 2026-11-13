@@ -6,7 +6,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 // 1) every TEXT entry has exactly two real translations (Korean, Japanese);
 // 2) every English text found in the screen files and in the plugin's messages is in TEXT, unless it is a device name.
 const UI = 'com.haeunga0822.topping-e2x2.sdPlugin/ui/'
-const common = readFileSync(UI + 'common.js', 'utf8')
+const common = readFileSync(UI + 'common.js', 'utf8').replace(/\r\n/g, '\n') // a Windows checkout has CRLF
 const TEXT = new Function(`return ${common.match(/const TEXT = (\{[\s\S]*?\n\})\nlet language/)[1]}`)()
 
 // Names of the device's own channels and buttons: shown as the device and the keys call them, so they stay English.

@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { STORE } from './model/e2x2.js'
 import { createMeterParser, type MeterChannel } from './protocol/meter.js'
 import { encodeReport } from './protocol/report.js'
 import { diffReports, stateReports } from './state/crosspoints.js'
@@ -107,6 +108,13 @@ export class E2x2Connection {
 		this.send(diffReports(this.state, next))
 		this.state = next
 		this.emit()
+	}
+
+	/** Asks the device to keep its current values after power off (queued after any pending changes); false when it is not connected. */
+	storeOnDevice(): boolean {
+		if (!this.port) return false
+		this.send([STORE])
+		return true
 	}
 
 	/** Takes the app's workspace if one can be read; true once a state is loaded. */

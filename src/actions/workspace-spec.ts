@@ -49,5 +49,7 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 	const bak = join(dir, 'E2X2_OTG', `.E2X2_OTG_${name}.TPwork.bak`)
 	if (existsSync(path) && !existsSync(bak)) copyFileSync(path, bak)
 	renameSync(tmp, path)
+	// like the app's "Save the current workspace and download to the device"
+	if (!conn.storeOnDevice()) throw new Error('The workspace file was saved, but the device is not connected, so the values were not stored on it.')
 	return path
 }

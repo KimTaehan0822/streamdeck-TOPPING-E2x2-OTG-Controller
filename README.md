@@ -51,7 +51,7 @@ Elgato Stream Deck의 키와 다이얼로 **TOPPING E2x2 OTG** 믹서를 조작�
 | 디지털 게인 | 입력 디지털 게인 (키) |
 | 디지털 게인 다이얼 | 입력 디지털 게인 (다이얼, 누르면 입력 음소거) |
 | Source select | 루프백과 출력(OUT 1/2, Mobile OUT, S/PDIF OUT)에 보낼 소리 고르기 |
-| Workspace load/save | 작업 공간 파일 불러오기 / 현재 값을 새 작업 공간 파일로 저장 |
+| Workspace load/save | 작업 공간 파일 불러오기 / 현재 값을 새 작업 공간 파일로 저장하고 장치에도 기록(전원을 꺼도 유지) |
 
 Fader, Button fader, VU dial, Mute는 대상으로 **Mix 채널**(Mix A~D의 채널), **루프백**, **출력** 중 하나를 고릅니다. LINK를 끄면 스테레오 채널이 L/R 두 개가 되고, Mute·Solo·Pan 키는 대상에서 짝 전체 / L / R을 고를 수 있습니다.
 
