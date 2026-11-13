@@ -24,7 +24,7 @@ The device does not report its current mixer values. So the plugin keeps the mix
 
 ### Recommended workflow
 
-1. Change values **with Stream Deck**.
+1. Use Stream Deck as your main control. **(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.**
 2. To make the TOPPING app show the same values, press a **TOPPING app restart key** (토핑 앱 다시 켜기) in **Save Stream Deck values, then restart** mode. Save and Load keys do the same when pressed while **Restart the TOPPING app to match** is on.
 
    > ⚠ **The TOPPING app closes and opens again for 2-3 seconds.** Changes made in the app but not saved there are lost.

@@ -16,7 +16,7 @@ const NOTICE = `
 	<b>Heads up:</b> <span>values changed from Stream Deck are not shown in the TOPPING app, and the app can overwrite them (it goes back to the values it remembers when you change the Mix view or restart it).</span>
 	<details><summary>Recommended workflow</summary>
 	<ol>
-		<li><span>Change values with Stream Deck.</span></li>
+		<li><span>Use Stream Deck as your main control.</span> <b>(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.</b></li>
 		<li><span>To make the TOPPING app show the same values, press a TOPPING app restart key in "Save Stream Deck values, then restart" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.</span> <b>The TOPPING app closes and opens again for 2-3 seconds, and changes not saved in the app are lost.</b></li>
 		<li><span>Overwrote the wrong values? The restart key's "Undo to the previous version" mode puts back the version from before.</span></li>
 		<li><span>Changed values in the TOPPING app itself? Save the workspace in the app, and the plugin reads it again.</span></li>
@@ -38,7 +38,8 @@ const TEXT = {
 		'Stream Deck で変更した値は TOPPING アプリの画面には表示されず、アプリに上書きされることがあります。アプリで Mix の画面を切り替えたり、アプリを再起動したりすると、アプリが覚えている値に戻ります。',
 	],
 	'Recommended workflow': ['권장 사용법', 'おすすめの手順'],
-	'Change values with Stream Deck.': ['값은 Stream Deck으로 바꿉니다.', '値は Stream Deck で変更します。'],
+	'Use Stream Deck as your main control.': ['스트림덱 위주로 사용합니다.', 'Stream Deck を中心に使います。'],
+	'(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.': ['(중요) 스트림덱 플러그인과 토핑 컨트롤 센터 앱은 서로 실시간 연동이 되지 않습니다.', '(重要) Stream Deck プラグインと TOPPING Control Center アプリは、お互いにリアルタイムでは連動しません。'],
 	'To make the TOPPING app show the same values, press a TOPPING app restart key in "Save Stream Deck values, then restart" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.': [
 		'TOPPING 앱 화면도 같은 값으로 맞추려면 "토핑 앱 다시 켜기" 키를 "스트림덱 값을 저장하고 다시 켜기" 모드로 누릅니다. 저장·불러오기 키도 "토핑 앱 다시 켜서 맞추기"가 켜져 있으면 같은 일을 합니다.',
 		'TOPPING アプリの画面も同じ値に合わせるには、「토핑 앱 다시 켜기」(TOPPING アプリ再起動) キーを「Stream Deck の値を保存してから再起動」モードで押します。保存・読み込みキーも「TOPPINGアプリを再起動して合わせる」がオンなら同じことをします。',
