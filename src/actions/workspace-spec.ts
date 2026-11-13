@@ -14,16 +14,17 @@ const pathOf = (dir: string, name: string) => join(dir, 'E2X2_OTG', `E2X2_OTG_${
 const same = (a: string, b: string) => resolve(a).toLowerCase() === resolve(b).toLowerCase() // Windows paths are case-insensitive
 
 /** A reason the save key would refuse this name, or undefined. */
-export function saveProblem(dir: string, name: unknown): string | undefined {
+export function saveProblem(dir: string, name: unknown, restart = false): string | undefined {
 	if (!validName(name)) return 'Invalid name: use 1-60 characters without \\ / : * ? " < > | or "..".'
 	const current = currentWorkspacePath(dir)
-	if (current && same(current, pathOf(dir, name))) return 'The TOPPING app is using this workspace. Pick another name.'
+	// the app restart kills the app before it can save over the file, so its open workspace is fine then
+	if (!restart && current && same(current, pathOf(dir, name))) return 'The TOPPING app is using this workspace. Pick another name.'
 	return undefined
 }
 
 /** A notice (not a refusal) when saving would replace another saved workspace. */
-export function overwriteNotice(dir: string, name: unknown): string | undefined {
-	return validName(name) && !saveProblem(dir, name) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak.' : undefined
+export function overwriteNotice(dir: string, name: unknown, restart = false): string | undefined {
+	return validName(name) && !saveProblem(dir, name, restart) && existsSync(pathOf(dir, name)) ? 'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak.' : undefined
 }
 
 export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown): void {
@@ -32,10 +33,10 @@ export function loadWorkspace(conn: E2x2Connection, dir: string, name: unknown):
 }
 
 /** Writes the plugin's state as a new workspace, using the app's current file as the template for fields we do not model; `store` also keeps the values on the device. */
-export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown, store = true): string {
+export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown, store = true, restart = false): string {
 	// without a loaded workspace the state is made-up defaults (all mixes silent)
 	if (!conn.loaded) throw new Error('No workspace is loaded yet. Open one in the TOPPING app or press a Workspace load key.')
-	const problem = saveProblem(dir, name)
+	const problem = saveProblem(dir, name, restart)
 	if (problem) throw new Error(problem)
 	const template = currentWorkspacePath(dir)
 	if (!template) throw new Error('No workspace is open in the TOPPING app to use as a template.')

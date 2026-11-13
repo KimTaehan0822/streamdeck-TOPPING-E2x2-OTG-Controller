@@ -49,7 +49,7 @@ test('every English text on the settings screens is in TEXT', () => {
 })
 
 test('every message the plugin sends to the workspace screen is in TEXT', () => {
-	const src = readFileSync('src/actions/workspace-spec.ts', 'utf8')
+	const src = ['src/actions/workspace-spec.ts', 'src/workspace/app.ts'].map((f) => readFileSync(f, 'utf8')).join('\n')
 	const messages = [...src.matchAll(/'([A-Z][^'\n]* [^'\n]*\.)'/g)].map((m) => new Function(`return '${m[1]}'`)())
 	assert.ok(messages.length >= 4) // invalid name, in use, exists, no template
 	for (const m of messages) assert.ok(m in TEXT, m)

@@ -66,6 +66,7 @@ const TEXT = {
 		'작업 공간 파일은 저장했지만 장치가 연결되어 있지 않아 장치에는 기록하지 못했습니다.',
 		'ワークスペースファイルは保存しましたが、デバイスが接続されていないため、デバイスには記録できませんでした。',
 	],
+	'The TOPPING app did not close, so it was not restarted.': ['TOPPING 앱이 닫히지 않아 다시 켜지 못했습니다.', 'TOPPING アプリが閉じなかったため、再起動できませんでした。'],
 	'The TOPPING app is using this workspace. Pick another name.': ['TOPPING 앱이 이 작업 공간을 사용 중입니다. 다른 이름을 고르세요.', 'TOPPING アプリがこのワークスペースを使用中です。別の名前にしてください。'],
 	'A workspace with this name exists. Pressing the key replaces it and keeps the old file as .E2X2_OTG_<name>.TPwork.bak.': [
 		'같은 이름의 작업 공간이 이미 있습니다. 키를 누르면 덮어쓰고, 원래 파일은 .E2X2_OTG_<이름>.TPwork.bak 으로 남깁니다.',
@@ -138,6 +139,7 @@ const TEXT = {
 	'e.g. -20 or 0': ['예: -20 또는 0', '例: -20 または 0'],
 	'Touch tap mutes': ['화면 터치로 음소거', 'タッチでミュート'],
 	'Also store on the device': ['장치에도 기록', 'デバイスにも記録'],
+	'Restart the TOPPING app to match': ['토핑 앱 다시 켜서 맞추기', 'TOPPINGアプリを再起動して合わせる'],
 	Load: ['불러오기', '読み込み'],
 	Save: ['저장', '保存'],
 	Workspace: ['작업 공간', 'ワークスペース'],

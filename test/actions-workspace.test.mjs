@@ -164,3 +164,17 @@ test('save refuses without a loaded workspace and writes nothing', () => {
 		t.done()
 	}
 })
+
+test('with the app restart on, the save key may write the workspace the app uses (the kill skips the app exit save)', () => {
+	const t = setup()
+	try {
+		assert.equal(saveProblem(t.dir, 'App', true), undefined)
+		assert.match(saveProblem(t.dir, 'App'), /using this workspace/)
+		const path = saveWorkspace(t.conn, t.dir, 'App', false, true)
+		assert.equal(path, join(t.dir, 'E2X2_OTG', 'E2X2_OTG_App.TPwork'))
+		assert.ok(existsSync(join(t.dir, 'E2X2_OTG', '.E2X2_OTG_App.TPwork.bak')))
+		assert.throws(() => saveWorkspace(t.conn, t.dir, 'App', false), /using this workspace/)
+	} finally {
+		t.done()
+	}
+})

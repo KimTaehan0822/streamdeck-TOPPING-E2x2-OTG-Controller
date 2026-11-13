@@ -16,6 +16,7 @@
 			if (s.mode === 'save')
 				html += text('name', 'New workspace name', 'e.g. Streaming') + '<sdpi-item label="Also store on the device"><sdpi-checkbox setting="store" default="true"></sdpi-checkbox></sdpi-item>' + '<div id="warning" class="notice danger" hidden><b id="warningHead">Cannot save:</b> <span id="warningText"></span></div>'
 			else html += `<sdpi-item label="Workspace"><sdpi-select setting="name" datasource="workspaces" placeholder="Select"></sdpi-select></sdpi-item>`
+			html += '<sdpi-item label="Restart the TOPPING app to match"><sdpi-checkbox setting="restart" default="true"></sdpi-checkbox></sdpi-item>'
 			return html
 		}, ['mode'])
 		// The plugin tells us when the chosen name is not allowed.
