@@ -22,17 +22,19 @@ Get `TOPPING-E2x2-OTG-StreamDeck-v<version>.zip` from the [latest release](https
 
 The device does not report its current mixer values. So the plugin keeps the mixer values itself, and reads the TOPPING app's workspace file (`.TPwork`) at start-up and whenever that file changes to stay in sync. When you change the Mix view in the app or restart the app, the app sends the values it remembers back to the device.
 
-### Recommended workflow (4 steps)
+### Recommended workflow
 
-1. In the TOPPING app, set the volumes you want and **save the workspace**.
-2. At the top of the app, click the **download icon** to the right of the workspace name.
-3. Choose **"Save the current workspace and download to the device"** and click **OK**. The workspace is saved and also written to the device.
+1. Change values **with Stream Deck**.
+2. To make the TOPPING app show the same values, press a **TOPPING app restart key** (토핑 앱 다시 켜기) in **Save Stream Deck values, then restart** mode. Save and Load keys do the same when pressed while **Restart the TOPPING app to match** is on.
 
-   ![The download window: the red mark shows the item to choose](docs/images/download-to-device.png)
+   > ⚠ **The TOPPING app closes and opens again for 2-3 seconds.** Changes made in the app but not saved there are lost.
 
-4. In Stream Deck, press a **Workspace load key** to load that workspace. Now the device and the plugin hold the same values.
+3. Overwrote the wrong values? The same key's **Undo to the previous version** mode puts back the version from before.
+4. Changed values in the TOPPING app itself? Save the workspace in the app, and the plugin reads it again.
 
-After that, use Stream Deck as your main control. If you change values in the app again, do steps 1 to 4 once more.
+To keep the values after the interface is switched off and on, keep **Also store on the device** on for the save key, or click the **download icon** to the right of the workspace name at the top of the app, choose **"Save the current workspace and download to the device"** and click **OK**.
+
+![The download window: the red mark shows the item to choose](docs/images/download-to-device.png)
 
 ## Requirements
 

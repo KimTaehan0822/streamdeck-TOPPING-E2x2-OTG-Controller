@@ -16,10 +16,10 @@ const NOTICE = `
 	<b>Heads up:</b> <span>values changed from Stream Deck are not shown in the TOPPING app, and the app can overwrite them (it goes back to the values it remembers when you change the Mix view or restart it).</span>
 	<details><summary>Recommended workflow</summary>
 	<ol>
-		<li>In the TOPPING app, set your levels and save the workspace.</li>
-		<li>Click the download icon to the right of the workspace name and choose "Save the current workspace and download to the device", then OK.</li>
-		<li>Press a Stream Deck Workspace load key for that workspace, so the device and this plugin hold the same values.</li>
-		<li>After that, use Stream Deck as your main control.</li>
+		<li><span>Change values with Stream Deck.</span></li>
+		<li><span>To make the TOPPING app show the same values, press a TOPPING app restart key in "Save Stream Deck values, then restart" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.</span> <b>The TOPPING app closes and opens again for 2-3 seconds, and changes not saved in the app are lost.</b></li>
+		<li><span>Overwrote the wrong values? The restart key's "Undo to the previous version" mode puts back the version from before.</span></li>
+		<li><span>Changed values in the TOPPING app itself? Save the workspace in the app, and the plugin reads it again.</span></li>
 	</ol></details>
 </div>
 <sdpi-item label="Language"><sdpi-select setting="language" global default="en">
@@ -38,19 +38,23 @@ const TEXT = {
 		'Stream Deck で変更した値は TOPPING アプリの画面には表示されず、アプリに上書きされることがあります。アプリで Mix の画面を切り替えたり、アプリを再起動したりすると、アプリが覚えている値に戻ります。',
 	],
 	'Recommended workflow': ['권장 사용법', 'おすすめの手順'],
-	'In the TOPPING app, set your levels and save the workspace.': [
-		'TOPPING 앱에서 볼륨을 원하는 값으로 맞추고 작업 공간(Workspace)을 저장합니다.',
-		'TOPPING アプリで音量を好みの値に合わせ、ワークスペースを保存します。',
+	'Change values with Stream Deck.': ['값은 Stream Deck으로 바꿉니다.', '値は Stream Deck で変更します。'],
+	'To make the TOPPING app show the same values, press a TOPPING app restart key in "Save Stream Deck values, then restart" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.': [
+		'TOPPING 앱 화면도 같은 값으로 맞추려면 "토핑 앱 다시 켜기" 키를 "스트림덱 값을 저장하고 다시 켜기" 모드로 누릅니다. 저장·불러오기 키도 "토핑 앱 다시 켜서 맞추기"가 켜져 있으면 같은 일을 합니다.',
+		'TOPPING アプリの画面も同じ値に合わせるには、「토핑 앱 다시 켜기」(TOPPING アプリ再起動) キーを「Stream Deck の値を保存してから再起動」モードで押します。保存・読み込みキーも「TOPPINGアプリを再起動して合わせる」がオンなら同じことをします。',
 	],
-	'Click the download icon to the right of the workspace name and choose "Save the current workspace and download to the device", then OK.': [
-		'작업 공간 이름 오른쪽의 다운로드 아이콘을 누르고, 앱에 영어로 표시되는 "Save the current workspace and download to the device" (현재 작업 공간을 저장하고 장치에 다운로드)를 고른 뒤 OK를 누릅니다.',
-		'ワークスペース名の右にあるダウンロードアイコンをクリックし、アプリに英語で表示される "Save the current workspace and download to the device" (現在のワークスペースを保存してデバイスにダウンロード) を選んで OK を押します。',
+	'The TOPPING app closes and opens again for 2-3 seconds, and changes not saved in the app are lost.': [
+		'이때 TOPPING 앱이 2~3초 꺼졌다 다시 켜지고, 앱에서 바꾸고 저장하지 않은 값은 사라집니다.',
+		'このとき TOPPING アプリが 2〜3 秒止まってから起動し直し、アプリで変えて保存していない値は失われます。',
 	],
-	'Press a Stream Deck Workspace load key for that workspace, so the device and this plugin hold the same values.': [
-		'Stream Deck의 Workspace 불러오기 키를 눌러 그 작업 공간을 불러옵니다. 그러면 장치와 이 플러그인이 같은 값을 갖게 됩니다.',
-		'Stream Deck の Workspace 読み込みキーを押して、そのワークスペースを読み込みます。これでデバイスとこのプラグインが同じ値になります。',
+	'Overwrote the wrong values? The restart key\'s "Undo to the previous version" mode puts back the version from before.': [
+		'잘못 덮어썼다면 다시 켜기 키의 "직전으로 되돌리기" 모드로 바로 전 값을 되살립니다.',
+		'間違えて上書きしたときは、再起動キーの「直前に戻す」モードで直前の値に戻せます。',
 	],
-	'After that, use Stream Deck as your main control.': ['그다음부터는 Stream Deck을 주로 사용하세요.', 'その後は Stream Deck をメインの操作に使ってください。'],
+	'Changed values in the TOPPING app itself? Save the workspace in the app, and the plugin reads it again.': [
+		'TOPPING 앱에서 직접 값을 바꿨다면 앱에서 작업 공간을 저장하세요. 플러그인이 그 값을 다시 읽습니다.',
+		'TOPPING アプリで直接値を変えたときは、アプリでワークスペースを保存してください。プラグインがその値を読み直します。',
+	],
 	'48V phantom power:': ['48V 팬텀 전원:', '48V ファンタム電源:'],
 	'it can damage ribbon and some dynamic microphones, and it can pop speakers. Turn it on only with a condenser microphone connected, and turn the monitor level down first. The plugin sends it to the device straight away.': [
 		'리본 마이크와 일부 다이내믹 마이크가 망가질 수 있고, 스피커에서 큰 "퍽" 소리가 날 수 있습니다. 콘덴서 마이크를 연결했을 때만 켜고, 켜기 전에 모니터 볼륨을 먼저 낮추세요. 플러그인은 이 설정을 장치에 바로 보냅니다.',
