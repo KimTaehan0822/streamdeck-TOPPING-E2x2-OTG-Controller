@@ -259,6 +259,20 @@
 					"Image": "imgs/channel"
 				}
 			]
+		},
+		{
+			"Name": "토핑 앱 다시 켜기",
+			"UUID": "com.haeunga0822.topping-e2x2.app-restart",
+			"Icon": "imgs/channel",
+			"Controllers": [
+				"Keypad"
+			],
+			"PropertyInspectorPath": "ui/app-restart.html",
+			"States": [
+				{
+					"Image": "imgs/channel"
+				}
+			]
 		}
 	],
 	"CategoryIcon": "imgs/category"

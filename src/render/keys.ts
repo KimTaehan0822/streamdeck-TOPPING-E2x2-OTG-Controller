@@ -112,4 +112,10 @@ export function renderWorkspaceKey(v: { mode: 'load' | 'save'; name: string; act
 	return frame(K, K, b, v.overlay)
 }
 
+/** TOPPING app restart key, laid out like the workspace key: RESTART over SYNC (save first) or APP (just restart). */
+export function renderRestartKey(v: { mode: 'sync' | 'plain'; overlay: Overlay }): string {
+	const b = `<rect width="${K}" height="${K}" fill="${BG}"/>` + plainText(72, 40, 'RESTART', { size: 22, fill: DIM }) + text(72, 96, v.mode === 'sync' ? 'SYNC' : 'APP', 30, WHITE)
+	return frame(K, K, b, v.overlay)
+}
+
 export { renderVuStrip, renderValueStrip, renderButtonFader, type MeterView } from './meter.js'

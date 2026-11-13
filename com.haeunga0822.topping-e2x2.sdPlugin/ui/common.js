@@ -140,6 +140,17 @@ const TEXT = {
 	'Touch tap mutes': ['화면 터치로 음소거', 'タッチでミュート'],
 	'Also store on the device': ['장치에도 기록', 'デバイスにも記録'],
 	'Restart the TOPPING app to match': ['토핑 앱 다시 켜서 맞추기', 'TOPPINGアプリを再起動して合わせる'],
+	'Save Stream Deck values, then restart': ['스트림덱 값을 저장하고 다시 켜기', 'Stream Deck の値を保存してから再起動'],
+	'Just restart': ['그냥 다시 켜기', '再起動のみ'],
+	'Saves the Stream Deck values into the workspace the TOPPING app has open, then restarts the app with it.': [
+		'스트림덱 값을 TOPPING 앱이 열고 있는 작업 공간에 저장한 뒤, 그 작업 공간으로 앱을 다시 켭니다.',
+		'Stream Deck の値を TOPPING アプリが開いているワークスペースに保存し、そのワークスペースでアプリを再起動します。',
+	],
+	'Restarts the TOPPING app without saving. The app sends its saved workspace to the device, and the keys follow it.': [
+		'저장하지 않고 TOPPING 앱을 다시 켭니다. 앱이 저장된 작업 공간을 장치에 보내고, 키도 그 값을 따릅니다.',
+		'保存せずに TOPPING アプリを再起動します。アプリが保存済みのワークスペースをデバイスに送り、キーもその値に従います。',
+	],
+	'No workspace is open in the TOPPING app to restart with.': ['다시 켤 때 쓸, TOPPING 앱에서 열린 작업 공간이 없습니다.', '再起動に使う、TOPPING アプリで開いているワークスペースがありません。'],
 	Load: ['불러오기', '読み込み'],
 	Save: ['저장', '保存'],
 	Workspace: ['작업 공간', 'ワークスペース'],

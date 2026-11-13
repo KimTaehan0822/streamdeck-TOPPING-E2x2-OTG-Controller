@@ -178,3 +178,33 @@ test('with the app restart on, the save key may write the workspace the app uses
 		t.done()
 	}
 })
+
+test('syncOpenWorkspace writes the plugin state into the workspace the app has open', async () => {
+	const { syncOpenWorkspace, openWorkspaceName } = await import('../dist/actions/workspace-spec.js')
+	const t = setup()
+	try {
+		assert.equal(openWorkspaceName(t.dir), 'App')
+		t.conn.loadState({ ...parseWorkspace(fixture), inputs: { ...parseWorkspace(fixture).inputs, in1: { ...parseWorkspace(fixture).inputs.in1, gain: 4321 } } })
+		t.port.written.length = 0
+		assert.equal(syncOpenWorkspace(t.conn, t.dir), 'App')
+		assert.equal(parseWorkspace(readFileSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_App.TPwork'), 'utf8')).inputs.in1.gain, 4321)
+		assert.equal(t.port.written.length, 0) // the restarted app sends the file; nothing is stored on the device
+		rmSync(join(t.dir, 'sound_card_workspace_file.TPconfig'))
+		assert.equal(openWorkspaceName(t.dir), undefined)
+		assert.throws(() => syncOpenWorkspace(t.conn, t.dir), /No workspace is open/)
+	} finally {
+		t.done()
+	}
+})
+
+test('syncOpenWorkspace refuses before a workspace is loaded and leaves the file alone', async () => {
+	const { syncOpenWorkspace } = await import('../dist/actions/workspace-spec.js')
+	const t = setup()
+	try {
+		t.conn.loaded = false
+		assert.throws(() => syncOpenWorkspace(t.conn, t.dir), /No workspace is loaded/)
+		assert.equal(readFileSync(join(t.dir, 'E2X2_OTG', 'E2X2_OTG_App.TPwork'), 'utf8'), fixture)
+	} finally {
+		t.done()
+	}
+})

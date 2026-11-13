@@ -54,3 +54,18 @@ export function saveWorkspace(conn: E2x2Connection, dir: string, name: unknown, 
 	if (store && !conn.storeOnDevice()) throw new Error('The workspace file was saved, but the device is not connected, so the values were not stored on it.')
 	return path
 }
+
+/** The name of the workspace the TOPPING app has open, or undefined. */
+export function openWorkspaceName(dir: string): string | undefined {
+	const path = currentWorkspacePath(dir)
+	return path && /E2X2_OTG_(.+)\.TPwork$/i.exec(path)?.[1]
+}
+
+/** Writes the plugin state into the app's open workspace (the restart key, mode "sync") and returns its name. */
+export function syncOpenWorkspace(conn: E2x2Connection, dir: string): string {
+	if (!conn.loaded) throw new Error('No workspace is loaded yet. Open one in the TOPPING app or press a Workspace load key.')
+	const name = openWorkspaceName(dir)
+	if (!name) throw new Error('No workspace is open in the TOPPING app to restart with.')
+	saveWorkspace(conn, dir, name, false, true)
+	return name
+}
