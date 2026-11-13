@@ -10,6 +10,27 @@ const none = 'none'
 const mv = (o = {}) => ({ name: 'PB 1/2', left: lv(-10), right: lv(-14), fader: lv(-3), faderDb: '-3.0 dB', levelDb: '-9.0', muted: false, overlay: none, ...o })
 const tg = (o = {}) => ({ title: 'MUTE', label: 'PB 1/2', on: false, color: 'red', overlay: none, ...o })
 
+// A Stream Deck title used to blank the whole switch key; now only the row where it sits is left out.
+test('toggle key with a Stream Deck title keeps the rows away from it', () => {
+	const rows = (svg) => [...svg.matchAll(/<text[^>]* y="([\d.]+)"[^>]*>([^<]*)</g)].map((m) => [m[2], +m[1]])
+	const at = (svg) => Object.fromEntries(rows(svg))
+	const bottom = at(renderToggleKey(tg({ mix: 0, free: 'bottom' })))
+	assert.deepEqual(Object.keys(bottom), ['MUTE', 'MIX A'])
+	assert.ok(bottom['MIX A'] < 95)
+	assert.deepEqual(Object.keys(at(renderToggleKey(tg({ mix: 0, free: 'top' })))), ['MIX A', 'PB 1/2'])
+	const middle = at(renderToggleKey(tg({ mix: 0, free: 'middle' })))
+	assert.deepEqual(Object.keys(middle), ['MUTE', 'PB 1/2'])
+	// without a mix: the remaining row moves away from the title
+	const nb = at(renderToggleKey(tg({ free: 'bottom' })))
+	assert.deepEqual(Object.keys(nb), ['MUTE'])
+	assert.ok(nb.MUTE < 70)
+	const nt = at(renderToggleKey(tg({ free: 'top' })))
+	assert.deepEqual(Object.keys(nt), ['PB 1/2'])
+	assert.ok(nt['PB 1/2'] > 85)
+	const nm = at(renderToggleKey(tg({ free: 'middle' })))
+	assert.ok(nm.MUTE < 50 && nm['PB 1/2'] > 100)
+})
+
 // Samples mirror the approved mockup; written out for eyeballing (contact sheet).
 const samples = {
 	'toggle-mute-off-a': renderToggleKey(tg({ mix: 0 })),

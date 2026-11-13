@@ -19,6 +19,8 @@ export interface RenderContext {
 	overlay: Overlay
 	/** The user set a title for this key's current state in the Stream Deck app, so the drawn text would collide with it. */
 	userTitle: boolean
+	/** Where that title sits on the key; set only when there is one. */
+	titleAlign?: 'top' | 'middle' | 'bottom'
 }
 
 interface Instance<S extends JsonObject> {
@@ -29,6 +31,8 @@ interface Instance<S extends JsonObject> {
 	state?: 0 | 1
 	/** Title the user set in the Stream Deck app, by native state. */
 	titles: string[]
+	/** Where the Stream Deck app draws that title, by native state. */
+	aligns: ('top' | 'middle' | 'bottom')[]
 }
 
 /** Lifecycle shared by every action: one connection, subscribed while any instance is visible, redraws throttled by Redrawer (meters call onChange per report). */
@@ -59,7 +63,7 @@ export abstract class E2x2Action<S extends JsonObject> extends SingletonAction<S
 				throw error // Redrawer forgets the image and retries
 			}
 		})
-		this.instances.set(action.id, { action, settings: ev.payload.settings, redrawer, titles: [] })
+		this.instances.set(action.id, { action, settings: ev.payload.settings, redrawer, titles: [], aligns: [] })
 		if (action.isDial()) {
 			await action.setFeedbackLayout('layouts/strip.json').catch((error) => {
 				console.error(error instanceof Error ? error.message : String(error))
@@ -81,6 +85,7 @@ export abstract class E2x2Action<S extends JsonObject> extends SingletonAction<S
 		const instance = this.instances.get(ev.action.id)
 		if (!instance) return
 		instance.titles[ev.payload.state ?? 0] = ev.payload.titleParameters.showTitle ? ev.payload.title : ''
+		instance.aligns[ev.payload.state ?? 0] = ev.payload.titleParameters.titleAlignment
 		this.refresh(ev.action.id)
 	}
 
@@ -121,6 +126,7 @@ export abstract class E2x2Action<S extends JsonObject> extends SingletonAction<S
 				dial: instance.action.isDial(),
 				overlay: !this.connection.online ? 'offline' : this.connection.loaded ? 'none' : 'config',
 				userTitle: !!instance.titles[instance.state ?? 0],
+				titleAlign: instance.titles[instance.state ?? 0] ? (instance.aligns[instance.state ?? 0] ?? 'bottom') : undefined,
 			}
 			instance.redrawer.request(() => svgDataUrl(this.render(instance.settings, ctx)))
 		}

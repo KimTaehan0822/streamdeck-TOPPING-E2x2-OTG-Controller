@@ -30,7 +30,7 @@ const chip = (cx: number, cy: number, mix: Mix, size: number) => {
 }
 
 /** Switch key. With a mix: title / mix chip / label rows; otherwise title + label. `on` fills the whole key. */
-export function renderToggleKey(v: { title: string; mix?: Mix; label: string; on: boolean; color: KeyColor; overlay: Overlay }): string {
+export function renderToggleKey(v: { title: string; mix?: Mix; label: string; on: boolean; color: KeyColor; overlay: Overlay; free?: 'top' | 'middle' | 'bottom' }): string {
 	let b = `<rect width="${K}" height="${K}" fill="${v.on ? KEY_COLORS[v.color] : BG}"/>`
 	if (!v.on) b += `<rect x="3" y="3" width="${K - 6}" height="${K - 6}" rx="10" fill="none" stroke="${OUTLINE}" stroke-width="2"/>`
 	const tc = v.on ? WHITE : DIM
@@ -44,10 +44,20 @@ export function renderToggleKey(v: { title: string; mix?: Mix; label: string; on
 		title = wrap(v.title, 22)
 		label = wrap(v.label, 24)
 	}
-	const cy = stack(mix ? [height(title), 30, height(label)] : [height(title), height(label)], mix ? 73 : 83)
-	b += textBlock(title, cy[0], tc)
-	if (mix) b += chip(72, cy[1], v.mix!, 24) + textBlock(label, cy[2], lc)
-	else b += textBlock(label, cy[1], lc)
+	// `free`: the Stream Deck title sits there (top / middle / bottom), so the row in that place is left out
+	if (mix) {
+		const cy = stack([height(title), 30, height(label)], 73)
+		if (v.free !== 'top') b += textBlock(title, cy[0], tc)
+		if (v.free !== 'middle') b += chip(72, cy[1], v.mix!, 24)
+		if (v.free !== 'bottom') b += textBlock(label, cy[2], lc)
+	} else if (v.free === 'middle') {
+		b += textBlock(title, stack([height(title)], 30)[0], tc) + textBlock(label, stack([height(label)], 114)[0], lc)
+	} else if (v.free) {
+		b += v.free === 'bottom' ? textBlock(title, stack([height(title)], 50)[0], tc) : textBlock(label, stack([height(label)], 96)[0], lc)
+	} else {
+		const cy = stack([height(title), height(label)], 83)
+		b += textBlock(title, cy[0], tc) + textBlock(label, cy[1], lc)
+	}
 	return frame(K, K, b, v.overlay)
 }
 
