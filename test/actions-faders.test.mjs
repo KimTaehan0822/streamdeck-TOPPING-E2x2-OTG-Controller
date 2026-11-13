@@ -104,7 +104,7 @@ test('VU dial view: a mix channel shows its own playback meter, loopback its 5x,
 	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'pb56' }), [0, 0])
 	assert.deepEqual(lr({ kind: 'mix', mix: 0, channel: 'in12' }), [0, 0]) // no IN meter reports in this map
 	assert.deepEqual(lr({ kind: 'loopback', channel: 'lp12' }), [0.7 * 0.8, 0.71 * 0.8])
-	assert.equal(meterOf({ kind: 'mix', mix: 2, channel: 'otg', side: 'pair' }), undefined)
+	assert.deepEqual(meterOf({ kind: 'mix', mix: 2, channel: 'otg', side: 'pair' }), ['otgL_A', 'otgR_A'])
 	assert.deepEqual(meterOf({ kind: 'mix', mix: 1, channel: 'in12', side: 'pair' }), ['in1L_A', 'in2R_A'])
 	assert.deepEqual(meterOf({ kind: 'mix', mix: 2, channel: 'pb78', side: 'pair' }), ['pb78L_A', 'pb78R_A'])
 })

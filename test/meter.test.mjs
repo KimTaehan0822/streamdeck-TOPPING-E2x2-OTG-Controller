@@ -93,3 +93,10 @@ test('input meters: 21 04 is IN 1, 23 04 is IN 2 (capture 2026-11-13, sound into
 	// item 04 elsewhere is unseen: ignored, so it cannot overwrite that channel's item 01 meter
 	assert.equal(parseMeter(Uint8Array.from(Buffer.from('22332001014104FFFFFD7ED875667700', 'hex'))), undefined)
 })
+
+test('OTG meters: 22 04 is OTG L, 24 04 is OTG R (capture 2026-11-14, phone audio over OTG)', () => {
+	const l = parseMeter(Uint8Array.from(Buffer.from('22332001012204FFFFFF196135667700', 'hex')))
+	assert.equal(l.channel, 'otgL_A')
+	assert.ok(Math.abs(l.db - -23.1) < 0.1)
+	assert.equal(parseMeter(Uint8Array.from(Buffer.from('22332001012404FFFFFF196135667700', 'hex'))).channel, 'otgR_A')
+})

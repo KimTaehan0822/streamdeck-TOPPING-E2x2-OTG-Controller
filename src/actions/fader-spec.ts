@@ -130,8 +130,7 @@ export function meterOf(t: Target): [MeterChannel, MeterChannel] | undefined {
 	if (t.kind === 'loopback') return [`${t.id}L_A`, `${t.id}R_A`]
 	const c = t.channel
 	if (c === 'in12') return ['in1L_A', 'in2R_A']
-	// shortcut: OTG has no known meter code, so it shows empty bars; upgrade once captured
-	return c === 'otg' ? undefined : [`${c}L_A`, `${c}R_A`]
+	return [`${c}L_A`, `${c}R_A`]
 }
 
 /** Inverse of dbToLevel, by bisection (the scale is monotonic). */

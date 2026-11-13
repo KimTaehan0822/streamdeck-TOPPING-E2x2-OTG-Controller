@@ -4,6 +4,7 @@ const BASE = {
 	0x31: 'out1L', 0x32: 'out2R', 0x33: 'mobileL', 0x34: 'mobileR', 0x5a: 'spdifL', 0x5b: 'spdifR',
 	0x41: 'pb12L', 0x42: 'pb12R', 0x43: 'pb34L', 0x44: 'pb34R', 0x45: 'pb56L', 0x46: 'pb56R', 0x47: 'pb78L', 0x48: 'pb78R',
 	0x21: 'in1L', 0x23: 'in2R', // inputs send item 04 (capture 2026-11-13)
+	0x22: 'otgL', 0x24: 'otgR', // item 04 too; tracked the outputs while a phone played over OTG (capture 2026-11-14)
 	0x51: 'lp12L', 0x52: 'lp12R', 0x53: 'lp34L', 0x54: 'lp34R', 0x55: 'lp56L', 0x56: 'lp56R',
 } as const
 type Base = (typeof BASE)[keyof typeof BASE]
@@ -38,8 +39,8 @@ export function parseMeter(bytes: Uint8Array): Meter | undefined {
 	if (bytes.length < 16 || bytes[7] !== 0xff || bytes[13] !== 0x66 || bytes[14] !== 0x77) return undefined
 	if ([0x22, 0x33, 0x20, 0x01, 0x01].some((b, i) => bytes[i] !== b)) return undefined
 	const base = BASE[bytes[5] as keyof typeof BASE]
-	// item 04 is seen only for the inputs (21 04, 23 04)
-	if (!base || !(bytes[6] === 4 ? bytes[5] === 0x21 || bytes[5] === 0x23 : bytes[6] === 1 || bytes[6] === 2)) return undefined
+	// item 04 is seen only for the inputs and OTG (21-24 04)
+	if (!base || !(bytes[6] === 4 ? bytes[5] >= 0x21 && bytes[5] <= 0x24 : bytes[6] === 1 || bytes[6] === 2)) return undefined
 	const db = new DataView(bytes.buffer, bytes.byteOffset, bytes.length).getInt32(8) / 2560
 	return { channel: `${base}_${bytes[6] === 2 ? 'B' : 'A'}`, db, level: dbToLevel(db) }
 }
