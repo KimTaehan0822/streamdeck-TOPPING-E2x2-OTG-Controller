@@ -62,7 +62,7 @@
 <tr><td>Solo</td><td>Solo on / off / toggle for a Mix channel</td></tr>
 <tr><td>Input option (48V, INST, Ø)</td><td>48V phantom power, INST and Ø (phase invert) for IN 1, IN 2 and the Mobile input</td></tr>
 <tr><td>LINK</td><td>Links or unlinks a stereo channel, per Mix</td></tr>
-<tr><td>출력 컨트롤룸 (output control room)</td><td>The output gain buttons, and monitor HP / TRS / AUX on and off</td></tr>
+<tr><td>출력 컨트롤룸 (output control room)</td><td>Headphone gain (LOW / HIGH), and monitor HP / TRS / AUX on and off</td></tr>
 <tr><td>Fader</td><td>Sets the volume to a fixed value (Set) or moves it one step (Step)</td></tr>
 <tr><td>Button fader (2 keys)</td><td>Two keys (top/bottom or left/right) raise and lower the volume. Holding repeats</td></tr>
 <tr><td>VU dial</td><td>Turn for volume, press for mute (or to recall a set level), shows a level meter</td></tr>
@@ -72,6 +72,7 @@
 <tr><td>디지털 게인 다이얼 (digital gain dial)</td><td>Input digital gain (dial, press to mute the input)</td></tr>
 <tr><td>Source select</td><td>Chooses what a loopback or an output (Out 1/2, Mobile Out, S/PDIF) plays</td></tr>
 <tr><td>Workspace load/save</td><td>Loads a workspace, or saves the current values as a new workspace (see below)</td></tr>
+<tr><td>토핑 앱 다시 켜기 (restart the TOPPING app)</td><td>Force-closes the TOPPING app and starts it again, so the app and the keys show the same values (see below)</td></tr>
 </tbody></table>
 <p>Action names appear in the action list exactly as in the table above, some of them in Korean.</p>
 </section>
@@ -102,10 +103,11 @@
 <li><p><strong>Load:</strong> pick a saved workspace in the <strong>Workspace</strong> list. Pressing the key sends its values to the device and every key follows. The key you loaded last looks switched on.</p></li>
 <li><p><strong>Save:</strong> enter a <strong>New workspace name</strong>. Pressing the key saves the current values as a workspace file with that name. It appears in the TOPPING app's list after the app restarts.</p></li>
 <li><p><strong>Also store on the device</strong> (Save mode, on by default): when on, saving also stores the values in the device itself, so they stay after the interface is switched off and on. This does the same as the TOPPING app's download. When off, only the file is saved.</p></li>
+<li><p><strong>Restart the TOPPING app to match</strong> (both modes, on by default): after saving or loading, the TOPPING app is force-closed and started again in the tray with that workspace open. On start the app sends that workspace to the device, so the app, the device and the keys all show the same values. The app is gone for 2-3 seconds, and changes made in the app but not saved there are lost. Turn it off if you do not want this.</p></li>
 </ul>
 <p><strong>When saving</strong></p>
 <ul>
-<li><p>The key does not save under the name of the workspace the TOPPING app has open, because the app writes its own values over it when it exits. If the settings show "Cannot save", enter another name.</p></li>
+<li><p>With <strong>Restart the TOPPING app to match</strong> off, the key does not save under the name of the workspace the TOPPING app has open, because the app writes its own values over it when it exits. If the settings show "Cannot save", enter another name. With the option on, the app is force-closed before it can write over the file, so that name is allowed.</p></li>
 <li><p>A workspace with the same name is replaced. The original stays in the same folder as the hidden file <code>.E2X2_OTG_&lt;name&gt;.TPwork.bak</code>.</p></li>
 <li><p>If the device is not connected, only the file is saved; the key shows ⚠ and the settings say so.</p></li>
 </ul>
@@ -113,11 +115,20 @@
 <p><img src="../images/download-to-device.png" alt="The TOPPING app's download window"></p>
 </section>
 
+<section><h2>TOPPING app restart key</h2>
+<p>The TOPPING app saves the values it remembers to its workspace file when it exits, and sends that file to the device when it starts. So values set on Stream Deck jump back after the app is closed and opened. This key force-closes the app (with no exit save) and starts it again to remove that mismatch. Pick it in <strong>Mode</strong>:</p>
+<ul>
+<li><p><strong>Save Stream Deck values, then restart</strong> (default): saves the current key values into the workspace the app has open, then restarts the app. The Stream Deck values win.</p></li>
+<li><p><strong>Just restart</strong>: restarts the app without saving. The workspace saved in the app wins, and the device and the keys go back to it.</p></li>
+</ul>
+<p>If the app was not running, the key starts it. If the app does not close within 5 seconds, nothing is changed and the key shows ⚠.</p>
+</section>
+
 <section><h2>Level meters</h2>
 <ul>
 <li><p>Meters move <strong>only while sound is playing</strong>.</p></li>
 <li><p>Each channel has its own meter: a Mix channel shows that channel, a loopback shows the loopback, an output shows the output.</p></li>
-<li><p>The OTG input shows no meter yet.</p></li>
+<li><p>The OTG input shows its meter too.</p></li>
 </ul>
 </section>
 
@@ -127,8 +138,8 @@
 <tr><td>SETUP</td><td>No workspace has been loaded yet</td><td>Open a workspace in the TOPPING app, or press a Workspace load key</td></tr>
 <tr><td>SET CHANNEL</td><td>The key is not set up yet</td><td>Pick the target, channel, name and so on in the settings</td></tr>
 <tr><td>⚠ (briefly)</td><td>A Workspace key could not load or save</td><td>Read the message at the top of its settings</td></tr>
-<tr><td>Values differ from the app</td><td>Values changed by the plugin do not show in the app</td><td>This is normal. To match them, save the workspace in the app or press a load key</td></tr>
-<tr><td>Values set on Stream Deck jump back</td><td>The app sends its own values when it switches Mix view or restarts</td><td>Save the plugin's values with a save key and open that workspace in the app</td></tr>
+<tr><td>Values differ from the app</td><td>Values changed by the plugin do not show in the app</td><td>Press the TOPPING app restart key (Save Stream Deck values, then restart)</td></tr>
+<tr><td>Values set on Stream Deck jump back</td><td>The app sends its own values when it switches Mix view or restarts</td><td>Keep <strong>Restart the TOPPING app to match</strong> on for the save and load keys, or press the TOPPING app restart key</td></tr>
 </tbody></table>
 </section>
 
@@ -137,6 +148,7 @@
 <li><p><strong>Solo</strong> on an input has no effect on the device.</p></li>
 <li><p>Volume goes up to <strong>+12 dB</strong> and digital gain is <strong>0 to +20 dB</strong>. Pan on a linked channel moves exactly as in the TOPPING app.</p></li>
 <li><p><strong>48V</strong> only shows a warning in the settings. Pressing the key turns it on at once, so do not turn it on with anything other than a condenser microphone connected.</p></li>
+<li><p>INST, monitoring, 48V and headphone gain pressed on the device show on the keys at once. The monitoring knob (Input ↔ Playback) is not followed yet.</p></li>
 <li><p>The plugin does not change the device's USB driver. It uses only the HID communication the official driver allows.</p></li>
 </ul>
 </section>
