@@ -1,0 +1,50 @@
+{
+    "Name": "Controller for TOPPING E2x2 OTG",
+    "Description": "TOPPING E2x2 OTG 오디오 인터페이스를 USB로 조작합니다.",
+    "Category": "Controller for TOPPING E2x2 OTG",
+    "com.haeunga0822.topping-e2x2.mute": {
+        "Name": "Mute (음소거)"
+    },
+    "com.haeunga0822.topping-e2x2.solo": {
+        "Name": "Solo (솔로)"
+    },
+    "com.haeunga0822.topping-e2x2.input-option": {
+        "Name": "입력 옵션 (48V, INST, Ø)"
+    },
+    "com.haeunga0822.topping-e2x2.link": {
+        "Name": "LINK (스테레오 묶기)"
+    },
+    "com.haeunga0822.topping-e2x2.output-room": {
+        "Name": "출력 컨트롤룸"
+    },
+    "com.haeunga0822.topping-e2x2.fader": {
+        "Name": "페이더"
+    },
+    "com.haeunga0822.topping-e2x2.button-fader": {
+        "Name": "페이더 (2키)"
+    },
+    "com.haeunga0822.topping-e2x2.vu-dial": {
+        "Name": "VU 다이얼"
+    },
+    "com.haeunga0822.topping-e2x2.pan": {
+        "Name": "Pan (팬)"
+    },
+    "com.haeunga0822.topping-e2x2.pan-dial": {
+        "Name": "Pan 다이얼"
+    },
+    "com.haeunga0822.topping-e2x2.gain": {
+        "Name": "디지털 게인"
+    },
+    "com.haeunga0822.topping-e2x2.gain-dial": {
+        "Name": "디지털 게인 다이얼"
+    },
+    "com.haeunga0822.topping-e2x2.source": {
+        "Name": "Output Source Select (출력 소스 선택)"
+    },
+    "com.haeunga0822.topping-e2x2.workspace": {
+        "Name": "작업 공간 불러오기/저장"
+    },
+    "com.haeunga0822.topping-e2x2.app-restart": {
+        "Name": "토핑 앱 다시 켜기"
+    }
+}

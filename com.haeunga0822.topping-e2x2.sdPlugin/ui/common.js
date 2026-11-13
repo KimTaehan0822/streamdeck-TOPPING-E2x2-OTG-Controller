@@ -17,13 +17,13 @@ const NOTICE = `
 	<details><summary>Recommended workflow</summary>
 	<ol>
 		<li><span>Use Stream Deck as your main control.</span> <b>(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.</b></li>
-		<li><span>To make the TOPPING app show the same values, press a TOPPING app restart key in "Save Stream Deck values, then restart" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.</span> <b>The TOPPING app closes and opens again for 2-3 seconds, and changes not saved in the app are lost.</b></li>
+		<li><span>To make the TOPPING app show the same values, press a TOPPING app restart key in "Match TOPPING app settings" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.</span> <b>The TOPPING app closes and opens again for 2-3 seconds, and changes not saved in the app are lost.</b></li>
 		<li><span>Overwrote the wrong values? The restart key's "Undo to the previous version" mode puts back the version from before.</span></li>
 		<li><span>Changed values in the TOPPING app itself? Save the workspace in the app, and the plugin reads it again.</span></li>
 	</ol></details>
 </div>
-<sdpi-item label="Language"><sdpi-select setting="language" global default="en">
-<option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option>
+<sdpi-item label="Language"><sdpi-select setting="language" global default="auto">
+<option value="auto">Same as Stream Deck</option><option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option>
 </sdpi-select></sdpi-item>`
 document.body.insertAdjacentHTML('afterbegin', NOTICE)
 for (const s of document.querySelectorAll('sdpi-select')) s.append(...s.querySelectorAll('option'))
@@ -37,12 +37,13 @@ const TEXT = {
 		'Stream Deck에서 바꾼 값은 TOPPING 앱 화면에 보이지 않으며, 앱이 그 값을 다시 덮어쓸 수 있습니다. 앱에서 Mix 화면을 바꾸거나 앱을 다시 켜면, 앱이 기억하던 값으로 되돌아갑니다.',
 		'Stream Deck で変更した値は TOPPING アプリの画面には表示されず、アプリに上書きされることがあります。アプリで Mix の画面を切り替えたり、アプリを再起動したりすると、アプリが覚えている値に戻ります。',
 	],
+	'Same as Stream Deck': ['Stream Deck과 같게', 'Stream Deck と同じ'],
 	'Recommended workflow': ['권장 사용법', 'おすすめの手順'],
 	'Use Stream Deck as your main control.': ['스트림덱 위주로 사용합니다.', 'Stream Deck を中心に使います。'],
 	'(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.': ['(중요) 스트림덱 플러그인과 토핑 컨트롤 센터 앱은 서로 실시간 연동이 되지 않습니다.', '(重要) Stream Deck プラグインと TOPPING Control Center アプリは、お互いにリアルタイムでは連動しません。'],
-	'To make the TOPPING app show the same values, press a TOPPING app restart key in "Save Stream Deck values, then restart" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.': [
-		'TOPPING 앱 화면도 같은 값으로 맞추려면 "토핑 앱 다시 켜기" 키를 "스트림덱 값을 저장하고 다시 켜기" 모드로 누릅니다. 저장·불러오기 키도 "토핑 앱 다시 켜서 맞추기"가 켜져 있으면 같은 일을 합니다.',
-		'TOPPING アプリの画面も同じ値に合わせるには、「토핑 앱 다시 켜기」(TOPPING アプリ再起動) キーを「Stream Deck の値を保存してから再起動」モードで押します。保存・読み込みキーも「TOPPINGアプリを再起動して合わせる」がオンなら同じことをします。',
+	'To make the TOPPING app show the same values, press a TOPPING app restart key in "Match TOPPING app settings" mode. Save and Load keys do it too while "Restart the TOPPING app to match" is on.': [
+		'TOPPING 앱 화면도 같은 값으로 맞추려면 "토핑 앱 다시 켜기" 키를 "토핑앱 설정 맞추기" 모드로 누릅니다. 저장·불러오기 키도 "토핑 앱 다시 켜서 맞추기"가 켜져 있으면 같은 일을 합니다.',
+		'TOPPING アプリの画面も同じ値に合わせるには、「토핑 앱 다시 켜기」(TOPPING アプリ再起動) キーを「TOPPINGアプリの設定を合わせる」モードで押します。保存・読み込みキーも「TOPPINGアプリを再起動して合わせる」がオンなら同じことをします。',
 	],
 	'The TOPPING app closes and opens again for 2-3 seconds, and changes not saved in the app are lost.': [
 		'이때 TOPPING 앱이 2~3초 꺼졌다 다시 켜지고, 앱에서 바꾸고 저장하지 않은 값은 사라집니다.',
@@ -145,8 +146,8 @@ const TEXT = {
 	'Touch tap mutes': ['화면 터치로 음소거', 'タッチでミュート'],
 	'Also store on the device': ['장치에도 기록', 'デバイスにも記録'],
 	'Restart the TOPPING app to match': ['토핑 앱 다시 켜서 맞추기', 'TOPPINGアプリを再起動して合わせる'],
-	'Save Stream Deck values, then restart': ['스트림덱 값을 저장하고 다시 켜기', 'Stream Deck の値を保存してから再起動'],
-	'Just restart': ['그냥 다시 켜기', '再起動のみ'],
+	'Match TOPPING app settings': ['토핑앱 설정 맞추기', 'TOPPINGアプリの設定を合わせる'],
+	'Restart TOPPING app': ['토핑앱 재실행', 'TOPPINGアプリを再起動'],
 	'Undo to the previous version': ['직전으로 되돌리기', '直前に戻す'],
 	'Puts back the version of the open workspace from before the last save, then restarts the TOPPING app with it. Press again to return to the newer version.': [
 		'열린 작업 공간을 마지막 저장 바로 전 값으로 되돌린 뒤, 그 값으로 TOPPING 앱을 다시 켭니다. 한 번 더 누르면 새 값으로 돌아갑니다.',
@@ -202,13 +203,19 @@ function showText(el, en) {
 	el.dataset.enText = en
 	el.textContent = tr(en)
 }
+/** The Stream Deck app's own language: the "Same as Stream Deck" choice (and a first start) uses it. */
+let appLanguage = 'en'
 function setLanguage(value) {
-	language = Object.hasOwn({ en: 0, ko: 0, ja: 0 }, value) ? value : 'en'
+	const pick = (v) => (Object.hasOwn({ en: 0, ko: 0, ja: 0 }, v) ? v : undefined)
+	language = pick(value) ?? pick(appLanguage) ?? 'en'
 	translate(document.body)
 }
 new MutationObserver((records) => records.forEach((r) => r.addedNodes.forEach(translate))).observe(document.body, { childList: true, subtree: true })
 document.querySelector('[setting="language"]')?.addEventListener('valuechange', (e) => setLanguage(e.target.value))
-SDPIComponents.streamDeckClient.getGlobalSettings().then((g) => setLanguage(g?.language))
+Promise.all([SDPIComponents.streamDeckClient.getConnectionInfo().catch(() => undefined), SDPIComponents.streamDeckClient.getGlobalSettings()]).then(([c, g]) => {
+	appLanguage = c?.info?.application?.language ?? 'en'
+	setLanguage(g?.language)
+})
 
 /** Custom key name field (empty = the default name, shown as the placeholder). */
 const nameField = (placeholder) =>

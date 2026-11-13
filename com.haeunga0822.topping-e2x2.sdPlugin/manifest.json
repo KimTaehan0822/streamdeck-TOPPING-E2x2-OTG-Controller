@@ -95,7 +95,7 @@
 			]
 		},
 		{
-			"Name": "출력 컨트롤룸",
+			"Name": "Output control room",
 			"UUID": "com.haeunga0822.topping-e2x2.output-room",
 			"Icon": "imgs/global",
 			"Controllers": [
@@ -198,7 +198,7 @@
 			]
 		},
 		{
-			"Name": "디지털 게인",
+			"Name": "Digital gain",
 			"UUID": "com.haeunga0822.topping-e2x2.gain",
 			"Icon": "imgs/fader",
 			"Controllers": [
@@ -212,7 +212,7 @@
 			]
 		},
 		{
-			"Name": "디지털 게인 다이얼",
+			"Name": "Digital gain dial",
 			"UUID": "com.haeunga0822.topping-e2x2.gain-dial",
 			"Icon": "imgs/dial",
 			"Controllers": [
@@ -233,7 +233,7 @@
 			]
 		},
 		{
-			"Name": "Source select",
+			"Name": "Output Source Select",
 			"UUID": "com.haeunga0822.topping-e2x2.source",
 			"Icon": "imgs/channel",
 			"Controllers": [
@@ -261,7 +261,7 @@
 			]
 		},
 		{
-			"Name": "토핑 앱 다시 켜기",
+			"Name": "TOPPING app restart",
 			"UUID": "com.haeunga0822.topping-e2x2.app-restart",
 			"Icon": "imgs/channel",
 			"Controllers": [

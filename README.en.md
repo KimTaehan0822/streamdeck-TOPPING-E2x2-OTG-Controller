@@ -25,7 +25,7 @@ The device does not report its current mixer values. So the plugin keeps the mix
 ### Recommended workflow
 
 1. Use Stream Deck as your main control. **(Important) This Stream Deck plugin and the TOPPING Control Center app do not sync with each other in real time.**
-2. To make the TOPPING app show the same values, press a **TOPPING app restart key** (토핑 앱 다시 켜기) in **Save Stream Deck values, then restart** mode. Save and Load keys do the same when pressed while **Restart the TOPPING app to match** is on.
+2. To make the TOPPING app show the same values, press a **TOPPING app restart key** (토핑 앱 다시 켜기) in **Match TOPPING app settings** mode. Save and Load keys do the same when pressed while **Restart the TOPPING app to match** is on.
 
    > ⚠ **The TOPPING app closes and opens again for 2-3 seconds.** Changes made in the app but not saved there are lost.
 
@@ -64,14 +64,14 @@ Double-click `TOPPING-E2x2-OTG.streamDeckPlugin` and approve when the Stream Dec
 | Pan dial | Pan of a Mix channel (dial, press to center) |
 | 디지털 게인 (digital gain) | Digital gain of an input (key) |
 | 디지털 게인 다이얼 (digital gain dial) | Digital gain of an input (dial, press to mute the input) |
-| Source select | Chooses what is sent to the loopbacks and outputs (OUT 1/2, Mobile OUT, S/PDIF OUT) |
+| Output Source Select | Chooses what is sent to the loopbacks and outputs (OUT 1/2, Mobile OUT, S/PDIF OUT) |
 | Workspace load/save | Loads a workspace file, or saves the current values as a new workspace file and, if chosen, stores them on the device (kept after power off; on by default) |
 
 The action names 출력 컨트롤룸, 디지털 게인 and 디지털 게인 다이얼 are shown in Korean in the Stream Deck action list in every language.
 
 For Fader, Button fader, VU dial and Mute, the target is one of a **Mix channel** (a channel of Mix A to D), a **loopback** or an **output**. When LINK is off, a stereo channel becomes two channels, L and R, and the Mute, Solo and Pan keys let you choose the whole pair / L / R as the target.
 
-Source select has three ways to work: cycle the Mix A → B → C → D, cycle through the candidates you choose, or toggle between two candidates.
+Output Source Select has three ways to work: cycle the Mix A → B → C → D, cycle through the candidates you choose, or toggle between two candidates.
 
 Saving a workspace never overwrites the file the TOPPING app is currently using (the app writes its own values over it when it closes). The plugin saves under a new name, and you can open it from the app's workspace list. The plugin reads the TOPPING app's log to know which workspace the app has open, so it refuses that name, and a workspace you load in the app shows on the keys within a few seconds. The app lists a newly saved workspace after it is restarted. A replaced workspace is kept in the same folder as the hidden backup `.E2X2_OTG_<name>.TPwork.bak`.
 

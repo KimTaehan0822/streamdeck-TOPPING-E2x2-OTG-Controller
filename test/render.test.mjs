@@ -270,7 +270,7 @@ test('the muted two-key fader shows MUTED on the dB key for every role', () => {
 })
 
 test('restart key names its mode', () => {
-	assert.ok(samples['restart-sync'].includes('RESTART') && samples['restart-sync'].includes('SYNC'))
-	assert.ok(samples['restart-plain'].includes('APP') && !samples['restart-plain'].includes('SYNC'))
+	assert.ok(samples['restart-sync'].includes('TOPPING APP') && samples['restart-sync'].includes('SYNC'))
+	assert.ok(samples['restart-plain'].includes('RESTART') && !samples['restart-plain'].includes('SYNC'))
 	assert.ok(samples['restart-undo'].includes('UNDO'))
 })

@@ -112,9 +112,9 @@ export function renderWorkspaceKey(v: { mode: 'load' | 'save'; name: string; act
 	return frame(K, K, b, v.overlay)
 }
 
-/** TOPPING app restart key, laid out like the workspace key: RESTART over SYNC (save first), UNDO (previous version) or APP (just restart). */
+/** TOPPING app restart key, laid out like the workspace key: TOPPING APP over SYNC (match its settings), UNDO (previous version) or RESTART (just restart). */
 export function renderRestartKey(v: { mode: 'sync' | 'undo' | 'plain'; overlay: Overlay }): string {
-	const b = `<rect width="${K}" height="${K}" fill="${BG}"/>` + plainText(72, 40, 'RESTART', { size: 22, fill: DIM }) + text(72, 96, { sync: 'SYNC', undo: 'UNDO', plain: 'APP' }[v.mode], 30, WHITE)
+	const b = `<rect width="${K}" height="${K}" fill="${BG}"/>` + plainText(72, 40, 'TOPPING APP', { size: 20, fill: DIM }) + text(72, 96, { sync: 'SYNC', undo: 'UNDO', plain: 'RESTART' }[v.mode], 30, WHITE)
 	return frame(K, K, b, v.overlay)
 }
 

@@ -62,17 +62,17 @@
 <tr><td>Solo</td><td>Solo on / off / toggle for a Mix channel</td></tr>
 <tr><td>Input option (48V, INST, Ø)</td><td>48V phantom power, INST and Ø (phase invert) for IN 1, IN 2 and the Mobile input</td></tr>
 <tr><td>LINK</td><td>Links or unlinks a stereo channel, per Mix</td></tr>
-<tr><td>출력 컨트롤룸 (output control room)</td><td>Headphone gain (LOW / HIGH), and monitor HP / TRS / AUX on and off</td></tr>
+<tr><td>Output control room</td><td>Headphone gain (LOW / HIGH), and monitor HP / TRS / AUX on and off</td></tr>
 <tr><td>Fader</td><td>Sets the volume to a fixed value (Set) or moves it one step (Step)</td></tr>
 <tr><td>Button fader (2 keys)</td><td>Two keys (top/bottom or left/right) raise and lower the volume. Holding repeats</td></tr>
 <tr><td>VU dial</td><td>Turn for volume, press for mute (or to recall a set level), shows a level meter</td></tr>
 <tr><td>Pan</td><td>Pan of a Mix channel (key)</td></tr>
 <tr><td>Pan dial</td><td>Pan of a Mix channel (dial, press to center)</td></tr>
-<tr><td>디지털 게인 (digital gain)</td><td>Input digital gain (key, 0 to +20 dB)</td></tr>
-<tr><td>디지털 게인 다이얼 (digital gain dial)</td><td>Input digital gain (dial, press to mute the input)</td></tr>
-<tr><td>Source select</td><td>Chooses what a loopback or an output (Out 1/2, Mobile Out, S/PDIF) plays</td></tr>
+<tr><td>Digital gain</td><td>Input digital gain (key, 0 to +20 dB)</td></tr>
+<tr><td>Digital gain dial</td><td>Input digital gain (dial, press to mute the input)</td></tr>
+<tr><td>Output Source Select</td><td>Chooses what a loopback or an output (Out 1/2, Mobile Out, S/PDIF) plays</td></tr>
 <tr><td>Workspace load/save</td><td>Loads a workspace, or saves the current values as a new workspace (see below)</td></tr>
-<tr><td>토핑 앱 다시 켜기 (restart the TOPPING app)</td><td>Force-closes the TOPPING app and starts it again, so the app and the keys show the same values (see below)</td></tr>
+<tr><td>TOPPING app restart</td><td>Force-closes the TOPPING app and starts it again, so the app and the keys show the same values (see below)</td></tr>
 </tbody></table>
 <p>Action names appear in the action list exactly as in the table above, some of them in Korean.</p>
 </section>
@@ -88,7 +88,7 @@
 <p>Every channel key shows the text in its <strong>Name</strong> field. Leave it empty for the default name (24 characters at most).</p>
 </section>
 
-<section><h2>Source select</h2>
+<section><h2>Output Source Select</h2>
 <p>Pick where the sound goes (a loopback or an output) under <strong>Target</strong>, and how it changes under <strong>Mode</strong>.</p>
 <ul>
 <li><p><strong>Cycle MIX A-D:</strong> each press goes MIX A → B → C → D.</p></li>
@@ -118,9 +118,9 @@
 <section><h2>TOPPING app restart key</h2>
 <p>The TOPPING app saves the values it remembers to its workspace file when it exits, and sends that file to the device when it starts. So values set on Stream Deck jump back after the app is closed and opened. This key force-closes the app (with no exit save) and starts it again to remove that mismatch. Pick it in <strong>Mode</strong>:</p>
 <ul>
-<li><p><strong>Save Stream Deck values, then restart</strong> (default): saves the current key values into the workspace the app has open, then restarts the app. The Stream Deck values win. <strong>The values saved in that workspace are overwritten.</strong> Only the version just before is kept as a backup.</p></li>
+<li><p><strong>Match TOPPING app settings</strong> (default): saves the current key values into the workspace the app has open, then restarts the app. The Stream Deck values win. <strong>The values saved in that workspace are overwritten.</strong> Only the version just before is kept as a backup.</p></li>
 <li><p><strong>Undo to the previous version</strong>: puts back the version of the app's open workspace from before the last save (the backup), then restarts the app. Press again to return to the newer version. With no backup the key shows ⚠.</p></li>
-<li><p><strong>Just restart</strong>: restarts the app without saving. The workspace saved in the app wins, and the device and the keys go back to it.</p></li>
+<li><p><strong>Restart TOPPING app</strong>: restarts the app without saving. The workspace saved in the app wins, and the device and the keys go back to it.</p></li>
 </ul>
 <p>If the app was not running, the key starts it. If the app does not close within 5 seconds, nothing is changed and the key shows ⚠.</p>
 </section>
@@ -139,7 +139,7 @@
 <tr><td>SETUP</td><td>No workspace has been loaded yet</td><td>Open a workspace in the TOPPING app, or press a Workspace load key</td></tr>
 <tr><td>SET CHANNEL</td><td>The key is not set up yet</td><td>Pick the target, channel, name and so on in the settings</td></tr>
 <tr><td>⚠ (briefly)</td><td>A Workspace key could not load or save</td><td>Read the message at the top of its settings</td></tr>
-<tr><td>Values differ from the app</td><td>Values changed by the plugin do not show in the app</td><td>Press the TOPPING app restart key (Save Stream Deck values, then restart)</td></tr>
+<tr><td>Values differ from the app</td><td>Values changed by the plugin do not show in the app</td><td>Press the TOPPING app restart key (Match TOPPING app settings)</td></tr>
 <tr><td>Values set on Stream Deck jump back</td><td>The app sends its own values when it switches Mix view or restarts</td><td>Keep <strong>Restart the TOPPING app to match</strong> on for the save and load keys, or press the TOPPING app restart key</td></tr>
 </tbody></table>
 </section>
