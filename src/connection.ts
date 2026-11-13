@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { STORE } from './model/e2x2.js'
+import { INPUT_GROUPS, INPUT_ITEMS, OUTPUTS, STORE } from './model/e2x2.js'
 import { createMeterParser, type MeterChannel } from './protocol/meter.js'
 import { encodeReport } from './protocol/report.js'
 import { diffReports, stateReports } from './state/crosspoints.js'
@@ -175,11 +175,26 @@ export class E2x2Connection {
 	}
 
 	private onData(buf: Buffer): void {
+		if (this.deviceButton(buf)) return
 		const m = this.parse(buf)
 		if (!m) return
 		this.lastMeterAt = this.now()
 		this.meters.set(m.channel, m.level)
 		this.emit()
+	}
+
+	/** A front-panel press (INST, MON, 48V, Gain) reported by the device: value in bytes 7..10, meters have FF there (capture 2026-11-14). */
+	private deviceButton(b: Buffer): boolean {
+		if (b.length < 16 || b[7] === 0xff || b[13] !== 0x66 || b[14] !== 0x77 || [0x22, 0x33, 0x20, 0x01, 0x01].some((x, i) => b[i] !== x)) return false
+		const [group, item, on] = [b[5], b[6], b.readInt32BE(7) === 1]
+		const input = group === INPUT_GROUPS.in1 ? 'in1' : group === INPUT_GROUPS.in2 ? 'in2' : undefined
+		const key = (['mon', 'p48v', 'inst'] as const).find((k) => INPUT_ITEMS[k] === item)
+		if (input && key) this.state.inputs[input][key] = on
+		else if (group === OUTPUTS.out12.gain.group && item === OUTPUTS.out12.gain.item) this.state.outputs.out12.gainBtn = on
+		else return false
+		// the device already has the value, so nothing is sent
+		this.emit()
+		return true
 	}
 
 	// Meters only flow while the audio stream runs: silence the bars when they stop.

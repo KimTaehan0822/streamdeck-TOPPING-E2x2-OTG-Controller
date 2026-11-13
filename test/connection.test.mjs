@@ -216,3 +216,31 @@ test('no workspace: the read is retried every 5 s until one loads', () => {
 	assert.ok(n > 0)
 	assert.equal(port.written.length, 0)
 })
+
+test('device buttons update the state without sending (capture 2026-11-14: INST, MON, 48V, Gain pressed on the E2x2)', () => {
+	const { conn, port } = setup((p) => p, emptyState())
+	conn.start()
+	let n = 0
+	conn.onChange(() => n++)
+	const before = port.written.length
+	port.data(Buffer.from('22332001012103000000014cc1667700', 'hex')) // INST 1 on
+	port.data(Buffer.from('2233200101230300000001aec0667700', 'hex')) // INST 2 on
+	port.data(Buffer.from('22332001012101000000014cc1667700', 'hex')) // MON 1 on
+	port.data(Buffer.from('22332001012302000000014cc1667700', 'hex')) // 48V 2 on
+	port.data(Buffer.from('2233200101350200000000583e667700', 'hex')) // Gain off
+	assert.equal(conn.state.inputs.in1.inst, true)
+	assert.equal(conn.state.inputs.in2.inst, true)
+	assert.equal(conn.state.inputs.in1.mon, true)
+	assert.equal(conn.state.inputs.in2.p48v, true)
+	assert.equal(conn.state.inputs.in1.p48v, false)
+	assert.equal(conn.state.outputs.out12.gainBtn, false)
+	port.data(Buffer.from('223320010135020000000198ff667700', 'hex')) // Gain on
+	assert.equal(conn.state.outputs.out12.gainBtn, true)
+	port.data(Buffer.from('22332001012103000000008c00667700', 'hex')) // INST 1 off
+	assert.equal(conn.state.inputs.in1.inst, false)
+	assert.equal(port.written.length, before) // the device already has these values
+	assert.ok(n >= 7)
+	// the knob (35 03) is not modelled: ignored
+	port.data(Buffer.from('22332001013503000000039943667700', 'hex'))
+	assert.equal(conn.state.outputs.out12.gainBtn, true)
+})
