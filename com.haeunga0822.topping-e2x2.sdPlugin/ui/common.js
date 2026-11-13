@@ -124,6 +124,7 @@ const TEXT = {
 	'Ø (phase invert)': ['Ø (위상 반전)', 'Ø (位相反転)'],
 	Button: ['버튼', 'ボタン'],
 	Gain: ['게인', 'ゲイン'],
+	'Headphone gain': ['헤드폰 게인', 'ヘッドホンゲイン'],
 	Press: ['누르기', '押す'],
 	'Press + turn left': ['누른 채 왼쪽으로', '押しながら左に回す'],
 	'Press + turn right': ['누른 채 오른쪽으로', '押しながら右に回す'],

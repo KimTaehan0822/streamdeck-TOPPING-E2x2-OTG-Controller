@@ -19,12 +19,13 @@ abstract class ToggleAction extends E2x2Action<JsonObject> {
 	protected render(settings: JsonObject, ctx: RenderContext): string {
 		const spec = this.spec(settings)
 		if (!spec) return renderToggleKey({ title: '', label: '', on: false, color: 'blue', overlay: 'setup' })
+		const on = spec.read(this.connection.state)
 		return renderToggleKey({
 			title: spec.title,
 			mix: spec.mix,
-			label: spec.label,
+			label: spec.labelOf?.(on) ?? spec.label,
 			free: ctx.titleAlign, // a Stream Deck title leaves only its own row free
-			on: spec.read(this.connection.state),
+			on,
 			color: spec.color,
 			overlay: ctx.overlay,
 		})

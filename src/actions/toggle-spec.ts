@@ -11,6 +11,8 @@ export interface ToggleSpec {
 	title: string
 	mix?: Mix
 	label: string
+	/** a label that shows the state instead (headphone gain: LOW / HIGH) */
+	labelOf?: (on: boolean) => string
 	color: KeyColor
 	read: (s: MixerState) => boolean
 	write: (s: MixerState, on: boolean) => void
@@ -80,7 +82,6 @@ export function linkSpec(settings: JsonObject): ToggleSpec | undefined {
 }
 
 const BUTTONS = { gain: 'GAIN', hp: 'HP', trs: 'TRS', aux: 'AUX' } as const
-const OUTPUTS = { out12: 'Out 1/2', mobile: 'Mobile Out' } as const
 
 export function outputRoomSpec(settings: JsonObject): ToggleSpec | undefined {
 	const button = pick(settings.button, BUTTONS)
@@ -89,9 +90,8 @@ export function outputRoomSpec(settings: JsonObject): ToggleSpec | undefined {
 		// HP / TRS / AUX are one set of phone buttons, not per output.
 		return { title: BUTTONS[button], label: nameOf(settings, 'Phones'), color: 'blue', read: (s) => s.phones[button], write: (s, on) => void (s.phones[button] = on) }
 	}
-	const output = pick(settings.output, OUTPUTS)
-	if (!output) return undefined
-	return { title: 'GAIN', label: nameOf(settings, OUTPUTS[output]), color: 'blue', read: (s) => !!s.outputs[output].gainBtn, write: (s, on) => void (s.outputs[output].gainBtn = on) }
+	// the E2x2 OTG has one gain button, the headphone gain (35 02, 1 = HIGH); the workspace's Gain2_Enable is never sent by the device (capture 2026-11-14)
+	return { title: nameOf(settings, 'HP GAIN'), label: '', labelOf: (on) => (on ? 'HIGH' : 'LOW'), color: 'blue', read: (s) => !!s.outputs.out12.gainBtn, write: (s, on) => void (s.outputs.out12.gainBtn = on) }
 }
 
 /** Key press: toggle flips what the key shows; on/off force it. Only changed reports are sent. */

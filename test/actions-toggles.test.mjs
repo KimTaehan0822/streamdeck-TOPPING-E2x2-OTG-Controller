@@ -104,7 +104,7 @@ test('output room: HP and Gain buttons', () => {
 	pressToggle(conn, outputRoomSpec({ button: 'gain', output: 'out12' }), 'toggle')
 	assert.equal(conn.state.outputs.out12.gainBtn, true)
 	assert.deepEqual(sent(), [{ group: 0x35, item: 2, value: 1 }])
-	assert.equal(outputRoomSpec({ button: 'gain' }), undefined)
+	assert.equal(outputRoomSpec({ button: 'gain' }).read(conn.state), true) // one headphone gain: no output to pick
 })
 
 test('specs read live state for the key face', () => {
@@ -120,6 +120,8 @@ test('a custom name replaces the key label on every toggle spec; blank keeps the
 	assert.equal(linkSpec({ mix: 1, channel: 'pb12', name: 'Game' }).label, 'Game')
 	assert.equal(inputOptionSpec({ input: 'in1', option: 'p48v', name: 'Vocal' }).label, 'Vocal')
 	assert.equal(outputRoomSpec({ button: 'hp', name: 'Cans' }).label, 'Cans')
-	assert.equal(outputRoomSpec({ button: 'gain', output: 'mobile', name: 'Phone out' }).label, 'Phone out')
+	const g = outputRoomSpec({ button: 'gain', name: 'Cans gain' })
+	assert.deepEqual([g.title, g.labelOf(false), g.labelOf(true)], ['Cans gain', 'LOW', 'HIGH'])
+	assert.equal(outputRoomSpec({ button: 'gain' }).title, 'HP GAIN')
 	assert.equal(outputRoomSpec({ button: 'hp' }).label, 'Phones')
 })
