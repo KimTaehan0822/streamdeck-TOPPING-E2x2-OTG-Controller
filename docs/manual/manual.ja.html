@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Controller for TOPPING E2x2 OTG Stream Deck プラグイン 取扱説明書</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<h1>Controller for TOPPING E2x2 OTG Stream Deck プラグイン 取扱説明書</h1>
+<p><time datetime="2026-11-13">2026-11-13 (v0.1.1)</time></p>
+<p>Elgato Stream Deck のキーとダイヤルで <strong>TOPPING E2x2 OTG</strong> のミキサーを操作するプラグインです。デバイスと USB(HID)で直接通信します。キーごとに Mix とチャンネルを決めておけば、TOPPING アプリにどの Mix が表示されていても、決めた対象だけが動きます。</p>
+<p>作者: <strong>김탄2 (Kimtan2)</strong></p>
+
+<section><h2>必要なもの</h2>
+<table><thead><tr><th>項目</th><th>必要なもの</th></tr></thead><tbody>
+<tr><td>パソコン</td><td>Windows 10 以降</td></tr>
+<tr><td>Stream Deck アプリ</td><td>Stream Deck ソフトウェア 7.3 以降</td></tr>
+<tr><td>オーディオインターフェース</td><td>TOPPING E2x2 OTG と <strong>TOPPING 公式ドライバー</strong>(プラグインはドライバーを変更しません)</td></tr>
+<tr><td>TOPPING アプリ</td><td>TOPPING Professional Control Center。起動したまま一緒に使えます</td></tr>
+<tr><td>インストールファイル</td><td><code>TOPPING-E2x2-OTG.streamDeckPlugin</code></td></tr>
+</tbody></table>
+<p>ダイヤルのアクション(VU dial、Pan dial、디지털 게인 다이얼)は <strong>Stream Deck +</strong> でのみ使えます。キーのアクションはすべての Stream Deck で使えます。</p>
+</section>
+
+<section><h2>最初に必ずお読みください(制限)</h2>
+<p><strong>このプラグインで変えた値は TOPPING アプリの画面には表示されません。また、アプリがその値を上書きすることがあります。</strong></p>
+<p>デバイスは現在のミキサーの値を返しません。そのためプラグインは値を自分で覚えておき、TOPPING アプリのワークスペースファイル(<code>.TPwork</code>)を読んで値を合わせます。アプリで Mix 画面を切り替えたり、アプリを再起動したりすると、アプリは自分が覚えている値をデバイスに送り直します。これを避けるには、下のステップ 2 のようにアプリとプラグインの値を一度合わせ、その後は Stream Deck を中心に使ってください。</p>
+</section>
+
+<section><h2>ステップ 1: プラグインのインストール</h2>
+<ol>
+<li><p><code>TOPPING-E2x2-OTG.streamDeckPlugin</code> をダブルクリックします。</p></li>
+<li><p>Stream Deck アプリがインストールするか聞いてきたら<strong>インストール</strong>を押します。上書きするか聞かれた場合もインストールを選びます。既存のキー設定はそのまま残ります。</p></li>
+<li><p>右側のアクション一覧に <strong>Controller for TOPPING E2x2 OTG</strong> カテゴリーがあることを確認します。</p></li>
+<li><p>どれかのアクションをキーに置いてクリックすると、下に設定画面が出ます。一番上の<strong>言語</strong>で 한국어、English、日本語 を選べます。選んだ言語はすべてのアクションに適用されます。</p></li>
+</ol>
+</section>
+
+<section><h2>ステップ 2: アプリとプラグインの値を合わせる</h2>
+<p>プラグインは TOPPING アプリが開いているワークスペースを読んで始まります。アプリでワークスペースが開いていれば、特に何もする必要はありません。キーに <strong>SETUP</strong> と表示されている場合は、まだ読めるワークスペースがありません。次のどちらかを行ってください。</p>
+<ul>
+<li><p><strong>アプリでワークスペースを開く:</strong> TOPPING アプリ上部の <strong>Workspace</strong> 一覧からワークスペースを選びます。数秒でキーがその値に変わります。</p></li>
+<li><p><strong>Workspace の読み込みキーを押す:</strong> 下の「Workspace キー」を参考に読み込みキーを作って押します。</p></li>
+</ul>
+<p>アプリで値を変えたら、アプリでワークスペースを保存してください。保存するとプラグインが新しい値を読み直します。</p>
+</section>
+
+<section><h2>ステップ 3: 最初のキーを作る</h2>
+<p>Mix A の Playback 1/2 の音量を、キー 1 回で 1 dB ずつ上げる例です。</p>
+<ol>
+<li><p>アクション一覧から <strong>Fader</strong> をキーにドラッグします。</p></li>
+<li><p>設定画面で<strong>対象</strong>を <strong>Mix チャンネル</strong>、<strong>Mix</strong> を <strong>A</strong>、<strong>チャンネル</strong>を <strong>Playback 1/2</strong> にします。</p></li>
+<li><p><strong>モード</strong>は<strong>ステップ調整</strong>のままにし、<strong>調整幅 (dB、負の数 = 下げる)</strong>に <code>1</code> を入れます。</p></li>
+<li><p>押すたびに 1 dB ずつ上がります。下げるキーは同じ方法で <code>-1</code> を入れて作ります。</p></li>
+</ol>
+<p>キー 2 つを上下に並べて使うなら <strong>Button fader (2 keys)</strong> が便利です。2 つのキーにまたがってフェーダーが描かれ、押し続けると動き続けます。</p>
+</section>
+
+<section><h2>アクション一覧</h2>
+<table class="name"><thead><tr><th>アクション</th><th>できること</th></tr></thead><tbody>
+<tr><td>Mute</td><td>対象のミュートのオン/オフ/切り替え</td></tr>
+<tr><td>Solo</td><td>Mix チャンネルのソロのオン/オフ/切り替え</td></tr>
+<tr><td>Input option (48V, INST, Ø)</td><td>IN 1、IN 2、Mobile 入力の 48V ファンタム電源、INST、Ø(位相反転)</td></tr>
+<tr><td>LINK</td><td>Mix ごとにステレオチャンネルをリンク/解除</td></tr>
+<tr><td>출력 컨트롤룸(出力コントロールルーム)</td><td>出力ゲインボタン、モニター HP / TRS / AUX のオン・オフ</td></tr>
+<tr><td>Fader</td><td>音量を決めた値にする(値に設定)、または 1 段ずつ上げ下げする(ステップ調整)</td></tr>
+<tr><td>Button fader (2 keys)</td><td>キー 2 つ(上・下 または 左・右)で音量を上げ下げ。押し続けると繰り返し</td></tr>
+<tr><td>VU dial</td><td>回すと音量、押すとミュート(または指定音量に戻す)、レベルメーター表示</td></tr>
+<tr><td>Pan</td><td>Mix チャンネルのパン(キー)</td></tr>
+<tr><td>Pan dial</td><td>Mix チャンネルのパン(ダイヤル、押すと中央)</td></tr>
+<tr><td>디지털 게인(デジタルゲイン)</td><td>入力のデジタルゲイン(キー、0 〜 +20 dB)</td></tr>
+<tr><td>디지털 게인 다이얼(デジタルゲインダイヤル)</td><td>入力のデジタルゲイン(ダイヤル、押すと入力をミュート)</td></tr>
+<tr><td>Source select</td><td>ループバックと出力(Out 1/2、Mobile Out、S/PDIF)に送る音を選ぶ</td></tr>
+<tr><td>Workspace load/save</td><td>ワークスペースの読み込み / 現在の値を新しいワークスペースとして保存(下記参照)</td></tr>
+</tbody></table>
+<p>アクション一覧には上の表のとおりの名前で表示されます。一部は韓国語の名前です。</p>
+</section>
+
+<section><h2>対象の選び方</h2>
+<p>Fader、Button fader、VU dial、Mute は<strong>対象</strong>で次の 3 つから 1 つを選びます。</p>
+<table><thead><tr><th>対象</th><th>意味</th></tr></thead><tbody>
+<tr><td>Mix チャンネル</td><td>Mix A〜D の中のチャンネル 1 つ(IN、Playback、Loopback など)。Mix とチャンネルを選びます</td></tr>
+<tr><td>ループバック</td><td>Loop 1/2、3/4、5/6</td></tr>
+<tr><td>出力</td><td>Out 1/2、Mobile Out、S/PDIF</td></tr>
+</tbody></table>
+<p>LINK がオフのチャンネルは L と R が別々に動きます。このとき Mute、Solo、Pan のキーは<strong>左右</strong>で<strong>両方 (ペア)</strong>、<strong>L のみ</strong>、<strong>R のみ</strong>を選べます。音量のキー、Button fader、VU dial は常に両方に働きます。</p>
+<p>すべてのチャンネルキーは<strong>名前</strong>欄に入れた文字をキーに表示します。空欄なら既定の名前になります(最大 24 文字)。</p>
+</section>
+
+<section><h2>Source select</h2>
+<p><strong>対象</strong>で音を送る先(ループバックまたは出力)を選び、<strong>モード</strong>で選び方を決めます。</p>
+<ul>
+<li><p><strong>MIX A〜D を順に切り替え:</strong> 押すたびに MIX A → B → C → D と変わります。</p></li>
+<li><p><strong>選んだソースを順に切り替え:</strong> <strong>ソース</strong>でチェックしたものだけを順に切り替えます。</p></li>
+<li><p><strong>2つのソースを切り替え:</strong> <strong>ソース 1</strong> と <strong>ソース 2</strong> を行き来します。</p></li>
+</ul>
+</section>
+
+<section><h2>Workspace キー</h2>
+<p><strong>モード</strong>で<strong>読み込み</strong>か<strong>保存</strong>を選びます。</p>
+<ul>
+<li><p><strong>読み込み:</strong> <strong>ワークスペース</strong>一覧から保存済みのワークスペースを選びます。キーを押すとその値をデバイスに送り、すべてのキーがその値に変わります。最後に読み込んだキーはオンのように表示されます。</p></li>
+<li><p><strong>保存:</strong> <strong>新しいワークスペース名</strong>を入れます。キーを押すと現在の値をその名前のワークスペースファイルに保存します。保存したワークスペースは TOPPING アプリを再起動するとアプリの一覧にも出ます。</p></li>
+<li><p><strong>デバイスにも記録</strong>(保存モード、初期設定はオン): オンにすると、保存のときに値をデバイス本体にも記録します。インターフェースの電源を切って入れ直してもその値が残ります。TOPPING アプリのダウンロードと同じ働きです。オフにするとファイルだけを保存します。</p></li>
+</ul>
+<p><strong>保存のときの注意</strong></p>
+<ul>
+<li><p>TOPPING アプリがいま開いているワークスペースの名前では保存しません。アプリが終了するときに自分の値で上書きしてしまうためです。設定画面に「保存できません」と出たら別の名前を入れてください。</p></li>
+<li><p>同じ名前のワークスペースがあれば上書きします。元のファイルは同じフォルダーに隠しファイル <code>.E2X2_OTG_&lt;名前&gt;.TPwork.bak</code> として残ります。</p></li>
+<li><p>デバイスが接続されていないときはファイルだけを保存し、キーに ⚠ を表示して、設定画面でそのことを知らせます。</p></li>
+</ul>
+<p><strong>アプリから直接デバイスに記録する方法:</strong> TOPPING アプリ上部のワークスペース名の右にあるダウンロードアイコンを押し、一番上の項目(現在のワークスペースを保存してデバイスにダウンロード)を選んで OK を押します。</p>
+<p><img src="../images/download-to-device.png" alt="TOPPING アプリのダウンロード画面"></p>
+</section>
+
+<section><h2>レベルメーター</h2>
+<ul>
+<li><p>メーターは<strong>音が出ているときだけ</strong>動きます。</p></li>
+<li><p>メーターはチャンネルごとにあります。Mix チャンネルはそのチャンネル、ループバックはループバック、出力は出力のメーターを表示します。</p></li>
+<li><p>OTG 入力はまだメーターを表示しません。</p></li>
+</ul>
+</section>
+
+<section><h2>キーの表示とトラブルシューティング</h2>
+<table><thead><tr><th>表示 / 症状</th><th>意味</th><th>すること</th></tr></thead><tbody>
+<tr><td>OFFLINE</td><td>デバイスが接続されていない</td><td>USB ケーブルと電源を確認。つながれば自動で戻ります</td></tr>
+<tr><td>SETUP</td><td>まだワークスペースを読み込んでいない</td><td>TOPPING アプリでワークスペースを開くか、Workspace の読み込みキーを押す</td></tr>
+<tr><td>SET CHANNEL</td><td>キーの設定が終わっていない</td><td>設定画面で対象、チャンネル、名前などを選ぶ</td></tr>
+<tr><td>⚠(一瞬表示)</td><td>Workspace キーの読み込みか保存に失敗した</td><td>設定画面上部のメッセージを確認</td></tr>
+<tr><td>値がアプリの画面と違う</td><td>プラグインで変えた値はアプリに表示されない</td><td>正常です。合わせるにはアプリでワークスペースを保存するか、読み込みキーを押す</td></tr>
+<tr><td>Stream Deck で変えた値が戻る</td><td>アプリが Mix 画面の切り替えや再起動のときに自分の値を送り直す</td><td>プラグインの値を保存キーで保存し、そのワークスペースをアプリで開く</td></tr>
+</tbody></table>
+</section>
+
+<section><h2>既知の制限</h2>
+<ul>
+<li><p>入力の <strong>Solo</strong> はデバイスで何の効果もありません。</p></li>
+<li><p>音量は最大 <strong>+12 dB</strong>、デジタルゲインは <strong>0 〜 +20 dB</strong> です。LINK 状態のパンも TOPPING アプリと同じように動きます。</p></li>
+<li><p><strong>48V</strong> はオンにするとき設定画面に警告を出すだけです。キーを押すとすぐオンになるので、コンデンサーマイク以外の機器をつないだままオンにしないよう注意してください。</p></li>
+<li><p>プラグインはデバイスの USB ドライバーを変更しません。公式ドライバーで使える HID 通信だけを使います。</p></li>
+</ul>
+</section>
+
+<section><h2>お問い合わせ</h2>
+<p>問題や質問があれば、作者(김탄2)にお問い合わせください。</p>
+<ul>
+<li><p>Discord: kimtan2</p></li>
+<li><p>CHZZK(치지직): 김탄2</p></li>
+</ul>
+<p>TOPPING は TOPPING の商標です。Stream Deck は Elgato(Corsair)の商標です。このプラグインはこれらと関係のない非公式プロジェクトです。</p>
+</section>
+</body>
+</html>

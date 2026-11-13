@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Controller for TOPPING E2x2 OTG Stream Deck Plugin Manual</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<h1>Controller for TOPPING E2x2 OTG Stream Deck Plugin Manual</h1>
+<p><time datetime="2026-11-13">2026-11-13 (v0.1.1)</time></p>
+<p>This plugin controls the <strong>TOPPING E2x2 OTG</strong> mixer from Elgato Stream Deck keys and dials. It talks to the device directly over USB (HID). Each key is set to a Mix and a channel, and it moves only that target, whatever Mix the TOPPING app is showing.</p>
+<p>Made by: <strong>Kimtan2</strong></p>
+
+<section><h2>What you need</h2>
+<table><thead><tr><th>Item</th><th>Requirement</th></tr></thead><tbody>
+<tr><td>Computer</td><td>Windows 10 or later</td></tr>
+<tr><td>Stream Deck app</td><td>Stream Deck software 7.3 or later</td></tr>
+<tr><td>Audio interface</td><td>TOPPING E2x2 OTG with the <strong>official TOPPING driver</strong> (the plugin does not change the driver)</td></tr>
+<tr><td>TOPPING app</td><td>TOPPING Professional Control Center. It can stay open while you use the plugin</td></tr>
+<tr><td>Install file</td><td><code>TOPPING-E2x2-OTG.streamDeckPlugin</code></td></tr>
+</tbody></table>
+<p>The dial actions (VU dial, Pan dial, 디지털 게인 다이얼) need a <strong>Stream Deck +</strong>. Key actions work on every Stream Deck.</p>
+</section>
+
+<section><h2>Read this first (limits)</h2>
+<p><strong>Values the plugin changes do not show in the TOPPING app, and the app can overwrite them.</strong></p>
+<p>The device does not report its current mixer values. So the plugin keeps the values itself and matches them by reading the TOPPING app's workspace file (<code>.TPwork</code>). When you switch the Mix view in the app or restart the app, the app sends its own values to the device again. To avoid this, match the app and the plugin once as in step 2, then use Stream Deck as your main control.</p>
+</section>
+
+<section><h2>Step 1: Install the plugin</h2>
+<ol>
+<li><p>Double-click <code>TOPPING-E2x2-OTG.streamDeckPlugin</code>.</p></li>
+<li><p>When the Stream Deck app asks, click <strong>Install</strong>. If it asks to replace an installed version, choose Install too. Your existing keys are kept.</p></li>
+<li><p>Check that the <strong>Controller for TOPPING E2x2 OTG</strong> category is in the action list on the right.</p></li>
+<li><p>Put any action on a key and click it to open its settings below. At the top, <strong>Language</strong> switches between 한국어, English and 日本語. The choice applies to every action.</p></li>
+</ol>
+</section>
+
+<section><h2>Step 2: Match the app and the plugin</h2>
+<p>The plugin starts from the workspace the TOPPING app has open, so if the app has a workspace open there is nothing to do. If the keys show <strong>SETUP</strong>, no workspace has been read yet. Then do one of these:</p>
+<ul>
+<li><p><strong>Open a workspace in the app:</strong> pick one in the <strong>Workspace</strong> list at the top of the TOPPING app. The keys follow within a few seconds.</p></li>
+<li><p><strong>Press a Workspace load key:</strong> make a load key (see "Workspace key" below) and press it.</p></li>
+</ul>
+<p>After changing values in the app, save the workspace in the app. The plugin then reads the new values.</p>
+</section>
+
+<section><h2>Step 3: Make your first key</h2>
+<p>This example raises the Playback 1/2 volume in Mix A by 1 dB per press.</p>
+<ol>
+<li><p>Drag <strong>Fader</strong> from the action list onto a key.</p></li>
+<li><p>In the settings, set <strong>Target</strong> to <strong>Mix channel</strong>, <strong>Mix</strong> to <strong>A</strong> and <strong>Channel</strong> to <strong>Playback 1/2</strong>.</p></li>
+<li><p>Leave <strong>Mode</strong> on <strong>Step</strong> and enter <code>1</code> in <strong>Step (dB, negative = down)</strong>.</p></li>
+<li><p>Each press raises the volume by 1 dB. Make a key that lowers it the same way, with <code>-1</code>.</p></li>
+</ol>
+<p>For two keys stacked together, <strong>Button fader (2 keys)</strong> is handier: it draws one fader across both keys and keeps moving while you hold a key.</p>
+</section>
+
+<section><h2>Actions</h2>
+<table class="name"><thead><tr><th>Action</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Mute</td><td>Mute on / off / toggle for the target</td></tr>
+<tr><td>Solo</td><td>Solo on / off / toggle for a Mix channel</td></tr>
+<tr><td>Input option (48V, INST, Ø)</td><td>48V phantom power, INST and Ø (phase invert) for IN 1, IN 2 and the Mobile input</td></tr>
+<tr><td>LINK</td><td>Links or unlinks a stereo channel, per Mix</td></tr>
+<tr><td>출력 컨트롤룸 (output control room)</td><td>The output gain buttons, and monitor HP / TRS / AUX on and off</td></tr>
+<tr><td>Fader</td><td>Sets the volume to a fixed value (Set) or moves it one step (Step)</td></tr>
+<tr><td>Button fader (2 keys)</td><td>Two keys (top/bottom or left/right) raise and lower the volume. Holding repeats</td></tr>
+<tr><td>VU dial</td><td>Turn for volume, press for mute (or to recall a set level), shows a level meter</td></tr>
+<tr><td>Pan</td><td>Pan of a Mix channel (key)</td></tr>
+<tr><td>Pan dial</td><td>Pan of a Mix channel (dial, press to center)</td></tr>
+<tr><td>디지털 게인 (digital gain)</td><td>Input digital gain (key, 0 to +20 dB)</td></tr>
+<tr><td>디지털 게인 다이얼 (digital gain dial)</td><td>Input digital gain (dial, press to mute the input)</td></tr>
+<tr><td>Source select</td><td>Chooses what a loopback or an output (Out 1/2, Mobile Out, S/PDIF) plays</td></tr>
+<tr><td>Workspace load/save</td><td>Loads a workspace, or saves the current values as a new workspace (see below)</td></tr>
+</tbody></table>
+<p>Action names appear in the action list exactly as in the table above, some of them in Korean.</p>
+</section>
+
+<section><h2>Choosing a target</h2>
+<p>Fader, Button fader, VU dial and Mute pick one of three under <strong>Target</strong>.</p>
+<table><thead><tr><th>Target</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Mix channel</td><td>One channel in Mix A to D (IN, Playback, Loopback and so on). You pick the Mix and the channel</td></tr>
+<tr><td>Loopback</td><td>Loop 1/2, 3/4, 5/6</td></tr>
+<tr><td>Output</td><td>Out 1/2, Mobile Out, S/PDIF</td></tr>
+</tbody></table>
+<p>A channel with LINK off has separate L and R. Then Mute, Solo and Pan keys can pick <strong>Both (pair)</strong>, <strong>L only</strong> or <strong>R only</strong> under <strong>Side</strong>. Volume keys, Button fader and VU dial always act on both sides.</p>
+<p>Every channel key shows the text in its <strong>Name</strong> field. Leave it empty for the default name (24 characters at most).</p>
+</section>
+
+<section><h2>Source select</h2>
+<p>Pick where the sound goes (a loopback or an output) under <strong>Target</strong>, and how it changes under <strong>Mode</strong>.</p>
+<ul>
+<li><p><strong>Cycle MIX A-D:</strong> each press goes MIX A → B → C → D.</p></li>
+<li><p><strong>Cycle chosen sources:</strong> steps through only the ones ticked in <strong>Sources</strong>.</p></li>
+<li><p><strong>Toggle between two:</strong> switches between <strong>Source 1</strong> and <strong>Source 2</strong>.</p></li>
+</ul>
+</section>
+
+<section><h2>Workspace key</h2>
+<p>Pick <strong>Load</strong> or <strong>Save</strong> under <strong>Mode</strong>.</p>
+<ul>
+<li><p><strong>Load:</strong> pick a saved workspace in the <strong>Workspace</strong> list. Pressing the key sends its values to the device and every key follows. The key you loaded last looks switched on.</p></li>
+<li><p><strong>Save:</strong> enter a <strong>New workspace name</strong>. Pressing the key saves the current values as a workspace file with that name. It appears in the TOPPING app's list after the app restarts.</p></li>
+<li><p><strong>Also store on the device</strong> (Save mode, on by default): when on, saving also stores the values in the device itself, so they stay after the interface is switched off and on. This does the same as the TOPPING app's download. When off, only the file is saved.</p></li>
+</ul>
+<p><strong>When saving</strong></p>
+<ul>
+<li><p>The key does not save under the name of the workspace the TOPPING app has open, because the app writes its own values over it when it exits. If the settings show "Cannot save", enter another name.</p></li>
+<li><p>A workspace with the same name is replaced. The original stays in the same folder as the hidden file <code>.E2X2_OTG_&lt;name&gt;.TPwork.bak</code>.</p></li>
+<li><p>If the device is not connected, only the file is saved; the key shows ⚠ and the settings say so.</p></li>
+</ul>
+<p><strong>Storing on the device from the app:</strong> in the TOPPING app, click the download icon right of the workspace name at the top, pick the first option (save the current workspace and download to the device) and click OK.</p>
+<p><img src="../images/download-to-device.png" alt="The TOPPING app's download window"></p>
+</section>
+
+<section><h2>Level meters</h2>
+<ul>
+<li><p>Meters move <strong>only while sound is playing</strong>.</p></li>
+<li><p>Each channel has its own meter: a Mix channel shows that channel, a loopback shows the loopback, an output shows the output.</p></li>
+<li><p>The OTG input shows no meter yet.</p></li>
+</ul>
+</section>
+
+<section><h2>Key indicators and troubleshooting</h2>
+<table><thead><tr><th>Indicator / symptom</th><th>Meaning</th><th>What to do</th></tr></thead><tbody>
+<tr><td>OFFLINE</td><td>The device is not connected</td><td>Check the USB cable and power. Keys come back on their own when it reconnects</td></tr>
+<tr><td>SETUP</td><td>No workspace has been loaded yet</td><td>Open a workspace in the TOPPING app, or press a Workspace load key</td></tr>
+<tr><td>SET CHANNEL</td><td>The key is not set up yet</td><td>Pick the target, channel, name and so on in the settings</td></tr>
+<tr><td>⚠ (briefly)</td><td>A Workspace key could not load or save</td><td>Read the message at the top of its settings</td></tr>
+<tr><td>Values differ from the app</td><td>Values changed by the plugin do not show in the app</td><td>This is normal. To match them, save the workspace in the app or press a load key</td></tr>
+<tr><td>Values set on Stream Deck jump back</td><td>The app sends its own values when it switches Mix view or restarts</td><td>Save the plugin's values with a save key and open that workspace in the app</td></tr>
+</tbody></table>
+</section>
+
+<section><h2>Known limits</h2>
+<ul>
+<li><p><strong>Solo</strong> on an input has no effect on the device.</p></li>
+<li><p>Volume goes up to <strong>+12 dB</strong> and digital gain is <strong>0 to +20 dB</strong>. Pan on a linked channel moves exactly as in the TOPPING app.</p></li>
+<li><p><strong>48V</strong> only shows a warning in the settings. Pressing the key turns it on at once, so do not turn it on with anything other than a condenser microphone connected.</p></li>
+<li><p>The plugin does not change the device's USB driver. It uses only the HID communication the official driver allows.</p></li>
+</ul>
+</section>
+
+<section><h2>Contact</h2>
+<p>If something goes wrong or you have a question, please contact the author (Kimtan2).</p>
+<ul>
+<li><p>Discord: kimtan2</p></li>
+<li><p>Chzzk: 김탄2</p></li>
+</ul>
+<p>TOPPING is a trademark of TOPPING. Stream Deck is a trademark of Elgato (Corsair). This plugin is an unofficial project, not affiliated with them.</p>
+</section>
+</body>
+</html>

@@ -4,6 +4,18 @@
 
 A plugin that controls the **TOPPING E2x2 OTG** mixer with the keys and dials of an Elgato Stream Deck. It talks to the device directly over USB (HID). You choose a Mix and a channel for each key, and the key moves only that target, whichever Mix the TOPPING app happens to be showing.
 
+## Download
+
+Get `TOPPING-E2x2-OTG-StreamDeck-v<version>.zip` from the [latest release](https://github.com/KimTaehan0822/streamdeck-TOPPING-E2x2-OTG-Controller/releases/latest) page and unzip it. It contains:
+
+- `TOPPING-E2x2-OTG.streamDeckPlugin`: the installer
+- Manual PDFs, one per language
+  - `Controller for TOPPING E2x2 OTG 스트림덱 플러그인 사용설명서.pdf`: Korean
+  - `Controller for TOPPING E2x2 OTG Stream Deck Plugin Manual (English).pdf`: English
+  - `Controller for TOPPING E2x2 OTG Stream Deck プラグイン 取扱説明書 (日本語).pdf`: Japanese
+- `LICENSE.txt`: this plugin's license (MIT)
+- `THIRD-PARTY-NOTICES.txt`: notices for the open source it uses
+
 ## Please read this first (limitation)
 
 **Values changed by this plugin are not shown on the TOPPING app screen, and the app can overwrite them again.**
@@ -32,7 +44,7 @@ After that, use Stream Deck as your main control. If you change values in the ap
 
 ## Installation
 
-Double-click `com.haeunga0822.topping-e2x2.streamDeckPlugin` and approve when the Stream Deck software asks to install it. The action list then gets a **Controller for TOPPING E2x2 OTG** category. The settings screens come in Korean, English and Japanese: choose the language with **Language** at the top of the screen (it applies to every action). The limitation warning above is always shown at the very top.
+Double-click `TOPPING-E2x2-OTG.streamDeckPlugin` and approve when the Stream Deck software asks to install it. The action list then gets a **Controller for TOPPING E2x2 OTG** category. The settings screens come in Korean, English and Japanese: choose the language with **Language** at the top of the screen (it applies to every action). The limitation warning above is always shown at the very top.
 
 ## Actions
 
@@ -82,6 +94,7 @@ Saving a workspace never overwrites the file the TOPPING app is currently using 
 npm install
 npm test          # build, then run all tests
 npm run pack      # create com.haeunga0822.topping-e2x2.streamDeckPlugin
+node docs/manual/make-pdf.mjs   # manual PDFs (needs Edge and Noto Sans KR/JP)
 ```
 
 The USB protocol analysis is in [docs/usb-protocol.md](docs/usb-protocol.md), and the design is in `docs/superpowers/specs/`. Notices for the open-source software used are in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

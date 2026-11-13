@@ -4,6 +4,18 @@
 
 Elgato Stream Deck의 키와 다이얼로 **TOPPING E2x2 OTG** 믹서를 조작하는 플러그인입니다. 장치와 USB(HID)로 직접 통신하며, 키마다 Mix와 채널을 정해 두면 토핑 앱 화면에 어떤 Mix가 떠 있든 정해 둔 대상만 움직입니다.
 
+## 다운로드
+
+[최신 릴리즈](https://github.com/KimTaehan0822/streamdeck-TOPPING-E2x2-OTG-Controller/releases/latest) 페이지에서 `TOPPING-E2x2-OTG-StreamDeck-v<버전>.zip`을 받아 압축을 풉니다. 안에 들어 있는 파일은 아래와 같습니다.
+
+- `TOPPING-E2x2-OTG.streamDeckPlugin`: 설치 파일
+- 사용설명서 PDF (언어별로 하나씩)
+  - `Controller for TOPPING E2x2 OTG 스트림덱 플러그인 사용설명서.pdf`: 한국어
+  - `Controller for TOPPING E2x2 OTG Stream Deck Plugin Manual (English).pdf`: 영어
+  - `Controller for TOPPING E2x2 OTG Stream Deck プラグイン 取扱説明書 (日本語).pdf`: 일본어
+- `LICENSE.txt`: 이 플러그인의 라이선스 (MIT)
+- `THIRD-PARTY-NOTICES.txt`: 함께 쓰인 오픈소스 고지
+
 ## 먼저 꼭 읽어 주세요 (한계)
 
 **이 플러그인이 바꾼 값은 TOPPING 앱 화면에 보이지 않습니다. 그리고 앱이 그 값을 다시 덮어쓸 수 있습니다.**
@@ -32,7 +44,7 @@ Elgato Stream Deck의 키와 다이얼로 **TOPPING E2x2 OTG** 믹서를 조작�
 
 ## 설치
 
-`com.haeunga0822.topping-e2x2.streamDeckPlugin` 파일을 더블클릭하고, Stream Deck이 설치할지 물으면 승인합니다. 설치 후 액션 목록에 **Controller for TOPPING E2x2 OTG** 카테고리가 생깁니다. 설정 화면은 한국어, English, 日本語로 볼 수 있습니다(화면 맨 위 **Language**에서 고르며 모든 액션에 공통 적용). 화면 맨 위에는 위의 한계 경고가 항상 표시됩니다.
+`TOPPING-E2x2-OTG.streamDeckPlugin` 파일을 더블클릭하고, Stream Deck이 설치할지 물으면 승인합니다. 설치 후 액션 목록에 **Controller for TOPPING E2x2 OTG** 카테고리가 생깁니다. 설정 화면은 한국어, English, 日本語로 볼 수 있습니다(화면 맨 위 **Language**에서 고르며 모든 액션에 공통 적용). 화면 맨 위에는 위의 한계 경고가 항상 표시됩니다.
 
 ## 액션
 
@@ -80,6 +92,7 @@ Workspace의 저장은 TOPPING 앱이 지금 쓰고 있는 파일을 덮어쓰�
 npm install
 npm test          # 빌드 후 전체 테스트
 npm run pack      # com.haeunga0822.topping-e2x2.streamDeckPlugin 만들기
+node docs/manual/make-pdf.mjs   # 사용설명서 PDF (Edge, Noto Sans KR/JP 필요)
 ```
 
 USB 통신 분석 결과는 [docs/usb-protocol.md](docs/usb-protocol.md), 설계는 `docs/superpowers/specs/`에 있습니다. 함께 쓰인 오픈소스 고지는 [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt)에 있습니다.
