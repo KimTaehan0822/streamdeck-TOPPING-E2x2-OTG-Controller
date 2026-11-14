@@ -8,7 +8,7 @@ const BASE = {
 	0x51: 'lp12L', 0x52: 'lp12R', 0x53: 'lp34L', 0x54: 'lp34R', 0x55: 'lp56L', 0x56: 'lp56R',
 } as const
 type Base = (typeof BASE)[keyof typeof BASE]
-/** Suffix A = item 01 (inputs: 04, the one shown), B = item 02. shortcut: item 02 is an unknown variant, parsed but not displayed. */
+/** Suffix A = item 01 (inputs: 04), B = item 02. Outputs show A, except S/PDIF, which sends only B. */
 export type MeterChannel = `${Base}_${'A' | 'B'}`
 
 export type Meter = { channel: MeterChannel; db: number; level: number }
