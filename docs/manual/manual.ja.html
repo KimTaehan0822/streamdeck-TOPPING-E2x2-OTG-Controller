@@ -19,7 +19,7 @@
 <tr><td>TOPPING アプリ</td><td>TOPPING Professional Control Center。起動したまま一緒に使えます</td></tr>
 <tr><td>インストールファイル</td><td><code>TOPPING-E2x2-OTG.streamDeckPlugin</code></td></tr>
 </tbody></table>
-<p>ダイヤルのアクション(VU dial、Pan dial、디지털 게인 다이얼)は <strong>Stream Deck +</strong> でのみ使えます。キーのアクションはすべての Stream Deck で使えます。</p>
+<p>ダイヤルのアクション(VU ダイヤル、Pan ダイヤル、デジタルゲイン ダイヤル)は <strong>Stream Deck +</strong> でのみ使えます。キーのアクションはすべての Stream Deck で使えます。</p>
 </section>
 
 <section><h2>最初に必ずお読みください(制限)</h2>
@@ -32,7 +32,8 @@
 <li><p><code>TOPPING-E2x2-OTG.streamDeckPlugin</code> をダブルクリックします。</p></li>
 <li><p>Stream Deck アプリがインストールするか聞いてきたら<strong>インストール</strong>を押します。上書きするか聞かれた場合もインストールを選びます。既存のキー設定はそのまま残ります。</p></li>
 <li><p>右側のアクション一覧に <strong>Controller for TOPPING E2x2 OTG</strong> カテゴリーがあることを確認します。</p></li>
-<li><p>どれかのアクションをキーに置いてクリックすると、下に設定画面が出ます。一番上の<strong>言語</strong>で 한국어、English、日本語 を選べます。選んだ言語はすべてのアクションに適用されます。</p></li>
+<li><p>どれかのアクションをキーに置いてクリックすると、下に設定画面が出ます。一番上の<strong>言語</strong>で 한국어、English、日本語 を選べます。初期設定の <strong>Stream Deck と同じ</strong> は Stream Deck アプリの言語に従います。選んだ言語はすべてのアクションに共通です。アクション一覧の名前はいつも Stream Deck アプリの言語に従います。</p></li>
+<li><p>GitHub に新しいバージョンが出ると、設定画面の一番下にお知らせと <strong>リリースページを開く</strong> リンクが出ます。</p></li>
 </ol>
 </section>
 
@@ -40,7 +41,7 @@
 <p>プラグインは TOPPING アプリが開いているワークスペースを読んで始まります。アプリでワークスペースが開いていれば、特に何もする必要はありません。キーに <strong>SETUP</strong> と表示されている場合は、まだ読めるワークスペースがありません。次のどちらかを行ってください。</p>
 <ul>
 <li><p><strong>アプリでワークスペースを開く:</strong> TOPPING アプリ上部の <strong>Workspace</strong> 一覧からワークスペースを選びます。数秒でキーがその値に変わります。</p></li>
-<li><p><strong>Workspace の読み込みキーを押す:</strong> 下の「Workspace キー」を参考に読み込みキーを作って押します。</p></li>
+<li><p><strong>ワークスペースの読み込みキーを押す:</strong> 下の「ワークスペース読み込み/保存キー」を参考に読み込みキーを作って押します。</p></li>
 </ul>
 <p>アプリで値を変えたら、アプリでワークスペースを保存してください。保存するとプラグインが新しい値を読み直します。</p>
 </section>
@@ -48,12 +49,12 @@
 <section><h2>ステップ 3: 最初のキーを作る</h2>
 <p>Mix A の Playback 1/2 の音量を、キー 1 回で 1 dB ずつ上げる例です。</p>
 <ol>
-<li><p>アクション一覧から <strong>Fader</strong> をキーにドラッグします。</p></li>
+<li><p>アクション一覧から <strong>フェーダー</strong> をキーにドラッグします。</p></li>
 <li><p>設定画面で<strong>対象</strong>を <strong>Mix チャンネル</strong>、<strong>Mix</strong> を <strong>A</strong>、<strong>チャンネル</strong>を <strong>Playback 1/2</strong> にします。</p></li>
 <li><p><strong>モード</strong>は<strong>ステップ調整</strong>のままにし、<strong>調整幅 (dB、負の数 = 下げる)</strong>に <code>1</code> を入れます。</p></li>
 <li><p>押すたびに 1 dB ずつ上がります。下げるキーは同じ方法で <code>-1</code> を入れて作ります。</p></li>
 </ol>
-<p>キー 2 つを上下に並べて使うなら <strong>Button fader (2 keys)</strong> が便利です。2 つのキーにまたがってフェーダーが描かれ、押し続けると動き続けます。</p>
+<p>キー 2 つを上下に並べて使うなら <strong>フェーダー (2キー)</strong> が便利です。2 つのキーにまたがってフェーダーが描かれ、押し続けると動き続けます。</p>
 </section>
 
 <section><h2>アクション一覧</h2>
@@ -78,14 +79,14 @@
 </section>
 
 <section><h2>対象の選び方</h2>
-<p>Fader、Button fader、VU dial、Mute は<strong>対象</strong>で次の 3 つから 1 つを選びます。</p>
+<p>フェーダー、フェーダー (2キー)、VU ダイヤル、Mute は<strong>対象</strong>で次の 3 つから 1 つを選びます。</p>
 <table><thead><tr><th>対象</th><th>意味</th></tr></thead><tbody>
 <tr><td>Mix チャンネル</td><td>Mix A〜D の中のチャンネル 1 つ(IN、Playback、Loopback など)。Mix とチャンネルを選びます</td></tr>
 <tr><td>ループバック</td><td>Loop 1/2、3/4、5/6</td></tr>
 <tr><td>出力</td><td>Out 1/2、Mobile Out、S/PDIF</td></tr>
 </tbody></table>
 <p><strong>出力が鳴らしている Mix に追従</strong>(フェーダー、フェーダー 2キー、VU ダイヤル、Mute、Pan、Pan ダイヤル、LINK): <strong>Mix</strong> 一覧のいちばん下で選び、<strong>追従する出力</strong>(Out 1/2、Mobile Out、S/PDIF)を決めます。キーはその出力のソースがいま Mix A〜D のどれかに合わせて、その Mix のチャンネルを操作し、キーの Mix 表示も変わります。<strong>Mix ごとに音量が違うため、出力が別の Mix に切り替わると音が急に大きくなることがあります。切り替える前に音量を下げ、聞くときは注意してください。</strong>出力のソースが Mix でないときは、キーに <code>NOT A MIX</code> と表示され、何もしません。</p>
-<p>LINK がオフのチャンネルは L と R が別々に動きます。このとき Mute、Solo、Pan のキーは<strong>左右</strong>で<strong>両方 (ペア)</strong>、<strong>L のみ</strong>、<strong>R のみ</strong>を選べます。音量のキー、Button fader、VU dial は常に両方に働きます。</p>
+<p>LINK がオフのチャンネルは L と R が別々に動きます。このとき Mute、Solo、Pan のキーは<strong>左右</strong>で<strong>両方 (ペア)</strong>、<strong>L のみ</strong>、<strong>R のみ</strong>を選べます。音量のキー、フェーダー (2キー)、VU ダイヤルは常に両方に働きます。</p>
 <p>すべてのチャンネルキーは<strong>名前</strong>欄に入れた文字をキーに表示します。空欄なら既定の名前になります(最大 24 文字)。</p>
 </section>
 
@@ -98,7 +99,7 @@
 </ul>
 </section>
 
-<section><h2>Workspace キー</h2>
+<section><h2>ワークスペース読み込み/保存キー</h2>
 <p><strong>モード</strong>で<strong>読み込み</strong>か<strong>保存</strong>を選びます。</p>
 <ul>
 <li><p><strong>読み込み:</strong> <strong>ワークスペース</strong>一覧から保存済みのワークスペースを選びます。キーを押すとその値をデバイスに送り、すべてのキーがその値に変わります。最後に読み込んだキーはオンのように表示されます。</p></li>
@@ -137,9 +138,10 @@
 <section><h2>キーの表示とトラブルシューティング</h2>
 <table><thead><tr><th>表示 / 症状</th><th>意味</th><th>すること</th></tr></thead><tbody>
 <tr><td>OFFLINE</td><td>デバイスが接続されていない</td><td>USB ケーブルと電源を確認。つながれば自動で戻ります</td></tr>
-<tr><td>SETUP</td><td>まだワークスペースを読み込んでいない</td><td>TOPPING アプリでワークスペースを開くか、Workspace の読み込みキーを押す</td></tr>
+<tr><td>SETUP</td><td>まだワークスペースを読み込んでいない</td><td>TOPPING アプリでワークスペースを開くか、ワークスペースの読み込みキーを押す</td></tr>
 <tr><td>SET CHANNEL</td><td>キーの設定が終わっていない</td><td>設定画面で対象、チャンネル、名前などを選ぶ</td></tr>
-<tr><td>⚠(一瞬表示)</td><td>Workspace キーの読み込みか保存に失敗した</td><td>設定画面上部のメッセージを確認</td></tr>
+<tr><td>NOT A MIX</td><td>「出力が鳴らしている Mix に追従」のキーで、追従する出力のソースが Mix でない</td><td>その出力のソースを Mix A〜D のどれかにする (切り替える前に音量を下げる)</td></tr>
+<tr><td>⚠(一瞬表示)</td><td>ワークスペースのキーか TOPPING アプリ再起動キーが失敗した</td><td>設定画面上部のメッセージを確認</td></tr>
 <tr><td>値がアプリの画面と違う</td><td>プラグインで変えた値はアプリに表示されない</td><td>TOPPING アプリ再起動キー(TOPPINGアプリの設定を合わせる)を押す</td></tr>
 <tr><td>Stream Deck で変えた値が戻る</td><td>アプリが Mix 画面の切り替えや再起動のときに自分の値を送り直す</td><td>保存・読み込みキーの<strong>TOPPINGアプリを再起動して合わせる</strong>をオンにしておくか、TOPPING アプリ再起動キーを押す</td></tr>
 </tbody></table>
