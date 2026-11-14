@@ -121,7 +121,8 @@ export const setMute = (c: Pick<E2x2Connection, 'update'>, v: Vol, op: 'toggle' 
 const OUT_PAIRS: Record<OutputId, [MeterChannel, MeterChannel]> = {
 	out12: ['out1L_A', 'out2R_A'],
 	mobile: ['mobileL_A', 'mobileR_A'],
-	spdif: ['spdifL_A', 'spdifR_A'],
+	// S/PDIF sends only item 02 (5a 02 / 5b 02, capture 2026-11-14)
+	spdif: ['spdifL_B', 'spdifR_B'],
 }
 
 /** A mix channel shows its own channel meter (playbacks only), a loopback its 5x meter, an output its own. */

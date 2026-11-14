@@ -223,3 +223,8 @@ test('digital gain keys place the cap on their own 0 .. +20 dB scale', () => {
 	assert.equal(g.pos(dbToRaw(20)), 1)
 	assert.equal(volSpec({ kind: 'output', channel: 'out12' }).pos, undefined) // volume keys keep the shared axis
 })
+
+test('the S/PDIF meter reads item 02: the device sends no 5a 01 / 5b 01 (capture 2026-11-14)', () => {
+	assert.deepEqual(meterOf({ kind: 'output', id: 'spdif', side: 'pair' }), ['spdifL_B', 'spdifR_B'])
+	assert.deepEqual(meterOf({ kind: 'output', id: 'out12', side: 'pair' }), ['out1L_A', 'out2R_A'])
+})
